@@ -21,25 +21,23 @@ const Welcome = () => {
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="relative z-10 flex flex-col items-center text-center">
         
+        {/* Brand name */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mb-2 text-sm uppercase tracking-[0.3em] text-gold-light">
+          {t('welcome.title')}
+        </motion.p>
+
         {/* Logo */}
         <motion.img
           src={logoImg}
           alt="denueveanueve"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
           className="mb-8 h-8 w-auto" />
-        
-
-        {/* Brand name */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mb-2 text-sm uppercase tracking-[0.3em] text-gold-light">
-          
-          {t('welcome.title')}
-        </motion.p>
 
         
 
