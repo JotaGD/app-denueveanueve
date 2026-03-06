@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Scissors } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 const Welcome = () => {
   const navigate = useNavigate();
