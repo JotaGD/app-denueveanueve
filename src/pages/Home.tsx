@@ -2,9 +2,10 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift, Scissors } from 'lucide-react';
+import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BottomNav from '@/components/BottomNav';
+import logoImg from '@/assets/logo.png';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -27,9 +28,12 @@ const Home = () => {
       {/* Header */}
       <div className="relative overflow-hidden px-6 pt-12 pb-8">
         <div className="absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent" />
-        <div className="relative">
-          <p className="text-sm text-muted-foreground">{t('home.greeting')},</p>
-          <h1 className="font-display text-3xl text-foreground">{firstName}</h1>
+        <div className="relative flex items-center justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">{t('home.greeting')},</p>
+            <h1 className="font-display text-3xl text-foreground">{firstName}</h1>
+          </div>
+          <img src={logoImg} alt="denueveanueve" className="h-5 w-auto opacity-70" />
         </div>
       </div>
 
