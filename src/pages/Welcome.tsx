@@ -21,15 +21,15 @@ const Welcome = () => {
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="relative z-10 flex flex-col items-center text-center"
       >
-        {/* Logo mark */}
-        <motion.div
+        {/* Logo */}
+        <motion.img
+          src={logoImg}
+          alt="denueveanueve"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-gold/30 bg-card shadow-gold"
-        >
-          <Scissors className="h-8 w-8 text-gold" strokeWidth={1.5} />
-        </motion.div>
+          className="mb-8 h-8 w-auto"
+        />
 
         {/* Brand name */}
         <motion.p
