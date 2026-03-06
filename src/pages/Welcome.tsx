@@ -47,7 +47,7 @@ const Welcome = () => {
           transition={{ delay: 0.5, duration: 0.6 }}
           className="mb-3 font-display text-5xl font-light tracking-tight text-foreground">
           
-          dea<span className="text-gold">nueve</span>
+          dea
         </motion.h1>
 
         <motion.p
