@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, Gift, ArrowUpRight, ArrowDownRight, Clock, Award, Ticket, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,8 +38,10 @@ const Loyalty = () => {
   const [movements, setMovements] = useState<PointsMovement[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [coupon, setCoupon] = useState<WelcomeCoupon | null>(null);
+  const [qrToken, setQrToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCode, setShowCode] = useState<string | null>(null);
+  const [showQr, setShowQr] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -46,11 +49,13 @@ const Loyalty = () => {
       setLoading(true);
       const { data: customer } = await supabase
         .from('customers')
-        .select('id')
+        .select('id, qr_token')
         .eq('user_id', user.id)
         .single();
 
       if (!customer) { setLoading(false); return; }
+
+      setQrToken(customer.qr_token);
 
       const [loyaltyRes, movementsRes, rewardsRes, couponRes] = await Promise.all([
         supabase.from('loyalty_accounts').select('*').eq('customer_id', customer.id).single(),
@@ -86,6 +91,47 @@ const Loyalty = () => {
         </div>
       ) : (
         <>
+          {/* QR Card */}
+          <div className="px-6 mb-4">
+            <motion.button
+              onClick={() => setShowQr(!showQr)}
+              className="w-full rounded-xl border border-gold/20 bg-gradient-to-r from-gold/10 to-gold/5 p-4 transition-colors"
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/20">
+                  <QrCode className="h-5 w-5 text-gold" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-medium text-foreground">{t('loyalty.myQr')}</p>
+                  <p className="text-xs text-muted-foreground">{t('loyalty.myQrDesc')}</p>
+                </div>
+              </div>
+            </motion.button>
+
+            {showQr && qrToken && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 flex flex-col items-center rounded-xl border border-border bg-card p-6"
+              >
+                <div className="rounded-xl bg-white p-4">
+                  <QRCodeSVG
+                    value={qrToken}
+                    size={200}
+                    level="H"
+                    fgColor="#1a1712"
+                    bgColor="#ffffff"
+                  />
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground text-center">
+                  {t('loyalty.showQrAtSalon')}
+                </p>
+              </motion.div>
+            )}
+          </div>
+
           {/* Stats Cards */}
           <div className="flex gap-3 px-6 mb-4">
             <div className="flex-1 rounded-xl border border-border bg-card p-4 text-center">
@@ -102,7 +148,7 @@ const Loyalty = () => {
           <div className="px-6 mb-4">
             <h3 className="text-sm font-medium text-foreground mb-3">{t('loyalty.milestones')}</h3>
             <div className="flex items-center justify-between">
-              {MILESTONES.map((m, i) => {
+              {MILESTONES.map((m) => {
                 const Icon = m.icon;
                 const reached = (account?.visits_total || 0) >= m.visits;
                 return (
