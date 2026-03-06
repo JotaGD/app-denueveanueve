@@ -19,8 +19,8 @@ const Welcome = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
-        className="relative z-10 flex flex-col items-center text-center"
-      >
+        className="relative z-10 flex flex-col items-center text-center">
+        
         {/* Logo */}
         <motion.img
           src={logoImg}
@@ -28,16 +28,16 @@ const Welcome = () => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="mb-8 h-8 w-auto"
-        />
+          className="mb-8 h-8 w-auto" />
+        
 
         {/* Brand name */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="mb-2 text-sm uppercase tracking-[0.3em] text-gold-light"
-        >
+          className="mb-2 text-sm uppercase tracking-[0.3em] text-gold-light">
+          
           {t('welcome.title')}
         </motion.p>
 
@@ -45,17 +45,17 @@ const Welcome = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.6 }}
-          className="mb-3 font-display text-5xl font-light tracking-tight text-foreground"
-        >
-          de<span className="text-gold">nueve</span>a<span className="text-gold">nueve</span>
+          className="mb-3 font-display text-5xl font-light tracking-tight text-foreground">
+          
+          dea<span className="text-gold">nueve</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
-          className="mb-12 text-sm tracking-widest uppercase text-muted-foreground"
-        >
+          className="mb-12 text-sm tracking-widest uppercase text-muted-foreground">
+          
           {t('welcome.subtitle')}
         </motion.p>
 
@@ -64,25 +64,25 @@ const Welcome = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9 }}
-          className="flex w-full max-w-xs flex-col gap-3"
-        >
+          className="flex w-full max-w-xs flex-col gap-3">
+          
           <Button
             onClick={() => navigate('/register')}
-            className="h-12 w-full gradient-gold text-primary-foreground font-semibold tracking-wide shadow-gold hover:opacity-90 transition-opacity"
-          >
+            className="h-12 w-full gradient-gold text-primary-foreground font-semibold tracking-wide shadow-gold hover:opacity-90 transition-opacity">
+            
             {t('welcome.cta')}
           </Button>
           <Button
             variant="ghost"
             onClick={() => navigate('/login')}
-            className="h-12 w-full text-gold-light hover:text-gold hover:bg-gold/5"
-          >
+            className="h-12 w-full text-gold-light hover:text-gold hover:bg-gold/5">
+            
             {t('welcome.login')}
           </Button>
         </motion.div>
       </motion.div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Welcome;
