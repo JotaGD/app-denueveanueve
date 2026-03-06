@@ -301,6 +301,7 @@ export type Database = {
           phone: string
           phone_verified_at: string | null
           preferred_location_id: string | null
+          qr_token: string
           status: Database["public"]["Enums"]["customer_status"]
           updated_at: string
           user_id: string
@@ -319,6 +320,7 @@ export type Database = {
           phone: string
           phone_verified_at?: string | null
           preferred_location_id?: string | null
+          qr_token?: string
           status?: Database["public"]["Enums"]["customer_status"]
           updated_at?: string
           user_id: string
@@ -337,6 +339,7 @@ export type Database = {
           phone?: string
           phone_verified_at?: string | null
           preferred_location_id?: string | null
+          qr_token?: string
           status?: Database["public"]["Enums"]["customer_status"]
           updated_at?: string
           user_id?: string
