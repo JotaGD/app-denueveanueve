@@ -235,6 +235,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'home.visits': 'visits',
     'home.club': 'Premium Club',
     'home.promos': 'Promotions',
+    'home.services': 'Services',
     'home.welcomeCoupon': 'Welcome coupon',
     'home.couponDesc': '5% off your first visit',
     // Booking
