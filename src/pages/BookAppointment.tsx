@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock, Check, ChevronRight, CalendarDays, StickyNote } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Check, ChevronRight, CalendarDays, StickyNote, User, Scissors } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,8 +13,11 @@ import type { Tables } from '@/integrations/supabase/types';
 
 type Location = Tables<'locations'>;
 type Service = Tables<'services'>;
+type StaffMember = Tables<'staff_members'>;
 
-const STEPS = ['location', 'services', 'datetime', 'confirm'] as const;
+type SalonSection = 'CABALLEROS' | 'SENORAS';
+
+const STEPS = ['location', 'section', 'staff', 'services', 'datetime', 'confirm'] as const;
 type Step = typeof STEPS[number];
 
 const TIME_SLOTS = [
@@ -31,8 +34,11 @@ const BookAppointment = () => {
 
   const [step, setStep] = useState<Step>('location');
   const [locations, setLocations] = useState<Location[]>([]);
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [selectedSection, setSelectedSection] = useState<SalonSection | null>(null);
+  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -49,18 +55,35 @@ const BookAppointment = () => {
     });
   }, []);
 
+  // Load staff when location + section selected
   useEffect(() => {
-    if (selectedLocation) {
+    if (selectedLocation && selectedSection) {
+      supabase
+        .from('staff_members')
+        .select('*')
+        .eq('location_id', selectedLocation.id)
+        .eq('section', selectedSection)
+        .eq('active', true)
+        .then(({ data }) => {
+          if (data) setStaffMembers(data);
+        });
+    }
+  }, [selectedLocation, selectedSection]);
+
+  // Load services when section selected
+  useEffect(() => {
+    if (selectedLocation && selectedSection) {
       supabase
         .from('services')
         .select('*')
         .eq('active', true)
+        .eq('section', selectedSection)
         .or(`location_id.eq.${selectedLocation.id},location_id.is.null`)
         .then(({ data }) => {
           if (data) setServices(data);
         });
     }
-  }, [selectedLocation]);
+  }, [selectedLocation, selectedSection]);
 
   const handleConfirm = async () => {
     if (!selectedLocation || !selectedDate || !selectedTime || !user) return;
@@ -85,6 +108,7 @@ const BookAppointment = () => {
         .insert({
           customer_id: customer.id,
           location_id: selectedLocation.id,
+          staff_member_id: selectedStaff?.id || null,
           start_at: startAt.toISOString(),
           end_at: endAt.toISOString(),
           customer_notes: notes || null,
@@ -114,6 +138,8 @@ const BookAppointment = () => {
   const canNext = () => {
     switch (step) {
       case 'location': return !!selectedLocation;
+      case 'section': return !!selectedSection;
+      case 'staff': return !!selectedStaff;
       case 'services': return selectedServices.length > 0;
       case 'datetime': return !!selectedDate && !!selectedTime;
       case 'confirm': return true;
@@ -127,7 +153,13 @@ const BookAppointment = () => {
 
   const goPrev = () => {
     const i = STEPS.indexOf(step);
-    if (i > 0) setStep(STEPS[i - 1]);
+    if (i > 0) {
+      // Reset downstream selections when going back
+      if (step === 'staff') { setSelectedStaff(null); setSelectedServices([]); }
+      if (step === 'services') { setSelectedServices([]); }
+      if (step === 'section') { setSelectedSection(null); setSelectedStaff(null); setSelectedServices([]); }
+      setStep(STEPS[i - 1]);
+    }
   };
 
   const toggleService = (service: Service) => {
@@ -136,6 +168,12 @@ const BookAppointment = () => {
         ? prev.filter((s) => s.id !== service.id)
         : [...prev, service]
     );
+  };
+
+  const handleSectionSelect = (section: SalonSection) => {
+    setSelectedSection(section);
+    setSelectedStaff(null);
+    setSelectedServices([]);
   };
 
   if (success) {
@@ -214,7 +252,78 @@ const BookAppointment = () => {
             </div>
           )}
 
-          {/* Step 2: Services */}
+          {/* Step 2: Section */}
+          {step === 'section' && (
+            <div className="space-y-3">
+              <h2 className="text-lg font-display text-foreground mb-4">{t('book.selectSection')}</h2>
+              {(['CABALLEROS', 'SENORAS'] as SalonSection[]).map((section) => (
+                <button
+                  key={section}
+                  onClick={() => handleSectionSelect(section)}
+                  className={`w-full rounded-xl border p-5 text-left transition-all ${
+                    selectedSection === section
+                      ? 'border-gold bg-gold/5'
+                      : 'border-border bg-card hover:border-gold/20'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                      selectedSection === section ? 'gradient-gold' : 'bg-muted'
+                    }`}>
+                      <Scissors className={`h-5 w-5 ${selectedSection === section ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                    </div>
+                    <div>
+                      <p className="text-base font-medium text-foreground">
+                        {section === 'CABALLEROS' ? t('book.sectionMen') : t('book.sectionLadies')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {section === 'CABALLEROS' ? t('book.sectionMenDesc') : t('book.sectionLadiesDesc')}
+                      </p>
+                    </div>
+                    {selectedSection === section && <Check className="ml-auto h-4 w-4 text-gold" />}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Step 3: Staff */}
+          {step === 'staff' && (
+            <div className="space-y-3">
+              <h2 className="text-lg font-display text-foreground mb-4">{t('book.selectStaff')}</h2>
+              {staffMembers.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t('book.noStaff')}</p>
+              ) : (
+                staffMembers.map((member) => (
+                  <button
+                    key={member.id}
+                    onClick={() => setSelectedStaff(member)}
+                    className={`w-full rounded-xl border p-4 text-left transition-all ${
+                      selectedStaff?.id === member.id
+                        ? 'border-gold bg-gold/5'
+                        : 'border-border bg-card hover:border-gold/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                        selectedStaff?.id === member.id ? 'gradient-gold' : 'bg-muted'
+                      }`}>
+                        {member.avatar_url ? (
+                          <img src={member.avatar_url} alt={member.name} className="h-10 w-10 rounded-full object-cover" />
+                        ) : (
+                          <User className={`h-5 w-5 ${selectedStaff?.id === member.id ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                        )}
+                      </div>
+                      <p className="text-sm font-medium text-foreground">{member.name}</p>
+                      {selectedStaff?.id === member.id && <Check className="ml-auto h-4 w-4 text-gold" />}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Step 4: Services */}
           {step === 'services' && (
             <div className="space-y-3">
               <h2 className="text-lg font-display text-foreground mb-4">{t('book.selectServices')}</h2>
@@ -257,7 +366,7 @@ const BookAppointment = () => {
             </div>
           )}
 
-          {/* Step 3: Date & Time */}
+          {/* Step 5: Date & Time */}
           {step === 'datetime' && (
             <div className="space-y-4">
               <h2 className="text-lg font-display text-foreground mb-2">{t('book.selectDate')}</h2>
@@ -309,7 +418,7 @@ const BookAppointment = () => {
             </div>
           )}
 
-          {/* Step 4: Confirm */}
+          {/* Step 6: Confirm */}
           {step === 'confirm' && (
             <div className="space-y-4">
               <h2 className="text-lg font-display text-foreground mb-4">{t('book.confirm')}</h2>
@@ -320,6 +429,22 @@ const BookAppointment = () => {
                   <div>
                     <p className="text-xs text-muted-foreground">{t('appointments.location')}</p>
                     <p className="text-sm text-foreground">{selectedLocation?.name}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Scissors className="h-4 w-4 text-gold" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('book.section')}</p>
+                    <p className="text-sm text-foreground">
+                      {selectedSection === 'CABALLEROS' ? t('book.sectionMen') : t('book.sectionLadies')}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <User className="h-4 w-4 text-gold" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('book.staff')}</p>
+                    <p className="text-sm text-foreground">{selectedStaff?.name}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -366,7 +491,7 @@ const BookAppointment = () => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Next button (steps 1-3) */}
+      {/* Next button (steps 1-5) */}
       {step !== 'confirm' && (
         <div className="fixed bottom-20 left-0 right-0 px-6 pb-4">
           <Button
