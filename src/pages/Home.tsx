@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift } from 'lucide-react';
+import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift, Scissors } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BottomNav from '@/components/BottomNav';
 import logoImg from '@/assets/logo.png';
