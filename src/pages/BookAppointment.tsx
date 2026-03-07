@@ -15,7 +15,7 @@ type Location = Tables<'locations'>;
 type Service = Tables<'services'>;
 type StaffMember = Tables<'staff_members'>;
 
-type SalonSection = 'CABALLEROS' | 'SENORAS';
+type SalonSection = 'CABALLEROS' | 'SENORAS' | 'ESTETICA';
 
 const STEPS = ['location', 'section', 'staff', 'services', 'datetime', 'confirm'] as const;
 type Step = typeof STEPS[number];
@@ -256,7 +256,7 @@ const BookAppointment = () => {
           {step === 'section' && (
             <div className="space-y-3">
               <h2 className="text-lg font-display text-foreground mb-4">{t('book.selectSection')}</h2>
-              {(['CABALLEROS', 'SENORAS'] as SalonSection[]).map((section) => (
+              {(['CABALLEROS', 'SENORAS', 'ESTETICA'] as SalonSection[]).map((section) => (
                 <button
                   key={section}
                   onClick={() => handleSectionSelect(section)}
@@ -274,10 +274,10 @@ const BookAppointment = () => {
                     </div>
                     <div>
                       <p className="text-base font-medium text-foreground">
-                        {section === 'CABALLEROS' ? t('book.sectionMen') : t('book.sectionLadies')}
+                        {section === 'CABALLEROS' ? t('book.sectionMen') : section === 'SENORAS' ? t('book.sectionLadies') : t('book.sectionAesthetics')}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {section === 'CABALLEROS' ? t('book.sectionMenDesc') : t('book.sectionLadiesDesc')}
+                        {section === 'CABALLEROS' ? t('book.sectionMenDesc') : section === 'SENORAS' ? t('book.sectionLadiesDesc') : t('book.sectionAestheticsDesc')}
                       </p>
                     </div>
                     {selectedSection === section && <Check className="ml-auto h-4 w-4 text-gold" />}
@@ -436,7 +436,7 @@ const BookAppointment = () => {
                   <div>
                     <p className="text-xs text-muted-foreground">{t('book.section')}</p>
                     <p className="text-sm text-foreground">
-                      {selectedSection === 'CABALLEROS' ? t('book.sectionMen') : t('book.sectionLadies')}
+                      {selectedSection === 'CABALLEROS' ? t('book.sectionMen') : selectedSection === 'SENORAS' ? t('book.sectionLadies') : t('book.sectionAesthetics')}
                     </p>
                   </div>
                 </div>
