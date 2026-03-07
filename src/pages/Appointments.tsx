@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CalendarDays, MapPin, Clock, ChevronRight, MessageCircle } from 'lucide-react';
+import { CalendarDays, MapPin, Clock, MessageCircle, Star, Euro } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,12 @@ import BottomNav from '@/components/BottomNav';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Appointment = Tables<'appointments'>;
+type AppointmentService = Tables<'appointment_services'>;
+
+type EnrichedAppointment = Appointment & {
+  location_name?: string;
+  services_list: AppointmentService[];
+};
 
 const STATUS_COLORS: Record<string, string> = {
   CONFIRMED: 'bg-success/20 text-success',
@@ -25,7 +31,7 @@ const Appointments = () => {
   const { user } = useAuth();
 
   const [tab, setTab] = useState<'upcoming' | 'history'>('upcoming');
-  const [appointments, setAppointments] = useState<(Appointment & { location_name?: string; services_list?: string[] })[]>([]);
+  const [appointments, setAppointments] = useState<EnrichedAppointment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,10 +47,7 @@ const Appointments = () => {
       if (!customer) { setLoading(false); return; }
 
       const now = new Date().toISOString();
-      let query = supabase
-        .from('appointments')
-        .select('*')
-        .eq('customer_id', customer.id);
+      let query = supabase.from('appointments').select('*').eq('customer_id', customer.id);
 
       if (tab === 'upcoming') {
         query = query.in('status', ['CONFIRMED', 'RESCHEDULED']).gte('start_at', now).order('start_at', { ascending: true });
@@ -55,13 +58,28 @@ const Appointments = () => {
       const { data } = await query;
 
       if (data && data.length > 0) {
-        // Fetch location names
+        const aptIds = data.map((a) => a.id);
         const locIds = [...new Set(data.map((a) => a.location_id))];
-        const { data: locs } = await supabase.from('locations').select('id, name').in('id', locIds);
-        const locMap = new Map(locs?.map((l) => [l.id, l.name]) || []);
+
+        const [locsRes, servicesRes] = await Promise.all([
+          supabase.from('locations').select('id, name').in('id', locIds),
+          supabase.from('appointment_services').select('*').in('appointment_id', aptIds),
+        ]);
+
+        const locMap = new Map(locsRes.data?.map((l) => [l.id, l.name]) || []);
+        const svcMap = new Map<string, AppointmentService[]>();
+        (servicesRes.data || []).forEach((s) => {
+          const list = svcMap.get(s.appointment_id) || [];
+          list.push(s);
+          svcMap.set(s.appointment_id, list);
+        });
 
         setAppointments(
-          data.map((a) => ({ ...a, location_name: locMap.get(a.location_id) || '' }))
+          data.map((a) => ({
+            ...a,
+            location_name: locMap.get(a.location_id) || '',
+            services_list: svcMap.get(a.id) || [],
+          }))
         );
       } else {
         setAppointments([]);
@@ -92,16 +110,9 @@ const Appointments = () => {
         <h1 className="font-display text-3xl text-foreground">{t('appointments.title')}</h1>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 mx-6 mb-4 rounded-lg bg-muted p-1">
         {(['upcoming', 'history'] as const).map((t2) => (
-          <button
-            key={t2}
-            onClick={() => setTab(t2)}
-            className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${
-              tab === t2 ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
-            }`}
-          >
+          <button key={t2} onClick={() => setTab(t2)} className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${tab === t2 ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}>
             {t(`appointments.${t2}`)}
           </button>
         ))}
@@ -110,9 +121,7 @@ const Appointments = () => {
       <div className="px-6 space-y-3">
         {loading ? (
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 animate-pulse rounded-xl bg-muted" />
-            ))}
+            {[1, 2, 3].map((i) => <div key={i} className="h-24 animate-pulse rounded-xl bg-muted" />)}
           </div>
         ) : appointments.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -128,13 +137,7 @@ const Appointments = () => {
           </div>
         ) : (
           appointments.map((apt, i) => (
-            <motion.div
-              key={apt.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="rounded-xl border border-border bg-card p-4"
-            >
+            <motion.div key={apt.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <p className="text-sm font-medium text-foreground">{formatDate(apt.start_at)}</p>
@@ -144,9 +147,54 @@ const Appointments = () => {
                   {t(`appointments.status.${apt.status}`)}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
+
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
                 <MapPin size={12} /> {apt.location_name}
               </div>
+
+              {/* Services */}
+              {apt.services_list.length > 0 && (
+                <div className="mb-2 space-y-1">
+                  {apt.services_list.map((s) => (
+                    <div key={s.id} className="flex items-center justify-between text-[11px]">
+                      <span className="text-muted-foreground">{s.service_name_snapshot || 'Servicio'}</span>
+                      <div className="flex items-center gap-2">
+                        {s.unit_price_snapshot && (
+                          <span className="text-muted-foreground">{Number(s.unit_price_snapshot).toFixed(2)} €</span>
+                        )}
+                        {s.points_snapshot && (
+                          <span className="text-gold">{s.points_snapshot} pts</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Totals */}
+              <div className="flex items-center gap-4 text-xs border-t border-border pt-2 mb-2">
+                {apt.estimated_total_price && (
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    <Euro size={10} /> {Number(apt.estimated_total_price).toFixed(2)} €
+                  </span>
+                )}
+                {apt.estimated_total_duration && (
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    <Clock size={10} /> {apt.estimated_total_duration} min
+                  </span>
+                )}
+                {apt.estimated_pending_points && !apt.points_awarded && (
+                  <span className="flex items-center gap-1 text-gold">
+                    <Star size={10} /> {apt.estimated_pending_points} pts {t('appointments.pending')}
+                  </span>
+                )}
+                {apt.points_awarded && apt.final_total_points && (
+                  <span className="flex items-center gap-1 text-gold">
+                    <Star size={10} /> +{apt.final_total_points} pts
+                  </span>
+                )}
+              </div>
+
               {tab === 'upcoming' && (
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => handleCancel(apt.id)} className="text-xs">

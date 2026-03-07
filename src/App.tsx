@@ -16,6 +16,7 @@ import Loyalty from "./pages/Loyalty";
 import Profile from "./pages/Profile";
 import Club from "./pages/Club";
 import Promos from "./pages/Promos";
+import ServiceCatalog from "./pages/ServiceCatalog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
               <Route path="/home" element={<Home />} />
+              <Route path="/services" element={<ServiceCatalog />} />
               <Route path="/book" element={<BookAppointment />} />
               <Route path="/appointments" element={<Appointments />} />
               <Route path="/loyalty" element={<Loyalty />} />

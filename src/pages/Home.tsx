@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift } from 'lucide-react';
+import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift, Scissors } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BottomNav from '@/components/BottomNav';
 import logoImg from '@/assets/logo.png';
@@ -106,9 +106,21 @@ const Home = () => {
         </motion.div>
 
         {/* Quick actions */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <motion.div
             custom={3}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            onClick={() => navigate('/services')}
+            className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-colors hover:border-gold/20"
+          >
+            <Scissors className="mb-2 h-5 w-5 text-gold" />
+            <p className="text-sm font-medium text-foreground">{t('home.services')}</p>
+          </motion.div>
+
+          <motion.div
+            custom={4}
             variants={cardVariants}
             initial="hidden"
             animate="visible"
@@ -120,7 +132,7 @@ const Home = () => {
           </motion.div>
 
           <motion.div
-            custom={4}
+            custom={5}
             variants={cardVariants}
             initial="hidden"
             animate="visible"
