@@ -15,7 +15,7 @@ type Location = Tables<'locations'>;
 type Service = Tables<'services'>;
 type StaffMember = Tables<'staff_members'>;
 
-type SalonSection = 'CABALLEROS' | 'SENORAS';
+type SalonSection = 'CABALLEROS' | 'SENORAS' | 'ESTETICA';
 
 const STEPS = ['location', 'section', 'staff', 'services', 'datetime', 'confirm'] as const;
 type Step = typeof STEPS[number];
