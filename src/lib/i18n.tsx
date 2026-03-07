@@ -104,6 +104,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'appointments.date': 'Fecha',
     'appointments.time': 'Hora',
     'appointments.yourNotes': 'Tus notas',
+    'appointments.pending': 'pendientes',
     // Loyalty
     'loyalty.title': 'Fidelidad',
     'loyalty.points': 'Puntos',
