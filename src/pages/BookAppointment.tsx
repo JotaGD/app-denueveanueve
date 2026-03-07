@@ -274,10 +274,10 @@ const BookAppointment = () => {
                     </div>
                     <div>
                       <p className="text-base font-medium text-foreground">
-                        {section === 'CABALLEROS' ? t('book.sectionMen') : t('book.sectionLadies')}
+                        {section === 'CABALLEROS' ? t('book.sectionMen') : section === 'SENORAS' ? t('book.sectionLadies') : t('book.sectionAesthetics')}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {section === 'CABALLEROS' ? t('book.sectionMenDesc') : t('book.sectionLadiesDesc')}
+                        {section === 'CABALLEROS' ? t('book.sectionMenDesc') : section === 'SENORAS' ? t('book.sectionLadiesDesc') : t('book.sectionAestheticsDesc')}
                       </p>
                     </div>
                     {selectedSection === section && <Check className="ml-auto h-4 w-4 text-gold" />}
