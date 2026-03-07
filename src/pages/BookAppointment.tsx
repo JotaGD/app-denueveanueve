@@ -238,7 +238,7 @@ const BookAppointment = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-40">
       {/* Header */}
       <div className="px-6 pt-12 pb-4">
         <button onClick={() => (stepIndex > 0 ? goPrev() : navigate(-1))} className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
@@ -522,7 +522,7 @@ const BookAppointment = () => {
 
       {/* Next button */}
       {step !== 'confirm' && (
-        <div className="fixed bottom-24 left-0 right-0 px-6 pb-2 z-40">
+        <div className="fixed bottom-[5.5rem] left-0 right-0 px-6 z-40">
           <Button onClick={goNext} disabled={!canNext()} className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90 disabled:opacity-40">
             {t('book.next')} <ChevronRight size={16} />
           </Button>
