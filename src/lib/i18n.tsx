@@ -299,6 +299,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'appointments.date': 'Date',
     'appointments.time': 'Time',
     'appointments.yourNotes': 'Your notes',
+    'appointments.pending': 'pending',
     // Loyalty
     'loyalty.title': 'Loyalty',
     'loyalty.points': 'Points',
