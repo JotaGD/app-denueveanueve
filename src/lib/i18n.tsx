@@ -379,6 +379,11 @@ const translations: Record<Locale, Record<string, string>> = {
     'promos.bookNow': 'Book now',
     'promos.whatsapp': 'Info via WhatsApp',
     'promos.validUntil': 'Valid until',
+    // Catalog
+    'catalog.title': 'Our Services',
+    'catalog.subtitle': 'Discover everything we can do for you',
+    'catalog.noServices': 'No services in this category',
+    'catalog.bookNow': 'Book appointment',
     // General
     'general.loading': 'Loading...',
     'general.error': 'An error occurred',
