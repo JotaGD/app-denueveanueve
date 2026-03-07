@@ -238,7 +238,7 @@ const BookAppointment = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-40">
+    <div className="min-h-screen bg-background pb-48">
       {/* Header */}
       <div className="px-6 pt-12 pb-4">
         <button onClick={() => (stepIndex > 0 ? goPrev() : navigate(-1))} className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
