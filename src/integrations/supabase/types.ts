@@ -729,7 +729,7 @@ export type Database = {
           category_id: string | null
           created_at: string
           description: string | null
-          duration_min: number
+          duration_min: number | null
           excluded_from_discount: boolean
           fixed_points: number | null
           id: string
@@ -745,7 +745,7 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
-          duration_min: number
+          duration_min?: number | null
           excluded_from_discount?: boolean
           fixed_points?: number | null
           id?: string
@@ -761,7 +761,7 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
-          duration_min?: number
+          duration_min?: number | null
           excluded_from_discount?: boolean
           fixed_points?: number | null
           id?: string
