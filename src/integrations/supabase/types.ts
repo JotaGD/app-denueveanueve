@@ -842,7 +842,7 @@ export type Database = {
         | "RETAIL_VOUCHER"
         | "PACK_UPGRADE"
         | "CUSTOM"
-      salon_section: "CABALLEROS" | "SENORAS"
+      salon_section: "CABALLEROS" | "SENORAS" | "ESTETICA"
       subscription_plan: "LADIES_59" | "MEN_19"
       subscription_status:
         | "ACTIVE"
@@ -999,7 +999,7 @@ export const Constants = {
         "PACK_UPGRADE",
         "CUSTOM",
       ],
-      salon_section: ["CABALLEROS", "SENORAS"],
+      salon_section: ["CABALLEROS", "SENORAS", "ESTETICA"],
       subscription_plan: ["LADIES_59", "MEN_19"],
       subscription_status: [
         "ACTIVE",
