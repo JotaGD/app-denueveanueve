@@ -56,6 +56,7 @@ export type Database = {
           id: string
           location_id: string
           reschedule_count: number
+          staff_member_id: string | null
           staff_notes: string | null
           start_at: string
           status: Database["public"]["Enums"]["appointment_status"]
@@ -69,6 +70,7 @@ export type Database = {
           id?: string
           location_id: string
           reschedule_count?: number
+          staff_member_id?: string | null
           staff_notes?: string | null
           start_at: string
           status?: Database["public"]["Enums"]["appointment_status"]
@@ -82,6 +84,7 @@ export type Database = {
           id?: string
           location_id?: string
           reschedule_count?: number
+          staff_member_id?: string | null
           staff_notes?: string | null
           start_at?: string
           status?: Database["public"]["Enums"]["appointment_status"]
@@ -100,6 +103,13 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_staff_member_id_fkey"
+            columns: ["staff_member_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
             referencedColumns: ["id"]
           },
         ]
@@ -559,6 +569,7 @@ export type Database = {
           id: string
           location_id: string | null
           name: string
+          section: Database["public"]["Enums"]["salon_section"] | null
         }
         Insert: {
           active?: boolean
@@ -569,6 +580,7 @@ export type Database = {
           id?: string
           location_id?: string | null
           name: string
+          section?: Database["public"]["Enums"]["salon_section"] | null
         }
         Update: {
           active?: boolean
@@ -579,6 +591,7 @@ export type Database = {
           id?: string
           location_id?: string | null
           name?: string
+          section?: Database["public"]["Enums"]["salon_section"] | null
         }
         Relationships: [
           {
@@ -631,6 +644,44 @@ export type Database = {
           },
           {
             foreignKeyName: "slot_holds_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_members: {
+        Row: {
+          active: boolean
+          avatar_url: string | null
+          created_at: string
+          id: string
+          location_id: string
+          name: string
+          section: Database["public"]["Enums"]["salon_section"]
+        }
+        Insert: {
+          active?: boolean
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          location_id: string
+          name: string
+          section: Database["public"]["Enums"]["salon_section"]
+        }
+        Update: {
+          active?: boolean
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          location_id?: string
+          name?: string
+          section?: Database["public"]["Enums"]["salon_section"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_members_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
@@ -791,6 +842,7 @@ export type Database = {
         | "RETAIL_VOUCHER"
         | "PACK_UPGRADE"
         | "CUSTOM"
+      salon_section: "CABALLEROS" | "SENORAS"
       subscription_plan: "LADIES_59" | "MEN_19"
       subscription_status:
         | "ACTIVE"
@@ -947,6 +999,7 @@ export const Constants = {
         "PACK_UPGRADE",
         "CUSTOM",
       ],
+      salon_section: ["CABALLEROS", "SENORAS"],
       subscription_plan: ["LADIES_59", "MEN_19"],
       subscription_status: [
         "ACTIVE",
