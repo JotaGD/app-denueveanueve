@@ -436,7 +436,7 @@ const BookAppointment = () => {
                   <div>
                     <p className="text-xs text-muted-foreground">{t('book.section')}</p>
                     <p className="text-sm text-foreground">
-                      {selectedSection === 'CABALLEROS' ? t('book.sectionMen') : t('book.sectionLadies')}
+                      {selectedSection === 'CABALLEROS' ? t('book.sectionMen') : selectedSection === 'SENORAS' ? t('book.sectionLadies') : t('book.sectionAesthetics')}
                     </p>
                   </div>
                 </div>

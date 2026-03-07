@@ -251,6 +251,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'book.sectionLadies': 'Ladies',
     'book.sectionMenDesc': 'Cuts, barbering and more',
     'book.sectionLadiesDesc': 'Cuts, color, treatments and more',
+    'book.sectionAesthetics': 'Aesthetics',
+    'book.sectionAestheticsDesc': 'Facial, body treatments and more',
     'book.section': 'Section',
     'book.selectStaff': 'Choose your professional',
     'book.staff': 'Professional',
