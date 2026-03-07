@@ -17,18 +17,45 @@ export type Database = {
       appointment_services: {
         Row: {
           appointment_id: string
+          duration_minutes_snapshot: number | null
+          final_points: number | null
+          final_price: number | null
           id: string
+          is_completed: boolean
+          points_snapshot: number | null
+          price_type_snapshot: string | null
+          quantity: number
           service_id: string
+          service_name_snapshot: string | null
+          unit_price_snapshot: number | null
         }
         Insert: {
           appointment_id: string
+          duration_minutes_snapshot?: number | null
+          final_points?: number | null
+          final_price?: number | null
           id?: string
+          is_completed?: boolean
+          points_snapshot?: number | null
+          price_type_snapshot?: string | null
+          quantity?: number
           service_id: string
+          service_name_snapshot?: string | null
+          unit_price_snapshot?: number | null
         }
         Update: {
           appointment_id?: string
+          duration_minutes_snapshot?: number | null
+          final_points?: number | null
+          final_price?: number | null
           id?: string
+          is_completed?: boolean
+          points_snapshot?: number | null
+          price_type_snapshot?: string | null
+          quantity?: number
           service_id?: string
+          service_name_snapshot?: string | null
+          unit_price_snapshot?: number | null
         }
         Relationships: [
           {
@@ -53,42 +80,66 @@ export type Database = {
           customer_id: string
           customer_notes: string | null
           end_at: string
+          estimated_pending_points: number | null
+          estimated_total_duration: number | null
+          estimated_total_price: number | null
+          final_total_points: number | null
+          final_total_price: number | null
           id: string
           location_id: string
+          points_awarded: boolean
           reschedule_count: number
           staff_member_id: string | null
           staff_notes: string | null
           start_at: string
           status: Database["public"]["Enums"]["appointment_status"]
           updated_at: string
+          verified_at: string | null
+          verified_by_staff_id: string | null
         }
         Insert: {
           created_at?: string
           customer_id: string
           customer_notes?: string | null
           end_at: string
+          estimated_pending_points?: number | null
+          estimated_total_duration?: number | null
+          estimated_total_price?: number | null
+          final_total_points?: number | null
+          final_total_price?: number | null
           id?: string
           location_id: string
+          points_awarded?: boolean
           reschedule_count?: number
           staff_member_id?: string | null
           staff_notes?: string | null
           start_at: string
           status?: Database["public"]["Enums"]["appointment_status"]
           updated_at?: string
+          verified_at?: string | null
+          verified_by_staff_id?: string | null
         }
         Update: {
           created_at?: string
           customer_id?: string
           customer_notes?: string | null
           end_at?: string
+          estimated_pending_points?: number | null
+          estimated_total_duration?: number | null
+          estimated_total_price?: number | null
+          final_total_points?: number | null
+          final_total_price?: number | null
           id?: string
           location_id?: string
+          points_awarded?: boolean
           reschedule_count?: number
           staff_member_id?: string | null
           staff_notes?: string | null
           start_at?: string
           status?: Database["public"]["Enums"]["appointment_status"]
           updated_at?: string
+          verified_at?: string | null
+          verified_by_staff_id?: string | null
         }
         Relationships: [
           {
@@ -467,6 +518,54 @@ export type Database = {
           },
         ]
       }
+      loyalty_transactions: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          created_by_user_id: string | null
+          customer_id: string
+          description: string | null
+          id: string
+          points: number
+          type: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          customer_id: string
+          description?: string | null
+          id?: string
+          points: number
+          type: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          customer_id?: string
+          description?: string | null
+          id?: string
+          points?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_transactions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       points_movements: {
         Row: {
           created_at: string
@@ -501,6 +600,48 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "points_movements_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qr_scan_logs: {
+        Row: {
+          appointment_id: string | null
+          customer_id: string
+          id: string
+          result: string
+          scanned_at: string
+          scanned_by_staff_id: string | null
+        }
+        Insert: {
+          appointment_id?: string | null
+          customer_id: string
+          id?: string
+          result: string
+          scanned_at?: string
+          scanned_by_staff_id?: string | null
+        }
+        Update: {
+          appointment_id?: string | null
+          customer_id?: string
+          id?: string
+          result?: string
+          scanned_at?: string
+          scanned_by_staff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qr_scan_logs_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qr_scan_logs_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
@@ -559,41 +700,84 @@ export type Database = {
           },
         ]
       }
+      service_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           active: boolean
+          base_price: number | null
           category: string | null
+          category_id: string | null
           created_at: string
+          description: string | null
           duration_min: number
           excluded_from_discount: boolean
+          fixed_points: number | null
           id: string
           location_id: string | null
           name: string
+          price_type: string
           section: Database["public"]["Enums"]["salon_section"] | null
         }
         Insert: {
           active?: boolean
+          base_price?: number | null
           category?: string | null
+          category_id?: string | null
           created_at?: string
+          description?: string | null
           duration_min: number
           excluded_from_discount?: boolean
+          fixed_points?: number | null
           id?: string
           location_id?: string | null
           name: string
+          price_type?: string
           section?: Database["public"]["Enums"]["salon_section"] | null
         }
         Update: {
           active?: boolean
+          base_price?: number | null
           category?: string | null
+          category_id?: string | null
           created_at?: string
+          description?: string | null
           duration_min?: number
           excluded_from_discount?: boolean
+          fixed_points?: number | null
           id?: string
           location_id?: string | null
           name?: string
+          price_type?: string
           section?: Database["public"]["Enums"]["salon_section"] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "services_location_id_fkey"
             columns: ["location_id"]
