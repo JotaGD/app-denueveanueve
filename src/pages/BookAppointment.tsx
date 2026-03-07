@@ -522,7 +522,7 @@ const BookAppointment = () => {
 
       {/* Next button */}
       {step !== 'confirm' && (
-        <div className="fixed bottom-[5.5rem] left-0 right-0 px-6 z-40">
+        <div className="fixed bottom-[7rem] left-0 right-0 px-6 z-40">
           <Button onClick={goNext} disabled={!canNext()} className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90 disabled:opacity-40">
             {t('book.next')} <ChevronRight size={16} />
           </Button>
