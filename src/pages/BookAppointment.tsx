@@ -256,7 +256,7 @@ const BookAppointment = () => {
           {step === 'section' && (
             <div className="space-y-3">
               <h2 className="text-lg font-display text-foreground mb-4">{t('book.selectSection')}</h2>
-              {(['CABALLEROS', 'SENORAS'] as SalonSection[]).map((section) => (
+              {(['CABALLEROS', 'SENORAS', 'ESTETICA'] as SalonSection[]).map((section) => (
                 <button
                   key={section}
                   onClick={() => handleSectionSelect(section)}
