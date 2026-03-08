@@ -40,23 +40,19 @@ serve(async (req) => {
 
     const customerId = customers.data[0].id;
 
-    // Find active subscription
+    // Find active subscription in Stripe (try both active and trialing)
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: "active",
       limit: 1,
     });
 
-    if (subscriptions.data.length === 0) {
-      throw new Error("No active subscription found");
+    // Cancel in Stripe if an active subscription exists
+    if (subscriptions.data.length > 0) {
+      await stripe.subscriptions.cancel(subscriptions.data[0].id);
     }
 
-    const subscriptionId = subscriptions.data[0].id;
-
-    // Cancel immediately in Stripe
-    await stripe.subscriptions.cancel(subscriptionId);
-
-    // Update local DB: mark subscription as EXPIRED
+    // Always clean up local DB regardless of Stripe state
     const { data: customerRow } = await supabaseClient
       .from("customers")
       .select("id")
@@ -72,7 +68,7 @@ serve(async (req) => {
           updated_at: new Date().toISOString(),
         })
         .eq("customer_id", customerRow.id)
-        .eq("status", "ACTIVE");
+        .in("status", ["ACTIVE", "PAYMENT_DUE"]);
     }
 
     return new Response(JSON.stringify({ success: true }), {
