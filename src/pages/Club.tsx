@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Crown, Check, Star, Scissors, Palette, CalendarCheck } from 'lucide-react';
+import { ArrowLeft, Crown, Check, Star, Scissors, Palette, CalendarCheck, Info } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import BottomNav from '@/components/BottomNav';
 import type { Tables } from '@/integrations/supabase/types';
@@ -25,6 +26,7 @@ const PLANS = [
     price: 59,
     benefits: ['club.ladiesBenefits.1', 'club.ladiesBenefits.2', 'club.ladiesBenefits.3', 'club.ladiesBenefits.4'],
     icons: [Scissors, Palette, CalendarCheck, Star],
+    detailKey: 'club.ladiesDetail',
   },
   {
     plan: 'MEN_19' as const,
@@ -32,6 +34,7 @@ const PLANS = [
     price: 19,
     benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3', 'club.menBenefits.4'],
     icons: [Scissors, Scissors, CalendarCheck, Star],
+    detailKey: 'club.menDetail',
   },
 ];
 
@@ -42,6 +45,7 @@ const Club = () => {
 
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [infoPlan, setInfoPlan] = useState<typeof PLANS[number] | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -182,13 +186,38 @@ const Club = () => {
                 })}
               </div>
 
-              <Button className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90">
-                {t('club.subscribe')}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => setInfoPlan(plan)}
+                >
+                  <Info size={18} />
+                </Button>
+                <Button className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90">
+                  {t('club.subscribe')}
+                </Button>
+              </div>
             </div>
           </motion.div>
         ))}
       </div>
+
+      {/* Info Dialog */}
+      <Dialog open={!!infoPlan} onOpenChange={(open) => !open && setInfoPlan(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-gold" />
+              {infoPlan && t(infoPlan.nameKey)} — {infoPlan?.price}€{t('club.perMonth')}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+            {infoPlan && t(infoPlan.detailKey)}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <BottomNav />
     </div>
