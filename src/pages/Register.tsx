@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,6 +39,20 @@ const Register = () => {
       return;
     }
     setLoading(true);
+
+    // Check if phone is already registered
+    const { data: existingPhone } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('phone', form.phone)
+      .maybeSingle();
+
+    if (existingPhone) {
+      setLoading(false);
+      toast.error('Este número de teléfono ya está registrado');
+      return;
+    }
+
     const { error } = await signUp(form.email, form.password, {
       first_name: form.firstName,
       last_name: form.lastName,
@@ -47,7 +62,11 @@ const Register = () => {
     });
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      if (error.message?.includes('already registered') || error.message?.includes('already been registered')) {
+        toast.error('Este correo electrónico ya está registrado');
+      } else {
+        toast.error(error.message);
+      }
     } else {
       toast.success('Cuenta creada. Revisa tu correo para verificar.');
       navigate('/login');
