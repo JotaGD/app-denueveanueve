@@ -57,14 +57,21 @@ serve(async (req) => {
     });
 
     const invoice = subscription.latest_invoice as any;
-    const paymentIntentId = invoice?.payment_intent;
+    console.log("Invoice keys:", JSON.stringify(Object.keys(invoice || {})));
+    console.log("payment_intent:", invoice?.payment_intent);
+    console.log("pending_setup_intent:", (subscription as any).pending_setup_intent);
 
-    if (!paymentIntentId) {
-      throw new Error(`No payment_intent on invoice. Status: ${invoice?.status}`);
+    let clientSecret: string;
+
+    if (invoice?.payment_intent) {
+      const pi = await stripe.paymentIntents.retrieve(invoice.payment_intent as string);
+      clientSecret = pi.client_secret!;
+    } else if ((subscription as any).pending_setup_intent) {
+      const si = await stripe.setupIntents.retrieve((subscription as any).pending_setup_intent as string);
+      clientSecret = si.client_secret!;
+    } else {
+      throw new Error(`No payment_intent or setup_intent found`);
     }
-
-    // Retrieve the PaymentIntent to get the client_secret
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId as string);
 
     return new Response(
       JSON.stringify({
