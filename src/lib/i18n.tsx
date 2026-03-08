@@ -185,6 +185,21 @@ const translations: Record<Locale, Record<string, string>> = {
     'club.ladiesDetail': '✂️ 1 corte incluido al mes\n🎨 15% de descuento en servicios de color\n📅 Acceso prioritario a citas\n💆 Tratamiento capilar mensual gratuito\n\n🎁 Beneficios exclusivos para socias:\n🎂 Corte gratis + regalo en tu cumpleaños\n🏷️ Promociones exclusivas para socias\n🎰 Sorteos exclusivos',
     'club.menDetail': '✂️ 1 corte de pelo incluido al mes\n💰 2€ dto. en cortes extra\n📅 Acceso prioritario a citas\n\n🎁 Beneficios exclusivos para socios:\n🎂 Corte gratis + regalo en tu cumpleaños\n🏷️ Promociones exclusivas para socios\n🎰 Sorteos exclusivos',
     'club.confirmPayment': 'Confirmar pago',
+    // Premium
+    'premium.yourBenefits': 'Tus beneficios',
+    'premium.exclusiveBenefits': 'Beneficios exclusivos',
+    'premium.cutIncluded': '1 corte incluido al mes',
+    'premium.colorDiscount': '15% dto. en color',
+    'premium.priorityAccess': 'Acceso prioritario a citas',
+    'premium.monthlyTreatment': 'Tratamiento capilar mensual gratuito',
+    'premium.extraCutDiscount': '2€ dto. en cortes extra',
+    'premium.birthdayBenefit': 'Corte gratis + regalo en tu cumpleaños',
+    'premium.exclusivePromos': 'Promociones exclusivas para socios',
+    'premium.exclusiveGiveaways': 'Sorteos exclusivos',
+    'premium.birthdayAlert': '🎂 ¡Feliz cumpleaños!',
+    'premium.birthdayAlertDesc': 'Tienes un servicio gratis y un regalo esperándote en tu centro',
+    // Auth extras
+    'auth.dateOfBirth': 'Fecha de nacimiento',
     // Promos
     'promos.title': 'Promociones',
     'promos.noPromos': 'No hay promociones activas',
