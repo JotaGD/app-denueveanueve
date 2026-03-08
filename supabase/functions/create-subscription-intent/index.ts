@@ -53,16 +53,44 @@ serve(async (req) => {
       items: [{ price: priceId }],
       payment_behavior: "default_incomplete",
       payment_settings: { save_default_payment_method: "on_subscription" },
-      expand: ["latest_invoice.payment_intent"],
+      expand: ["latest_invoice"],
     });
 
-    const invoice = subscription.latest_invoice as Stripe.Invoice;
-    const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
+    const invoice = subscription.latest_invoice as any;
+    console.log("Invoice id:", invoice?.id, "status:", invoice?.status);
+
+    // Retrieve the full invoice with payment_intent expanded
+    const fullInvoice = await stripe.invoices.retrieve(invoice.id, {
+      expand: ["payment_intent"],
+    });
+    
+    console.log("Full invoice payment_intent:", JSON.stringify((fullInvoice as any).payment_intent));
+    
+    const pi = (fullInvoice as any).payment_intent;
+    let clientSecret: string;
+    
+    if (pi && typeof pi === "object" && pi.client_secret) {
+      clientSecret = pi.client_secret;
+    } else if (pi && typeof pi === "string") {
+      const piObj = await stripe.paymentIntents.retrieve(pi);
+      clientSecret = piObj.client_secret!;
+    } else {
+      // Try listing payment intents for this invoice
+      const paymentIntents = await stripe.paymentIntents.list({
+        customer: customerId,
+        limit: 1,
+      });
+      if (paymentIntents.data.length > 0 && paymentIntents.data[0].client_secret) {
+        clientSecret = paymentIntents.data[0].client_secret;
+      } else {
+        throw new Error(`Cannot find client_secret. Invoice: ${invoice.id}`);
+      }
+    }
 
     return new Response(
       JSON.stringify({
         subscriptionId: subscription.id,
-        clientSecret: paymentIntent.client_secret,
+        clientSecret,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
