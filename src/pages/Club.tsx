@@ -204,6 +204,21 @@ const Club = () => {
         ))}
       </div>
 
+      {/* Info Dialog */}
+      <Dialog open={!!infoPlan} onOpenChange={(open) => !open && setInfoPlan(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-gold" />
+              {infoPlan && t(infoPlan.nameKey)} — {infoPlan?.price}€{t('club.perMonth')}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+            {infoPlan && t(infoPlan.detailKey)}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <BottomNav />
     </div>
   );
