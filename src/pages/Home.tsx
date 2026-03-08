@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift, Scissors } from 'lucide-react';
+import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BottomNav from '@/components/BottomNav';
 import logoImg from '@/assets/logo.png';
@@ -20,8 +22,32 @@ const Home = () => {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { user } = useAuth();
+  const [points, setPoints] = useState(0);
+  const [visits, setVisits] = useState(0);
 
   const firstName = user?.user_metadata?.first_name || 'Cliente';
+
+  useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (!customer) return;
+      const { data: account } = await supabase
+        .from('loyalty_accounts')
+        .select('points_balance, visits_total')
+        .eq('customer_id', customer.id)
+        .single();
+      if (account) {
+        setPoints(account.points_balance);
+        setVisits(account.visits_total);
+      }
+    };
+    load();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -95,32 +121,20 @@ const Home = () => {
           </div>
           <div className="flex gap-6">
             <div>
-              <p className="font-display text-2xl text-gold">0</p>
+            <p className="font-display text-2xl text-gold">{points}</p>
               <p className="text-xs text-muted-foreground">{t('home.points')}</p>
             </div>
             <div>
-              <p className="font-display text-2xl text-foreground">0</p>
+              <p className="font-display text-2xl text-foreground">{visits}</p>
               <p className="text-xs text-muted-foreground">{t('home.visits')}</p>
             </div>
           </div>
         </motion.div>
 
         {/* Quick actions */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <motion.div
             custom={3}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            onClick={() => navigate('/services')}
-            className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-colors hover:border-gold/20"
-          >
-            <Scissors className="mb-2 h-5 w-5 text-gold" />
-            <p className="text-sm font-medium text-foreground">{t('home.services')}</p>
-          </motion.div>
-
-          <motion.div
-            custom={4}
             variants={cardVariants}
             initial="hidden"
             animate="visible"
@@ -132,7 +146,7 @@ const Home = () => {
           </motion.div>
 
           <motion.div
-            custom={5}
+            custom={4}
             variants={cardVariants}
             initial="hidden"
             animate="visible"
