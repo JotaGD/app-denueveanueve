@@ -23,6 +23,7 @@ const Register = () => {
     phone: '',
     email: '',
     password: '',
+    dateOfBirth: '',
     terms: false,
     marketing: false,
     whatsapp: false,
