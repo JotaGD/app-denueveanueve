@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Crown, Check, Star, Scissors, Palette, CalendarCheck, Info } from 'lucide-react';
+import { ArrowLeft, Crown, Check, Star, Scissors, Palette, CalendarCheck, Info, BadgeEuro } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,7 +33,7 @@ const PLANS = [
     nameKey: 'club.men',
     price: 19,
     benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3', 'club.menBenefits.4'],
-    icons: [Scissors, Scissors, CalendarCheck, Star],
+    icons: [Scissors, BadgeEuro, CalendarCheck, Star],
     detailKey: 'club.menDetail',
   },
 ];
