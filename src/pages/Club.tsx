@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Crown, Check, Star, Scissors, Palette, CalendarCheck, Info, BadgeEuro, Loader2, Settings } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,13 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { motion } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import BottomNav from '@/components/BottomNav';
+import CheckoutForm from '@/components/CheckoutForm';
 
-const STATUS_MAP: Record<string, string> = {
-  ACTIVE: 'club.active',
-  PAYMENT_DUE: 'club.paymentDue',
-  CANCELLED_END_OF_PERIOD: 'club.cancelledEnd',
-  EXPIRED: 'club.expired',
-};
+const stripePromise = loadStripe('pk_test_51T8nG9IsEUPwjqgmIaucyy7g3w3Z0rPgZC9PEvJUgI5RMDjGsn1DeXppc9aclkJcrVkG9p0lG9F5nsSdKpKMMWMr00K6OMdVI0');
 
 const PLANS = [
   {
@@ -55,7 +53,10 @@ const Club = () => {
   const [portalLoading, setPortalLoading] = useState(false);
   const [infoPlan, setInfoPlan] = useState<typeof PLANS[number] | null>(null);
 
-  // Check for checkout result in URL
+  // Embedded payment state
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [paymentPlan, setPaymentPlan] = useState<typeof PLANS[number] | null>(null);
+
   useEffect(() => {
     const checkout = searchParams.get('checkout');
     if (checkout === 'success') {
@@ -63,7 +64,6 @@ const Club = () => {
     }
   }, [searchParams, t]);
 
-  // Check Stripe subscription
   useEffect(() => {
     if (!user) return;
     const checkSub = async () => {
@@ -80,20 +80,34 @@ const Club = () => {
     checkSub();
   }, [user]);
 
-  const handleSubscribe = async (plan: string) => {
-    setCheckoutLoading(plan);
+  const handleSubscribe = async (plan: typeof PLANS[number]) => {
+    setCheckoutLoading(plan.plan);
     try {
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { plan },
+      const { data, error } = await supabase.functions.invoke('create-subscription-intent', {
+        body: { plan: plan.plan },
       });
       if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
+      if (data?.clientSecret) {
+        setClientSecret(data.clientSecret);
+        setPaymentPlan(plan);
       }
     } catch (err) {
       toast({ title: 'Error', description: String(err), variant: 'destructive' });
     }
     setCheckoutLoading(null);
+  };
+
+  const handlePaymentSuccess = () => {
+    setClientSecret(null);
+    setPaymentPlan(null);
+    toast({ title: t('club.checkoutSuccess'), description: t('club.checkoutSuccessDesc') });
+    // Refresh subscription status
+    setTimeout(async () => {
+      try {
+        const { data } = await supabase.functions.invoke('check-subscription');
+        if (data) setStripeSub(data as StripeSubscription);
+      } catch {}
+    }, 2000);
   };
 
   const handleManageSubscription = async () => {
@@ -136,7 +150,6 @@ const Club = () => {
         </div>
 
         <div className="px-6 space-y-4">
-          {/* Status card */}
           <div className="rounded-xl border border-gold/20 bg-gradient-to-br from-gold/10 to-gold/5 p-5">
             <div className="flex items-center gap-3 mb-3">
               <Crown className="h-6 w-6 text-gold" />
@@ -154,7 +167,6 @@ const Club = () => {
             </div>
           </div>
 
-          {/* Benefits */}
           <div className="rounded-xl border border-border bg-card p-4">
             <h3 className="text-sm font-medium text-foreground mb-3">{t('club.benefits')}</h3>
             <div className="space-y-2">
@@ -170,7 +182,6 @@ const Club = () => {
             </div>
           </div>
 
-          {/* Manage subscription */}
           <Button
             variant="outline"
             className="w-full"
@@ -242,7 +253,7 @@ const Club = () => {
                 </Button>
                 <Button
                   className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
-                  onClick={() => handleSubscribe(plan.plan)}
+                  onClick={() => handleSubscribe(plan)}
                   disabled={checkoutLoading !== null}
                 >
                   {checkoutLoading === plan.plan ? (
@@ -268,6 +279,42 @@ const Club = () => {
           <div className="text-sm text-foreground whitespace-pre-line leading-relaxed">
             {infoPlan && t(infoPlan.detailKey)}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Embedded Payment Dialog */}
+      <Dialog open={!!clientSecret} onOpenChange={(open) => { if (!open) { setClientSecret(null); setPaymentPlan(null); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-gold" />
+              {paymentPlan && t(paymentPlan.nameKey)} — {paymentPlan?.price}€{t('club.perMonth')}
+            </DialogTitle>
+          </DialogHeader>
+          {clientSecret && (
+            <Elements
+              stripe={stripePromise}
+              options={{
+                clientSecret,
+                appearance: {
+                  theme: 'night',
+                  variables: {
+                    colorPrimary: '#c8973e',
+                    colorBackground: '#1a1714',
+                    colorText: '#e8dcc8',
+                    colorDanger: '#ef4444',
+                    fontFamily: '"Josefin Sans", sans-serif',
+                    borderRadius: '0.75rem',
+                  },
+                },
+              }}
+            >
+              <CheckoutForm
+                onSuccess={handlePaymentSuccess}
+                onError={(msg) => toast({ title: 'Error', description: msg, variant: 'destructive' })}
+              />
+            </Elements>
+          )}
         </DialogContent>
       </Dialog>
 
