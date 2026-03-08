@@ -100,81 +100,80 @@ const PremiumBenefits = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="px-6 pt-12 pb-4">
-        <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft size={18} />
-          <span className="text-sm">{t('general.back')}</span>
-        </button>
-        <div className="flex items-center gap-2">
-          <Crown className="h-6 w-6 text-gold" />
-          <h1 className="font-display text-3xl text-foreground">Premium</h1>
+    <>
+      <div className="min-h-screen bg-background pb-24">
+        <div className="px-6 pt-12 pb-4">
+          <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft size={18} />
+            <span className="text-sm">{t('general.back')}</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <Crown className="h-6 w-6 text-gold" />
+            <h1 className="font-display text-3xl text-foreground">Premium</h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">de<span className="text-gold">nueve</span>a<span className="text-gold">nueve</span></p>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">de<span className="text-gold">nueve</span>a<span className="text-gold">nueve</span></p>
-      </div>
 
-      <div className="px-6 space-y-4">
-        {/* Birthday alert */}
-        {isBirthdayMonth() && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="rounded-xl border border-gold/30 bg-gradient-to-r from-gold/15 to-gold/5 p-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/20">
-                <Cake className="h-5 w-5 text-gold" />
+        <div className="px-6 space-y-4">
+          {isBirthdayMonth() && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-xl border border-gold/30 bg-gradient-to-r from-gold/15 to-gold/5 p-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/20">
+                  <Cake className="h-5 w-5 text-gold" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{t('premium.birthdayAlert')}</p>
+                  <p className="text-xs text-gold-light">{t('premium.birthdayAlertDesc')}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">{t('premium.birthdayAlert')}</p>
-                <p className="text-xs text-gold-light">{t('premium.birthdayAlertDesc')}</p>
-              </div>
+            </motion.div>
+          )}
+
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-border bg-card p-4">
+            <h3 className="text-sm font-medium text-foreground mb-3">{t('premium.yourBenefits')}</h3>
+            <div className="space-y-3">
+              {benefits.map(({ icon: Icon, key }) => (
+                <div key={key} className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/10">
+                    <Icon size={16} className="text-gold" />
+                  </div>
+                  <span className="text-sm text-foreground">{t(key)}</span>
+                </div>
+              ))}
             </div>
           </motion.div>
-        )}
 
-        {/* Plan benefits */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-border bg-card p-4">
-          <h3 className="text-sm font-medium text-foreground mb-3">{t('premium.yourBenefits')}</h3>
-          <div className="space-y-3">
-            {benefits.map(({ icon: Icon, key }) => (
-              <div key={key} className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/10">
-                  <Icon size={16} className="text-gold" />
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-xl border border-gold/20 bg-gradient-to-br from-gold/5 to-transparent p-4">
+            <h3 className="text-sm font-medium text-foreground mb-3">{t('premium.exclusiveBenefits')}</h3>
+            <div className="space-y-3">
+              {exclusiveBenefits.map(({ icon: Icon, key }) => (
+                <div key={key} className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/10">
+                    <Icon size={16} className="text-gold" />
+                  </div>
+                  <span className="text-sm text-foreground">{t(key)}</span>
                 </div>
-                <span className="text-sm text-foreground">{t(key)}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+              ))}
+            </div>
+          </motion.div>
 
-        {/* Exclusive benefits */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-xl border border-gold/20 bg-gradient-to-br from-gold/5 to-transparent p-4">
-          <h3 className="text-sm font-medium text-foreground mb-3">{t('premium.exclusiveBenefits')}</h3>
-          <div className="space-y-3">
-            {exclusiveBenefits.map(({ icon: Icon, key }) => (
-              <div key={key} className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/10">
-                  <Icon size={16} className="text-gold" />
-                </div>
-                <span className="text-sm text-foreground">{t(key)}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => setShowCancelDialog(true)}
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            {t('club.manageSubscription')}
+          </Button>
+        </div>
 
-        {/* Manage subscription */}
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => setShowCancelDialog(true)}
-        >
-          <Settings className="h-4 w-4 mr-2" />
-          {t('club.manageSubscription')}
-        </Button>
+        <BottomNav />
       </div>
 
-      {/* Cancel Subscription Dialog */}
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -182,14 +181,16 @@ const PremiumBenefits = () => {
               <AlertTriangle className="h-5 w-5 text-gold" />
               {t('premium.cancelTitle')}
             </DialogTitle>
-            <DialogDescription className="text-left space-y-3 pt-2">
-              <p>{t('premium.cancelDesc1')}</p>
-              {subscriptionEnd && (
-                <p className="text-sm font-medium text-foreground">
-                  {t('premium.cancelDesc2')} {new Date(subscriptionEnd).toLocaleDateString()}
-                </p>
-              )}
-              <p className="text-xs text-muted-foreground">{t('premium.cancelDesc3')}</p>
+            <DialogDescription asChild>
+              <div className="text-left space-y-3 pt-2">
+                <p>{t('premium.cancelDesc1')}</p>
+                {subscriptionEnd && (
+                  <p className="text-sm font-medium text-foreground">
+                    {t('premium.cancelDesc2')} {new Date(subscriptionEnd).toLocaleDateString()}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">{t('premium.cancelDesc3')}</p>
+              </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-col gap-2 sm:flex-col">
@@ -222,10 +223,7 @@ const PremiumBenefits = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </div>
-
-      <BottomNav />
-    </div>
+    </>
   );
 };
 
