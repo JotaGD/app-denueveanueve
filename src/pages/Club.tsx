@@ -33,7 +33,7 @@ const PLANS = [
     nameKey: 'club.men',
     price: 19,
     benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3', 'club.menBenefits.4'],
-    icons: [Scissors, Scissors, CalendarCheck, Star],
+    icons: [Scissors, BadgeEuro, CalendarCheck, Star],
     detailKey: 'club.menDetail',
   },
 ];
