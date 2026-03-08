@@ -24,6 +24,7 @@ const Home = () => {
   const { user } = useAuth();
   const [points, setPoints] = useState(0);
   const [visits, setVisits] = useState(0);
+  const [isClubMember, setIsClubMember] = useState(false);
 
   const rawName = user?.user_metadata?.first_name || 'Cliente';
   const firstName = rawName
