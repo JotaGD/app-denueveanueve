@@ -101,7 +101,12 @@ const Register = () => {
 
           <div className="space-y-1.5">
             <Label htmlFor="password" className="text-xs text-muted-foreground">{t('auth.password')}</Label>
-            <Input id="password" type="password" value={form.password} onChange={(e) => update('password', e.target.value)} required minLength={8} className="h-11 bg-secondary border-border focus:border-gold focus:ring-gold/20" />
+            <div className="relative">
+              <Input id="password" type={showPassword ? 'text' : 'password'} value={form.password} onChange={(e) => update('password', e.target.value)} required minLength={8} className="h-11 bg-secondary border-border focus:border-gold focus:ring-gold/20 pr-10" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-3 pt-2">
