@@ -60,7 +60,7 @@ const Home = () => {
         <div className="relative flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">{t('home.greeting')},</p>
-            <h1 className="font-display text-3xl text-foreground">{firstName}</h1>
+            <h1 className="font-display text-xl text-foreground">{firstName}</h1>
           </div>
           <img src={logoImg} alt="denueveanueve" className="h-5 w-auto opacity-70" />
         </div>
