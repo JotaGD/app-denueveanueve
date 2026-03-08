@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Crown, Check, Star, Scissors, Palette, CalendarCheck } from 'lucide-react';
+import { ArrowLeft, Crown, Check, Star, Scissors, Palette, CalendarCheck, Info } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import BottomNav from '@/components/BottomNav';
 import type { Tables } from '@/integrations/supabase/types';
