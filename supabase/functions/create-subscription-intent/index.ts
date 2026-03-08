@@ -53,22 +53,18 @@ serve(async (req) => {
       items: [{ price: priceId }],
       payment_behavior: "default_incomplete",
       payment_settings: { save_default_payment_method: "on_subscription" },
-      expand: ["latest_invoice.payment_intent"],
+      expand: ["latest_invoice"],
     });
 
-    console.log("Subscription created:", JSON.stringify({
-      id: subscription.id,
-      status: subscription.status,
-      latest_invoice_type: typeof subscription.latest_invoice,
-      latest_invoice: subscription.latest_invoice,
-    }));
-
     const invoice = subscription.latest_invoice as any;
-    const paymentIntent = invoice?.payment_intent;
+    const paymentIntentId = invoice?.payment_intent;
 
-    if (!paymentIntent?.client_secret) {
-      throw new Error(`No client_secret found. Invoice status: ${invoice?.status}, PI: ${JSON.stringify(paymentIntent)}`);
+    if (!paymentIntentId) {
+      throw new Error(`No payment_intent on invoice. Status: ${invoice?.status}`);
     }
+
+    // Retrieve the PaymentIntent to get the client_secret
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId as string);
 
     return new Response(
       JSON.stringify({
@@ -86,5 +82,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
+  }
+});
   }
 });
