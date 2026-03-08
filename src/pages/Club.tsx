@@ -30,8 +30,8 @@ const PLANS = [
     plan: 'MEN_19' as const,
     nameKey: 'club.men',
     price: 19,
-    benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3'],
-    icons: [Scissors, Star, CalendarCheck],
+    benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3', 'club.menBenefits.4'],
+    icons: [Scissors, Scissors, CalendarCheck, Star],
   },
 ];
 
