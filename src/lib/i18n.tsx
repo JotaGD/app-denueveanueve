@@ -378,11 +378,11 @@ const translations: Record<Locale, Record<string, string>> = {
     'club.ladiesBenefits.3': 'Priority appointment access',
     'club.ladiesBenefits.4': 'Free monthly treatment',
     'club.menBenefits.1': '1 included cut per month',
-    'club.menBenefits.2': 'Beard trim included',
+    'club.menBenefits.2': '2€ off extra haircuts',
     'club.menBenefits.3': 'Priority appointment access',
     'club.menBenefits.4': 'Exclusive member benefits',
     'club.ladiesDetail': '✂️ 1 included cut per month\n🎨 15% off color services\n📅 Priority appointment access\n💆 Free monthly hair treatment\n🎁 Exclusive promotions for members\n💳 No commitment, cancel anytime',
-    'club.menDetail': '✂️ 1 included haircut per month\n🧔 Beard trim included with every visit\n💰 2€ off extra haircuts\n📅 Priority appointment access\n\n🎁 Exclusive member benefits:\n🎂 Free haircut + gift on your birthday\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
+    'club.menDetail': '✂️ 1 included haircut per month\n💰 2€ off extra haircuts\n📅 Priority appointment access\n\n🎁 Exclusive member benefits:\n🎂 Free haircut + gift on your birthday\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
     // Promos
     'promos.title': 'Promotions',
     'promos.noPromos': 'No active promotions',
