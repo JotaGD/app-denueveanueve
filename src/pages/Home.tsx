@@ -121,11 +121,11 @@ const Home = () => {
           </div>
           <div className="flex gap-6">
             <div>
-              <p className="font-display text-2xl text-gold">0</p>
+            <p className="font-display text-2xl text-gold">{points}</p>
               <p className="text-xs text-muted-foreground">{t('home.points')}</p>
             </div>
             <div>
-              <p className="font-display text-2xl text-foreground">0</p>
+              <p className="font-display text-2xl text-foreground">{visits}</p>
               <p className="text-xs text-muted-foreground">{t('home.visits')}</p>
             </div>
           </div>
