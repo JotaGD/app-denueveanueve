@@ -36,11 +36,14 @@ const PremiumBenefits = () => {
 
       const { data: sub } = await supabase
         .from('subscriptions')
-        .select('plan')
+        .select('plan, current_period_end')
         .eq('customer_id', customer.id)
         .eq('status', 'ACTIVE')
         .maybeSingle();
-      if (sub) setPlan(sub.plan);
+      if (sub) {
+        setPlan(sub.plan);
+        setSubscriptionEnd(sub.current_period_end);
+      }
       setLoading(false);
     };
     load();
