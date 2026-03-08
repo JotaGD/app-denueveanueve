@@ -57,20 +57,34 @@ serve(async (req) => {
     });
 
     const invoice = subscription.latest_invoice as any;
-    console.log("Invoice keys:", JSON.stringify(Object.keys(invoice || {})));
-    console.log("payment_intent:", invoice?.payment_intent);
-    console.log("pending_setup_intent:", (subscription as any).pending_setup_intent);
+    console.log("Invoice id:", invoice?.id, "status:", invoice?.status);
 
+    // Retrieve the full invoice with payment_intent expanded
+    const fullInvoice = await stripe.invoices.retrieve(invoice.id, {
+      expand: ["payment_intent"],
+    });
+    
+    console.log("Full invoice payment_intent:", JSON.stringify((fullInvoice as any).payment_intent));
+    
+    const pi = (fullInvoice as any).payment_intent;
     let clientSecret: string;
-
-    if (invoice?.payment_intent) {
-      const pi = await stripe.paymentIntents.retrieve(invoice.payment_intent as string);
-      clientSecret = pi.client_secret!;
-    } else if ((subscription as any).pending_setup_intent) {
-      const si = await stripe.setupIntents.retrieve((subscription as any).pending_setup_intent as string);
-      clientSecret = si.client_secret!;
+    
+    if (pi && typeof pi === "object" && pi.client_secret) {
+      clientSecret = pi.client_secret;
+    } else if (pi && typeof pi === "string") {
+      const piObj = await stripe.paymentIntents.retrieve(pi);
+      clientSecret = piObj.client_secret!;
     } else {
-      throw new Error(`No payment_intent or setup_intent found`);
+      // Try listing payment intents for this invoice
+      const paymentIntents = await stripe.paymentIntents.list({
+        customer: customerId,
+        limit: 1,
+      });
+      if (paymentIntents.data.length > 0 && paymentIntents.data[0].client_secret) {
+        clientSecret = paymentIntents.data[0].client_secret;
+      } else {
+        throw new Error(`Cannot find client_secret. Invoice: ${invoice.id}`);
+      }
     }
 
     return new Response(
