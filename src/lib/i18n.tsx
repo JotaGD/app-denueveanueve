@@ -434,6 +434,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'premium.cancelDesc3': 'You can resubscribe at any time.',
     'premium.cancelConfirm': 'Cancel subscription',
     'premium.keepSubscription': 'Keep subscription',
+    'premium.cancelledSuccess': 'Subscription cancelled successfully',
     // Auth extras
     'auth.dateOfBirth': 'Date of birth',
     // Promos
