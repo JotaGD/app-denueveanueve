@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Crown, Check, Star, Scissors, Palette, CalendarCheck, Info, BadgeEuro } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Crown, Check, Star, Scissors, Palette, CalendarCheck, Info, BadgeEuro, Loader2, Settings } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
+import { toast } from '@/hooks/use-toast';
 import BottomNav from '@/components/BottomNav';
-import type { Tables } from '@/integrations/supabase/types';
-
-type Subscription = Tables<'subscriptions'>;
 
 const STATUS_MAP: Record<string, string> = {
   ACTIVE: 'club.active',
@@ -38,38 +36,79 @@ const PLANS = [
   },
 ];
 
+interface StripeSubscription {
+  subscribed: boolean;
+  plan?: string | null;
+  subscription_end?: string | null;
+  cancel_at_period_end?: boolean;
+}
+
 const Club = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t } = useI18n();
   const { user } = useAuth();
 
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [stripeSub, setStripeSub] = useState<StripeSubscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
   const [infoPlan, setInfoPlan] = useState<typeof PLANS[number] | null>(null);
 
+  // Check for checkout result in URL
+  useEffect(() => {
+    const checkout = searchParams.get('checkout');
+    if (checkout === 'success') {
+      toast({ title: t('club.checkoutSuccess'), description: t('club.checkoutSuccessDesc') });
+    }
+  }, [searchParams, t]);
+
+  // Check Stripe subscription
   useEffect(() => {
     if (!user) return;
-    const load = async () => {
+    const checkSub = async () => {
       setLoading(true);
-      const { data: customer } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (customer) {
-        const { data: sub } = await supabase
-          .from('subscriptions')
-          .select('*')
-          .eq('customer_id', customer.id)
-          .in('status', ['ACTIVE', 'PAYMENT_DUE', 'CANCELLED_END_OF_PERIOD'])
-          .single();
-        setSubscription(sub);
+      try {
+        const { data, error } = await supabase.functions.invoke('check-subscription');
+        if (error) throw error;
+        setStripeSub(data as StripeSubscription);
+      } catch {
+        setStripeSub({ subscribed: false });
       }
       setLoading(false);
     };
-    load();
+    checkSub();
   }, [user]);
+
+  const handleSubscribe = async (plan: string) => {
+    setCheckoutLoading(plan);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { plan },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      toast({ title: 'Error', description: String(err), variant: 'destructive' });
+    }
+    setCheckoutLoading(null);
+  };
+
+  const handleManageSubscription = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      toast({ title: 'Error', description: String(err), variant: 'destructive' });
+    }
+    setPortalLoading(false);
+  };
 
   if (loading) {
     return (
@@ -84,8 +123,8 @@ const Club = () => {
   }
 
   // Active subscription view
-  if (subscription) {
-    const planInfo = PLANS.find((p) => p.plan === subscription.plan);
+  if (stripeSub?.subscribed && stripeSub.plan) {
+    const planInfo = PLANS.find((p) => p.plan === stripeSub.plan);
     return (
       <div className="min-h-screen bg-background pb-24">
         <div className="px-6 pt-12 pb-4">
@@ -102,14 +141,15 @@ const Club = () => {
             <div className="flex items-center gap-3 mb-3">
               <Crown className="h-6 w-6 text-gold" />
               <div>
-                <p className="text-lg font-display text-foreground">{planInfo ? t(planInfo.nameKey) : subscription.plan}</p>
-                <span className="text-xs text-gold">{t(STATUS_MAP[subscription.status] || '')}</span>
+                <p className="text-lg font-display text-foreground">{planInfo ? t(planInfo.nameKey) : stripeSub.plan}</p>
+                <span className="text-xs text-gold">
+                  {stripeSub.cancel_at_period_end ? t('club.cancelledEnd') : t('club.active')}
+                </span>
               </div>
             </div>
             <div className="space-y-1 text-xs text-muted-foreground">
-              <p>{t('club.memberSince')}: {new Date(subscription.created_at).toLocaleDateString()}</p>
-              {subscription.next_renewal_at && (
-                <p>{t('club.nextRenewal')}: {new Date(subscription.next_renewal_at).toLocaleDateString()}</p>
+              {stripeSub.subscription_end && (
+                <p>{stripeSub.cancel_at_period_end ? t('club.endsAt') : t('club.nextRenewal')}: {new Date(stripeSub.subscription_end).toLocaleDateString()}</p>
               )}
             </div>
           </div>
@@ -130,11 +170,16 @@ const Club = () => {
             </div>
           </div>
 
-          {subscription.status === 'ACTIVE' && !subscription.cancel_at_period_end && (
-            <button className="w-full text-center text-xs text-muted-foreground py-3 hover:text-destructive transition-colors">
-              {t('club.cancelSubscription')}
-            </button>
-          )}
+          {/* Manage subscription */}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+          >
+            {portalLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Settings className="h-4 w-4 mr-2" />}
+            {t('club.manageSubscription')}
+          </Button>
         </div>
         <BottomNav />
       </div>
@@ -195,7 +240,14 @@ const Club = () => {
                 >
                   <Info size={18} />
                 </Button>
-                <Button className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90">
+                <Button
+                  className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
+                  onClick={() => handleSubscribe(plan.plan)}
+                  disabled={checkoutLoading !== null}
+                >
+                  {checkoutLoading === plan.plan ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
                   {t('club.subscribe')}
                 </Button>
               </div>
