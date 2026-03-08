@@ -198,6 +198,12 @@ const translations: Record<Locale, Record<string, string>> = {
     'premium.exclusiveGiveaways': 'Sorteos exclusivos',
     'premium.birthdayAlert': '🎂 ¡Feliz cumpleaños!',
     'premium.birthdayAlertDesc': 'Tienes un servicio gratis y un regalo esperándote en tu centro',
+    'premium.cancelTitle': 'Cancelar suscripción',
+    'premium.cancelDesc1': 'Si cancelas, no se te cobrará el mes siguiente.',
+    'premium.cancelDesc2': 'Tus beneficios seguirán activos hasta el',
+    'premium.cancelDesc3': 'Podrás volver a suscribirte en cualquier momento.',
+    'premium.cancelConfirm': 'Cancelar suscripción',
+    'premium.keepSubscription': 'Mantener suscripción',
     // Auth extras
     'auth.dateOfBirth': 'Fecha de nacimiento',
     // Promos
@@ -421,6 +427,12 @@ const translations: Record<Locale, Record<string, string>> = {
     'premium.exclusiveGiveaways': 'Exclusive giveaways',
     'premium.birthdayAlert': '🎂 Happy birthday!',
     'premium.birthdayAlertDesc': 'You have a free service and a gift waiting for you at the salon',
+    'premium.cancelTitle': 'Cancel subscription',
+    'premium.cancelDesc1': 'If you cancel, you will not be charged next month.',
+    'premium.cancelDesc2': 'Your benefits will remain active until',
+    'premium.cancelDesc3': 'You can resubscribe at any time.',
+    'premium.cancelConfirm': 'Cancel subscription',
+    'premium.keepSubscription': 'Keep subscription',
     // Auth extras
     'auth.dateOfBirth': 'Date of birth',
     // Promos
