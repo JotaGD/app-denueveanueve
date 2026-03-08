@@ -128,6 +128,11 @@ const Register = () => {
           </div>
 
           <div className="space-y-1.5">
+            <Label htmlFor="dateOfBirth" className="text-xs text-muted-foreground">{t('auth.dateOfBirth')}</Label>
+            <Input id="dateOfBirth" type="date" value={form.dateOfBirth} onChange={(e) => update('dateOfBirth', e.target.value)} required className="h-11 bg-secondary border-border focus:border-gold focus:ring-gold/20" />
+          </div>
+
+          <div className="space-y-1.5">
             <Label htmlFor="password" className="text-xs text-muted-foreground">{t('auth.password')}</Label>
             <div className="relative">
               <Input id="password" type={showPassword ? 'text' : 'password'} value={form.password} onChange={(e) => update('password', e.target.value)} required minLength={8} className="h-11 bg-secondary border-border focus:border-gold focus:ring-gold/20 pr-10" />
