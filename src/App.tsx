@@ -19,6 +19,7 @@ import Profile from "./pages/Profile";
 import Club from "./pages/Club";
 import Promos from "./pages/Promos";
 import ServiceCatalog from "./pages/ServiceCatalog";
+import PremiumBenefits from "./pages/PremiumBenefits";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
