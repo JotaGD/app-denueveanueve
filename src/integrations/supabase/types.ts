@@ -950,6 +950,41 @@ export type Database = {
         }
         Relationships: []
       }
+      visit_pins: {
+        Row: {
+          created_at: string
+          customer_id: string
+          expires_at: string
+          id: string
+          pin: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          expires_at?: string
+          id?: string
+          pin: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          expires_at?: string
+          id?: string
+          pin?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_pins_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       welcome_coupons: {
         Row: {
           audit_redemption_id: string | null

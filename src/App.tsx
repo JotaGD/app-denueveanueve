@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { I18nProvider } from "@/lib/i18n";
 import { AuthProvider } from "@/lib/auth";
 import RequireAuth from "@/components/RequireAuth";
+import PinOverlay from "@/components/PinOverlay";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import Register from "./pages/Register";
@@ -30,6 +31,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <PinOverlay />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/welcome" element={<Welcome />} />
