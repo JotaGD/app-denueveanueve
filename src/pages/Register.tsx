@@ -23,6 +23,7 @@ const Register = () => {
     phone: '',
     email: '',
     password: '',
+    dateOfBirth: '',
     terms: false,
     marketing: false,
     whatsapp: false,
@@ -64,6 +65,7 @@ const Register = () => {
       first_name: form.firstName,
       last_name: form.lastName,
       phone: form.phone,
+      date_of_birth: form.dateOfBirth || null,
       consent_marketing: form.marketing,
       consent_whatsapp: form.whatsapp,
     });
@@ -123,6 +125,11 @@ const Register = () => {
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-xs text-muted-foreground">{t('auth.email')}</Label>
             <Input id="email" type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required className="h-11 bg-secondary border-border focus:border-gold focus:ring-gold/20" />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="dateOfBirth" className="text-xs text-muted-foreground">{t('auth.dateOfBirth')}</Label>
+            <Input id="dateOfBirth" type="date" value={form.dateOfBirth} onChange={(e) => update('dateOfBirth', e.target.value)} required className="h-11 bg-secondary border-border focus:border-gold focus:ring-gold/20" />
           </div>
 
           <div className="space-y-1.5">

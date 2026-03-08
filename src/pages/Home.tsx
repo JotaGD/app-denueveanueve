@@ -81,6 +81,23 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Premium Banner */}
+      {isClubMember && (
+        <div className="px-6 mb-4">
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={() => navigate('/premium')}
+            className="w-full rounded-xl gradient-gold p-3.5 flex items-center justify-center gap-2 shadow-gold hover:opacity-90 transition-opacity"
+          >
+            <Crown className="h-5 w-5 text-primary-foreground" />
+            <span className="font-display text-base text-primary-foreground tracking-wide">
+              de<span className="opacity-90">nueve</span>a<span className="opacity-90">nueve</span> Premium
+            </span>
+          </motion.button>
+        </div>
+      )}
+
       <div className="space-y-4 px-6">
         {/* Welcome Coupon */}
         <motion.div
