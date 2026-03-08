@@ -953,27 +953,33 @@ export type Database = {
       visit_pins: {
         Row: {
           created_at: string
+          created_by_staff_id: string | null
           customer_id: string
           expires_at: string
           id: string
           pin: string
           status: string
+          used: boolean
         }
         Insert: {
           created_at?: string
+          created_by_staff_id?: string | null
           customer_id: string
           expires_at?: string
           id?: string
           pin: string
           status?: string
+          used?: boolean
         }
         Update: {
           created_at?: string
+          created_by_staff_id?: string | null
           customer_id?: string
           expires_at?: string
           id?: string
           pin?: string
           status?: string
+          used?: boolean
         }
         Relationships: [
           {
