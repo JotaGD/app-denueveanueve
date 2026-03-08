@@ -353,6 +353,7 @@ export type Database = {
           consent_terms_at: string
           consent_whatsapp_at: string | null
           created_at: string
+          date_of_birth: string | null
           deleted_at: string | null
           email: string
           email_verified_at: string | null
@@ -372,6 +373,7 @@ export type Database = {
           consent_terms_at?: string
           consent_whatsapp_at?: string | null
           created_at?: string
+          date_of_birth?: string | null
           deleted_at?: string | null
           email: string
           email_verified_at?: string | null
@@ -391,6 +393,7 @@ export type Database = {
           consent_terms_at?: string
           consent_whatsapp_at?: string | null
           created_at?: string
+          date_of_birth?: string | null
           deleted_at?: string | null
           email?: string
           email_verified_at?: string | null
