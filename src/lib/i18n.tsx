@@ -201,6 +201,11 @@ const translations: Record<Locale, Record<string, string>> = {
     'general.close': 'Cerrar',
     'general.yes': 'Sí',
     'general.no': 'No',
+    // Pin
+    'pin.title': 'Verificación de visita',
+    'pin.description': 'Muestra este código al personal',
+    'pin.showToStaff': 'El personal verificará tu visita con este PIN',
+    'pin.active': 'PIN activo',
   },
   en: {
     'nav.home': 'Home',
