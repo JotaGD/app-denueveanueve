@@ -25,7 +25,10 @@ const Home = () => {
   const [points, setPoints] = useState(0);
   const [visits, setVisits] = useState(0);
 
-  const firstName = user?.user_metadata?.first_name || 'Cliente';
+  const rawName = user?.user_metadata?.first_name || 'Cliente';
+  const firstName = rawName
+    .toLowerCase()
+    .replace(/\b\w/g, (c: string) => c.toUpperCase());
 
   useEffect(() => {
     if (!user) return;
@@ -57,7 +60,7 @@ const Home = () => {
         <div className="relative flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">{t('home.greeting')},</p>
-            <h1 className="font-display text-3xl text-foreground">{firstName}</h1>
+            <h1 className="font-display text-xl text-foreground">{firstName}</h1>
           </div>
           <img src={logoImg} alt="denueveanueve" className="h-5 w-auto opacity-70" />
         </div>
