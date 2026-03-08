@@ -427,6 +427,12 @@ const translations: Record<Locale, Record<string, string>> = {
     'premium.exclusiveGiveaways': 'Exclusive giveaways',
     'premium.birthdayAlert': '🎂 Happy birthday!',
     'premium.birthdayAlertDesc': 'You have a free service and a gift waiting for you at the salon',
+    'premium.cancelTitle': 'Cancel subscription',
+    'premium.cancelDesc1': 'If you cancel, you will not be charged next month.',
+    'premium.cancelDesc2': 'Your benefits will remain active until',
+    'premium.cancelDesc3': 'You can resubscribe at any time.',
+    'premium.cancelConfirm': 'Cancel subscription',
+    'premium.keepSubscription': 'Keep subscription',
     // Auth extras
     'auth.dateOfBirth': 'Date of birth',
     // Promos
