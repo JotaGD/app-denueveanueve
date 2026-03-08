@@ -401,6 +401,11 @@ const translations: Record<Locale, Record<string, string>> = {
     'general.close': 'Close',
     'general.yes': 'Yes',
     'general.no': 'No',
+    // Pin
+    'pin.title': 'Visit verification',
+    'pin.description': 'Show this code to staff',
+    'pin.showToStaff': 'Staff will verify your visit with this PIN',
+    'pin.active': 'PIN active',
   },
 };
 
