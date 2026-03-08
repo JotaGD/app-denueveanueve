@@ -43,8 +43,22 @@ const PinOverlay = () => {
           const row = payload.new as { pin: string; status: string };
           if (row.status === 'PENDING') {
             setPin(row.pin);
-            // Auto-dismiss after 2 minutes
             setTimeout(() => setPin(null), 120_000);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'visit_pins',
+          filter: `customer_id=eq.${customerId}`,
+        },
+        (payload) => {
+          const row = payload.new as { used: boolean };
+          if (row.used) {
+            setPin(null);
           }
         }
       )
