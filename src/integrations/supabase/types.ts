@@ -996,6 +996,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_customer_exists: {
+        Args: { _email: string; _phone: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

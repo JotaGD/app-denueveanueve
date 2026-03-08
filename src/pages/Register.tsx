@@ -40,17 +40,24 @@ const Register = () => {
     }
     setLoading(true);
 
-    // Check if phone is already registered
-    const { data: existingPhone } = await supabase
-      .from('customers')
-      .select('id')
-      .eq('phone', form.phone)
-      .maybeSingle();
+    // Check if email or phone already registered
+    const { data: checkResult } = await supabase.rpc('check_customer_exists', {
+      _email: form.email,
+      _phone: form.phone,
+    });
 
-    if (existingPhone) {
-      setLoading(false);
-      toast.error('Este número de teléfono ya está registrado');
-      return;
+    if (checkResult) {
+      const result = checkResult as { email_exists: boolean; phone_exists: boolean };
+      if (result.email_exists) {
+        setLoading(false);
+        toast.error('Este correo electrónico ya está registrado');
+        return;
+      }
+      if (result.phone_exists) {
+        setLoading(false);
+        toast.error('Este número de teléfono ya está registrado');
+        return;
+      }
     }
 
     const { error } = await signUp(form.email, form.password, {
