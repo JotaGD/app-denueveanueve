@@ -167,12 +167,61 @@ const PremiumBenefits = () => {
         <Button
           variant="outline"
           className="w-full"
-          onClick={handleManage}
-          disabled={portalLoading}
+          onClick={() => setShowCancelDialog(true)}
         >
-          {portalLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Settings className="h-4 w-4 mr-2" />}
+          <Settings className="h-4 w-4 mr-2" />
           {t('club.manageSubscription')}
         </Button>
+      </div>
+
+      {/* Cancel Subscription Dialog */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-gold" />
+              {t('premium.cancelTitle')}
+            </DialogTitle>
+            <DialogDescription className="text-left space-y-3 pt-2">
+              <p>{t('premium.cancelDesc1')}</p>
+              {subscriptionEnd && (
+                <p className="text-sm font-medium text-foreground">
+                  {t('premium.cancelDesc2')} {new Date(subscriptionEnd).toLocaleDateString()}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">{t('premium.cancelDesc3')}</p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col gap-2 sm:flex-col">
+            <Button
+              variant="destructive"
+              className="w-full"
+              disabled={cancelLoading}
+              onClick={async () => {
+                setCancelLoading(true);
+                try {
+                  const { data, error } = await supabase.functions.invoke('customer-portal');
+                  if (error) throw error;
+                  if (data?.url) window.location.href = data.url;
+                } catch (err) {
+                  toast({ title: 'Error', description: String(err), variant: 'destructive' });
+                }
+                setCancelLoading(false);
+              }}
+            >
+              {cancelLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {t('premium.cancelConfirm')}
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setShowCancelDialog(false)}
+            >
+              {t('premium.keepSubscription')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </div>
 
       <BottomNav />
