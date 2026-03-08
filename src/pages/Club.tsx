@@ -26,6 +26,7 @@ const PLANS = [
     price: 59,
     benefits: ['club.ladiesBenefits.1', 'club.ladiesBenefits.2', 'club.ladiesBenefits.3', 'club.ladiesBenefits.4'],
     icons: [Scissors, Palette, CalendarCheck, Star],
+    detailKey: 'club.ladiesDetail',
   },
   {
     plan: 'MEN_19' as const,
@@ -33,6 +34,7 @@ const PLANS = [
     price: 19,
     benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3', 'club.menBenefits.4'],
     icons: [Scissors, Scissors, CalendarCheck, Star],
+    detailKey: 'club.menDetail',
   },
 ];
 
