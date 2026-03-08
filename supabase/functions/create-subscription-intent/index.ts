@@ -56,8 +56,19 @@ serve(async (req) => {
       expand: ["latest_invoice.payment_intent"],
     });
 
-    const invoice = subscription.latest_invoice as Stripe.Invoice;
-    const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
+    console.log("Subscription created:", JSON.stringify({
+      id: subscription.id,
+      status: subscription.status,
+      latest_invoice_type: typeof subscription.latest_invoice,
+      latest_invoice: subscription.latest_invoice,
+    }));
+
+    const invoice = subscription.latest_invoice as any;
+    const paymentIntent = invoice?.payment_intent;
+
+    if (!paymentIntent?.client_secret) {
+      throw new Error(`No client_secret found. Invoice status: ${invoice?.status}, PI: ${JSON.stringify(paymentIntent)}`);
+    }
 
     return new Response(
       JSON.stringify({
