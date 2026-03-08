@@ -41,13 +41,13 @@ const Register = () => {
     setLoading(true);
 
     // Check if email or phone already registered
-    const { data: checkResult } = await supabase.rpc('check_customer_exists', {
-      _email: form.email,
-      _phone: form.phone,
-    });
+    const { data: checkResult, error: checkError } = await supabase.rpc(
+      'check_customer_exists' as any,
+      { _email: form.email, _phone: form.phone }
+    );
 
-    if (checkResult) {
-      const result = checkResult as { email_exists: boolean; phone_exists: boolean };
+    if (!checkError && checkResult) {
+      const result = checkResult as unknown as { email_exists: boolean; phone_exists: boolean };
       if (result.email_exists) {
         setLoading(false);
         toast.error('Este correo electrónico ya está registrado');
