@@ -178,7 +178,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'club.menBenefits.2': '2€ dto. en cortes extra',
     'club.menBenefits.3': 'Acceso prioritario a citas',
     'club.menBenefits.4': 'Beneficios exclusivos para socios',
-    'club.ladiesDetail': '✂️ 1 corte incluido al mes\n🎨 15% de descuento en servicios de color\n📅 Acceso prioritario a citas\n💆 Tratamiento capilar mensual gratuito\n🎁 Promociones y ofertas exclusivas para socias\n💳 Sin permanencia, cancela cuando quieras',
+    'club.ladiesDetail': '✂️ 1 corte incluido al mes\n🎨 15% de descuento en servicios de color\n📅 Acceso prioritario a citas\n💆 Tratamiento capilar mensual gratuito\n\n🎁 Beneficios exclusivos para socias:\n🎂 Corte gratis + regalo en tu cumpleaños\n🏷️ Promociones exclusivas para socias\n🎰 Sorteos exclusivos',
     'club.menDetail': '✂️ 1 corte de pelo incluido al mes\n💰 2€ dto. en cortes extra\n📅 Acceso prioritario a citas\n\n🎁 Beneficios exclusivos para socios:\n🎂 Corte gratis + regalo en tu cumpleaños\n🏷️ Promociones exclusivas para socios\n🎰 Sorteos exclusivos',
     // Promos
     'promos.title': 'Promociones',
@@ -381,7 +381,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'club.menBenefits.2': '2€ off extra haircuts',
     'club.menBenefits.3': 'Priority appointment access',
     'club.menBenefits.4': 'Exclusive member benefits',
-    'club.ladiesDetail': '✂️ 1 included cut per month\n🎨 15% off color services\n📅 Priority appointment access\n💆 Free monthly hair treatment\n🎁 Exclusive promotions for members\n💳 No commitment, cancel anytime',
+    'club.ladiesDetail': '✂️ 1 included cut per month\n🎨 15% off color services\n📅 Priority appointment access\n💆 Free monthly hair treatment\n\n🎁 Exclusive member benefits:\n🎂 Free haircut + gift on your birthday\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
     'club.menDetail': '✂️ 1 included haircut per month\n💰 2€ off extra haircuts\n📅 Priority appointment access\n\n🎁 Exclusive member benefits:\n🎂 Free haircut + gift on your birthday\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
     // Promos
     'promos.title': 'Promotions',
