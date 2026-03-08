@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { I18nProvider } from "@/lib/i18n";
 import { AuthProvider } from "@/lib/auth";
+import RequireAuth from "@/components/RequireAuth";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import Register from "./pages/Register";
@@ -34,14 +35,14 @@ const App = () => (
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/services" element={<ServiceCatalog />} />
-              <Route path="/book" element={<BookAppointment />} />
-              <Route path="/appointments" element={<Appointments />} />
-              <Route path="/loyalty" element={<Loyalty />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/club" element={<Club />} />
-              <Route path="/promos" element={<Promos />} />
+              <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
+              <Route path="/services" element={<RequireAuth><ServiceCatalog /></RequireAuth>} />
+              <Route path="/book" element={<RequireAuth><BookAppointment /></RequireAuth>} />
+              <Route path="/appointments" element={<RequireAuth><Appointments /></RequireAuth>} />
+              <Route path="/loyalty" element={<RequireAuth><Loyalty /></RequireAuth>} />
+              <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+              <Route path="/club" element={<RequireAuth><Club /></RequireAuth>} />
+              <Route path="/promos" element={<RequireAuth><Promos /></RequireAuth>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
