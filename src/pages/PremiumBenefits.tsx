@@ -201,9 +201,13 @@ const PremiumBenefits = () => {
               onClick={async () => {
                 setCancelLoading(true);
                 try {
-                  const { data, error } = await supabase.functions.invoke('customer-portal');
+                  const { data, error } = await supabase.functions.invoke('cancel-subscription');
                   if (error) throw error;
-                  if (data?.url) window.location.href = data.url;
+                  if (data?.success) {
+                    setShowCancelDialog(false);
+                    toast({ title: t('premium.cancelledSuccess') });
+                    navigate('/home');
+                  }
                 } catch (err) {
                   toast({ title: 'Error', description: String(err), variant: 'destructive' });
                 }
