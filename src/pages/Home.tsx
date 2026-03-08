@@ -55,7 +55,7 @@ const Home = () => {
         .from('subscriptions')
         .select('status')
         .eq('customer_id', customer.id)
-        .eq('status', 'ACTIVE')
+        .in('status', ['ACTIVE', 'CANCELLED_END_OF_PERIOD'])
         .maybeSingle();
       setIsClubMember(!!sub);
     };
