@@ -408,6 +408,21 @@ const translations: Record<Locale, Record<string, string>> = {
     'club.ladiesDetail': '✂️ 1 included cut per month\n🎨 15% off color services\n📅 Priority appointment access\n💆 Free monthly hair treatment\n\n🎁 Exclusive member benefits:\n🎂 Free haircut + gift on your birthday\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
     'club.menDetail': '✂️ 1 included haircut per month\n💰 2€ off extra haircuts\n📅 Priority appointment access\n\n🎁 Exclusive member benefits:\n🎂 Free haircut + gift on your birthday\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
     'club.confirmPayment': 'Confirm payment',
+    // Premium
+    'premium.yourBenefits': 'Your benefits',
+    'premium.exclusiveBenefits': 'Exclusive benefits',
+    'premium.cutIncluded': '1 included cut per month',
+    'premium.colorDiscount': '15% off color',
+    'premium.priorityAccess': 'Priority appointment access',
+    'premium.monthlyTreatment': 'Free monthly hair treatment',
+    'premium.extraCutDiscount': '2€ off extra haircuts',
+    'premium.birthdayBenefit': 'Free haircut + gift on your birthday',
+    'premium.exclusivePromos': 'Exclusive member promotions',
+    'premium.exclusiveGiveaways': 'Exclusive giveaways',
+    'premium.birthdayAlert': '🎂 Happy birthday!',
+    'premium.birthdayAlertDesc': 'You have a free service and a gift waiting for you at the salon',
+    // Auth extras
+    'auth.dateOfBirth': 'Date of birth',
     // Promos
     'promos.title': 'Promotions',
     'promos.noPromos': 'No active promotions',

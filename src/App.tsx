@@ -45,6 +45,7 @@ const App = () => (
               <Route path="/loyalty" element={<RequireAuth><Loyalty /></RequireAuth>} />
               <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
               <Route path="/club" element={<RequireAuth><Club /></RequireAuth>} />
+              <Route path="/premium" element={<RequireAuth><PremiumBenefits /></RequireAuth>} />
               <Route path="/promos" element={<RequireAuth><Promos /></RequireAuth>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
