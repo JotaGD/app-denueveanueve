@@ -15,6 +15,7 @@ const Register = () => {
   const { t } = useI18n();
   const { signUp } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
