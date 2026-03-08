@@ -179,7 +179,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'club.menBenefits.3': 'Acceso prioritario a citas',
     'club.menBenefits.4': 'Beneficios exclusivos para socios',
     'club.ladiesDetail': '✂️ 1 corte incluido al mes\n🎨 15% de descuento en servicios de color\n📅 Acceso prioritario a citas\n💆 Tratamiento capilar mensual gratuito\n🎁 Promociones y ofertas exclusivas para socias\n💳 Sin permanencia, cancela cuando quieras',
-    'club.menDetail': '✂️ 1 corte de pelo incluido al mes\n🧔 Perfilado de barba incluido en cada visita\n💰 2€ dto. en cortes extra\n📅 Acceso prioritario a citas\n⭐ Beneficios y promociones exclusivas para socios\n💳 Sin permanencia, cancela cuando quieras',
+    'club.menDetail': '✂️ 1 corte de pelo incluido al mes\n🧔 Perfilado de barba incluido en cada visita\n💰 2€ dto. en cortes extra\n📅 Acceso prioritario a citas\n\n🎁 Beneficios exclusivos para socios:\n🎂 Corte gratis + regalo en tu cumpleaños\n🏷️ Promociones exclusivas para socios\n🎰 Sorteos exclusivos',
     // Promos
     'promos.title': 'Promociones',
     'promos.noPromos': 'No hay promociones activas',
@@ -382,7 +382,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'club.menBenefits.3': 'Priority appointment access',
     'club.menBenefits.4': 'Exclusive member benefits',
     'club.ladiesDetail': '✂️ 1 included cut per month\n🎨 15% off color services\n📅 Priority appointment access\n💆 Free monthly hair treatment\n🎁 Exclusive promotions for members\n💳 No commitment, cancel anytime',
-    'club.menDetail': '✂️ 1 included haircut per month\n🧔 Beard trim included with every visit\n💰 2€ off extra haircuts\n📅 Priority appointment access\n⭐ Exclusive member benefits & promotions\n💳 No commitment, cancel anytime',
+    'club.menDetail': '✂️ 1 included haircut per month\n🧔 Beard trim included with every visit\n💰 2€ off extra haircuts\n📅 Priority appointment access\n\n🎁 Exclusive member benefits:\n🎂 Free haircut + gift on your birthday\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
     // Promos
     'promos.title': 'Promotions',
     'promos.noPromos': 'No active promotions',
