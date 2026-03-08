@@ -167,18 +167,20 @@ const Home = () => {
         </motion.div>
 
         {/* Quick actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <motion.div
-            custom={3}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            onClick={() => navigate('/club')}
-            className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-colors hover:border-gold/20"
-          >
-            <Crown className="mb-2 h-5 w-5 text-gold" />
-            <p className="text-sm font-medium text-foreground">{t('home.club')}</p>
-          </motion.div>
+        <div className={`grid ${isClubMember ? 'grid-cols-1' : 'grid-cols-2'} gap-3`}>
+          {!isClubMember && (
+            <motion.div
+              custom={3}
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              onClick={() => navigate('/club')}
+              className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-colors hover:border-gold/20"
+            >
+              <Crown className="mb-2 h-5 w-5 text-gold" />
+              <p className="text-sm font-medium text-foreground">{t('home.club')}</p>
+            </motion.div>
+          )}
 
           <motion.div
             custom={4}
