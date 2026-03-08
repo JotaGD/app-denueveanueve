@@ -186,9 +186,19 @@ const Club = () => {
                 })}
               </div>
 
-              <Button className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90">
-                {t('club.subscribe')}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => setInfoPlan(plan)}
+                >
+                  <Info size={18} />
+                </Button>
+                <Button className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90">
+                  {t('club.subscribe')}
+                </Button>
+              </div>
             </div>
           </motion.div>
         ))}
