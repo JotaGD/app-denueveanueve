@@ -132,21 +132,9 @@ const Home = () => {
         </motion.div>
 
         {/* Quick actions */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <motion.div
             custom={3}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            onClick={() => navigate('/services')}
-            className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-colors hover:border-gold/20"
-          >
-            <Scissors className="mb-2 h-5 w-5 text-gold" />
-            <p className="text-sm font-medium text-foreground">{t('home.services')}</p>
-          </motion.div>
-
-          <motion.div
-            custom={4}
             variants={cardVariants}
             initial="hidden"
             animate="visible"
@@ -158,7 +146,7 @@ const Home = () => {
           </motion.div>
 
           <motion.div
-            custom={5}
+            custom={4}
             variants={cardVariants}
             initial="hidden"
             animate="visible"
