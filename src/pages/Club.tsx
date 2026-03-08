@@ -45,6 +45,7 @@ const Club = () => {
 
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [infoPlan, setInfoPlan] = useState<typeof PLANS[number] | null>(null);
 
   useEffect(() => {
     if (!user) return;
