@@ -65,6 +65,7 @@ const Register = () => {
       first_name: form.firstName,
       last_name: form.lastName,
       phone: form.phone,
+      date_of_birth: form.dateOfBirth || null,
       consent_marketing: form.marketing,
       consent_whatsapp: form.whatsapp,
     });
