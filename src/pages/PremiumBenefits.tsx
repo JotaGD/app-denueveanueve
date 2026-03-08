@@ -17,6 +17,9 @@ const PremiumBenefits = () => {
   const [plan, setPlan] = useState<string | null>(null);
   const [birthday, setBirthday] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
