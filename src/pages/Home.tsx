@@ -70,7 +70,12 @@ const Home = () => {
         <div className="relative flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">{t('home.greeting')},</p>
-            <h1 className="font-display text-xl text-foreground">{firstName}</h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="font-display text-xl text-foreground">{firstName}</h1>
+              {isClubMember && (
+                <Crown className="h-4 w-4 text-gold" />
+              )}
+            </div>
           </div>
           <img src={logoImg} alt="denueveanueve" className="h-5 w-auto opacity-70" />
         </div>
