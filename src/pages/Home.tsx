@@ -40,6 +40,7 @@ const Home = () => {
         .eq('user_id', user.id)
         .single();
       if (!customer) return;
+
       const { data: account } = await supabase
         .from('loyalty_accounts')
         .select('points_balance, visits_total')
@@ -49,6 +50,14 @@ const Home = () => {
         setPoints(account.points_balance);
         setVisits(account.visits_total);
       }
+
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('status')
+        .eq('customer_id', customer.id)
+        .eq('status', 'ACTIVE')
+        .maybeSingle();
+      setIsClubMember(!!sub);
     };
     load();
   }, [user]);
