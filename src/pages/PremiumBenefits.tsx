@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Crown, Scissors, Palette, CalendarCheck, Star, Gift, Cake, Tag, Ticket, Settings, Loader2 } from 'lucide-react';
+import { ArrowLeft, Crown, Scissors, Palette, CalendarCheck, Star, Gift, Cake, Tag, Ticket, Settings, Loader2, AlertTriangle } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import BottomNav from '@/components/BottomNav';
