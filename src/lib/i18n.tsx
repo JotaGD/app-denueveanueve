@@ -173,7 +173,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'club.ladiesBenefits.1': '1 corte incluido al mes',
     'club.ladiesBenefits.2': '15% dto. en color',
     'club.ladiesBenefits.3': 'Acceso prioritario a citas',
-    'club.ladiesBenefits.4': 'Tratamiento mensual gratuito',
+    'club.ladiesBenefits.4': 'Beneficios exclusivos para socias',
     'club.menBenefits.1': '1 corte incluido al mes',
     'club.menBenefits.2': '2€ dto. en cortes extra',
     'club.menBenefits.3': 'Acceso prioritario a citas',
