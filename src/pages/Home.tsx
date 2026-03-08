@@ -24,6 +24,7 @@ const Home = () => {
   const { user } = useAuth();
   const [points, setPoints] = useState(0);
   const [visits, setVisits] = useState(0);
+  const [isClubMember, setIsClubMember] = useState(false);
 
   const rawName = user?.user_metadata?.first_name || 'Cliente';
   const firstName = rawName
@@ -39,6 +40,7 @@ const Home = () => {
         .eq('user_id', user.id)
         .single();
       if (!customer) return;
+
       const { data: account } = await supabase
         .from('loyalty_accounts')
         .select('points_balance, visits_total')
@@ -48,6 +50,14 @@ const Home = () => {
         setPoints(account.points_balance);
         setVisits(account.visits_total);
       }
+
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('status')
+        .eq('customer_id', customer.id)
+        .eq('status', 'ACTIVE')
+        .maybeSingle();
+      setIsClubMember(!!sub);
     };
     load();
   }, [user]);
@@ -60,7 +70,12 @@ const Home = () => {
         <div className="relative flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">{t('home.greeting')},</p>
-            <h1 className="font-display text-xl text-foreground">{firstName}</h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="font-display text-xl text-foreground">{firstName}</h1>
+              {isClubMember && (
+                <Crown className="h-4 w-4 text-gold" />
+              )}
+            </div>
           </div>
           <img src={logoImg} alt="denueveanueve" className="h-5 w-auto opacity-70" />
         </div>
