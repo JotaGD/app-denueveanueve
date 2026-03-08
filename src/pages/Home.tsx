@@ -22,8 +22,32 @@ const Home = () => {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { user } = useAuth();
+  const [points, setPoints] = useState(0);
+  const [visits, setVisits] = useState(0);
 
   const firstName = user?.user_metadata?.first_name || 'Cliente';
+
+  useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (!customer) return;
+      const { data: account } = await supabase
+        .from('loyalty_accounts')
+        .select('points_balance, visits_total')
+        .eq('customer_id', customer.id)
+        .single();
+      if (account) {
+        setPoints(account.points_balance);
+        setVisits(account.visits_total);
+      }
+    };
+    load();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
