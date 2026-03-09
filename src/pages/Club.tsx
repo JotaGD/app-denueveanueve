@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Crown, Check, ArrowLeft, Loader2 } from 'lucide-react';
+import { Crown, Check, ArrowLeft, Loader2, Info } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { useI18n } from '@/lib/i18n';
@@ -51,6 +51,7 @@ const Club = () => {
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -268,17 +269,36 @@ const Club = () => {
                 ))}
               </div>
 
-              <Button
-                onClick={() => handleSubscribe(plan.plan, plan.price * 100)}
-                disabled={subscribing}
-                className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
-              >
-                {subscribing && selectedPlan === plan.plan ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  t('club.subscribe')
-                )}
-              </Button>
+              {/* Detail text (collapsible) */}
+              {expandedPlan === plan.key ? (
+                <div className="rounded-lg border border-border bg-muted/50 p-3 mb-3">
+                  <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
+                    {t(plan.detailKey)}
+                  </pre>
+                </div>
+              ) : null}
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setExpandedPlan(expandedPlan === plan.key ? null : plan.key)}
+                  variant="outline"
+                  size="icon"
+                  className="border-gold/20 text-muted-foreground shrink-0"
+                >
+                  <Info size={18} />
+                </Button>
+                <Button
+                  onClick={() => handleSubscribe(plan.plan, plan.price * 100)}
+                  disabled={subscribing}
+                  className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
+                >
+                  {subscribing && selectedPlan === plan.plan ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    t('club.subscribe')
+                  )}
+                </Button>
+              </div>
             </motion.div>
           ))}
         </div>
