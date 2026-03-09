@@ -67,20 +67,25 @@ Deno.serve(async (req) => {
       items: [{ price: price.id }],
       payment_behavior: 'default_incomplete',
       payment_settings: { save_default_payment_method: 'on_subscription' },
-      expand: ['latest_invoice.payment_intent'],
       metadata: { plan, user_id: user.id },
     })
 
-    const invoice = subscription.latest_invoice as any
-    const paymentIntent = invoice?.payment_intent as any
+    // Retrieve the latest invoice to get the payment intent
+    const invoiceId = typeof subscription.latest_invoice === 'string' 
+      ? subscription.latest_invoice 
+      : subscription.latest_invoice?.id
     
+    if (!invoiceId) {
+      throw new Error('No invoice created for subscription')
+    }
+
+    const invoice = await stripe.invoices.retrieve(invoiceId, {
+      expand: ['payment_intent'],
+    })
+
+    const paymentIntent = invoice.payment_intent as any
     if (!paymentIntent?.client_secret) {
-      console.error('Missing payment_intent or client_secret', { 
-        hasInvoice: !!invoice, 
-        invoiceId: invoice?.id,
-        hasPaymentIntent: !!invoice?.payment_intent,
-        paymentIntentType: typeof invoice?.payment_intent,
-      })
+      console.error('Missing payment_intent', { invoiceId, piType: typeof invoice.payment_intent })
       throw new Error('Could not create payment intent for subscription')
     }
 
