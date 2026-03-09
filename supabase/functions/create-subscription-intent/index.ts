@@ -79,36 +79,29 @@ Deno.serve(async (req) => {
       throw new Error('No invoice created for subscription')
     }
 
-    const invoice = await stripe.invoices.retrieve(invoiceId)
+    // Finalize the invoice to create the payment intent
+    let invoice = await stripe.invoices.retrieve(invoiceId)
     
-    // Get payment intent - could be string ID or expanded object
+    if (invoice.status === 'draft') {
+      invoice = await stripe.invoices.finalizeInvoice(invoiceId)
+    }
+    
+    // Get payment intent
     let clientSecret: string | null = null
     const piRef = (invoice as any).payment_intent
     
     if (typeof piRef === 'string') {
-      // It's a PI ID, retrieve it
       const pi = await stripe.paymentIntents.retrieve(piRef)
       clientSecret = pi.client_secret
     } else if (piRef?.client_secret) {
       clientSecret = piRef.client_secret
     }
-    
-    // If still no PI, check pending_setup_intent on subscription
-    if (!clientSecret && subscription.pending_setup_intent) {
-      const siId = typeof subscription.pending_setup_intent === 'string' 
-        ? subscription.pending_setup_intent 
-        : subscription.pending_setup_intent.id
-      const si = await stripe.setupIntents.retrieve(siId)
-      clientSecret = si.client_secret
-    }
 
     if (!clientSecret) {
-      console.error('No client_secret found', { 
+      console.error('No client_secret after finalize', { 
         invoiceId, 
-        piRef: typeof piRef, 
-        piRefValue: piRef,
-        pendingSetup: subscription.pending_setup_intent,
-        subStatus: subscription.status,
+        invoiceStatus: invoice.status,
+        piRef: piRef,
       })
       throw new Error('Could not obtain payment client secret')
     }
