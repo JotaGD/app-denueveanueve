@@ -197,7 +197,7 @@ const Club = () => {
           {/* Detail text */}
           <div className="rounded-xl border border-border bg-card p-4">
             <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
-              {t(subscription.plan === 'LADIES_59' ? 'club.ladiesDetail' : 'club.menDetail')}
+              {t(subscription.plan === 'LADIES_39' ? 'club.ladiesDetail' : 'club.menDetail')}
             </pre>
           </div>
         </div>
