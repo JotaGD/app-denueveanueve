@@ -318,6 +318,12 @@ const Club = () => {
                       <span className="text-sm text-muted-foreground">{t(b)}</span>
                     </div>
                   ))}
+                  {isAnnual && plan.annualOnlyBenefits.map((b) => (
+                    <div key={b} className="flex items-center gap-2">
+                      <Check size={14} className="text-gold" />
+                      <span className="text-sm text-muted-foreground">{t(b)}</span>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Detail text (collapsible) */}
