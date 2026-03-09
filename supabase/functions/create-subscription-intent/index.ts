@@ -77,10 +77,9 @@ Deno.serve(async (req) => {
     let clientSecret: string | null = paymentIntent?.client_secret || null
 
     if (!clientSecret) {
-      console.error('No client_secret after finalize', { 
-        invoiceId, 
-        invoiceStatus: invoice.status,
-        piRef: piRef,
+      console.error('No client_secret from subscription', { 
+        invoiceId: invoice?.id,
+        piId: paymentIntent?.id,
       })
       throw new Error('Could not obtain payment client secret')
     }
