@@ -5,8 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
-const POINTS_PER_VISIT = 10
-
 const PLAN_BENEFITS: Record<string, { key: string; label: string; limit: number }[]> = {
   MEN_19: [
     { key: 'monthly_cut', label: 'Corte de pelo mensual', limit: 1 },
@@ -60,7 +58,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    const { qr_token, location_id } = await req.json()
+    const { qr_token, location_id, appointment_id, service_prices } = await req.json()
 
     if (!qr_token || !location_id) {
       return new Response(JSON.stringify({ error: 'qr_token and location_id are required' }), {
@@ -92,6 +90,137 @@ Deno.serve(async (req) => {
 
     const now = new Date().toISOString()
 
+    // === CALCULATE POINTS FROM APPOINTMENT SERVICES ===
+    let pointsToAdd = 0
+    let pointsDetail: { service: string; price: number; points: number }[] = []
+
+    if (appointment_id) {
+      // Fetch appointment and verify it belongs to this customer
+      const { data: appointment } = await supabaseAuth
+        .from('appointments')
+        .select('id, customer_id, status, points_awarded')
+        .eq('id', appointment_id)
+        .eq('customer_id', customer.id)
+        .single()
+
+      if (!appointment) {
+        return new Response(JSON.stringify({ error: 'Appointment not found for this customer' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      if (appointment.points_awarded) {
+        return new Response(JSON.stringify({ error: 'Points already awarded for this appointment' }), {
+          status: 409,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Get appointment services
+      const { data: services } = await supabaseAuth
+        .from('appointment_services')
+        .select('service_name_snapshot, unit_price_snapshot, price_type_snapshot, points_snapshot, final_price, final_points, quantity')
+        .eq('appointment_id', appointment_id)
+
+      // If staff sent overridden prices for variable-price services, apply them
+      const priceOverrides: Record<string, number> = {}
+      if (service_prices && Array.isArray(service_prices)) {
+        for (const sp of service_prices) {
+          if (sp.service_name && sp.final_price != null) {
+            priceOverrides[sp.service_name] = sp.final_price
+          }
+        }
+      }
+
+      for (const svc of services || []) {
+        const qty = svc.quantity || 1
+        let price: number
+
+        // Priority: staff override > final_price (already set) > unit_price_snapshot
+        if (priceOverrides[svc.service_name_snapshot || ''] != null) {
+          price = priceOverrides[svc.service_name_snapshot || '']
+        } else if (svc.final_price != null) {
+          price = svc.final_price
+        } else if (svc.unit_price_snapshot != null) {
+          price = svc.unit_price_snapshot * qty
+        } else {
+          price = 0
+        }
+
+        // If service has fixed_points override, use that; otherwise ceil(price/2)
+        let svcPoints: number
+        if (svc.final_points != null) {
+          svcPoints = svc.final_points
+        } else if (svc.points_snapshot != null) {
+          svcPoints = svc.points_snapshot * qty
+        } else {
+          svcPoints = Math.ceil(price / 2)
+        }
+
+        pointsToAdd += svcPoints
+        pointsDetail.push({
+          service: svc.service_name_snapshot || 'Servicio',
+          price,
+          points: svcPoints,
+        })
+      }
+
+      // Update appointment: mark points awarded and set final totals
+      const finalTotalPrice = pointsDetail.reduce((sum, d) => sum + d.price, 0)
+      await supabaseAuth
+        .from('appointments')
+        .update({
+          points_awarded: true,
+          verified_at: now,
+          verified_by_staff_id: staffUser.id,
+          status: 'COMPLETED',
+          final_total_points: pointsToAdd,
+          final_total_price: finalTotalPrice,
+        })
+        .eq('id', appointment_id)
+
+      // Update final values on appointment_services if overrides were provided
+      if (Object.keys(priceOverrides).length > 0) {
+        for (const svc of services || []) {
+          const overridePrice = priceOverrides[svc.service_name_snapshot || '']
+          if (overridePrice != null) {
+            const svcPoints = Math.ceil(overridePrice / 2)
+            await supabaseAuth
+              .from('appointment_services')
+              .update({ final_price: overridePrice, final_points: svcPoints, is_completed: true })
+              .eq('appointment_id', appointment_id)
+              .eq('service_name_snapshot', svc.service_name_snapshot)
+          }
+        }
+      }
+
+    } else {
+      // Walk-in (no appointment): staff can send service_prices array
+      // or we default to 0 points if no price info provided
+      if (service_prices && Array.isArray(service_prices)) {
+        for (const sp of service_prices) {
+          const price = sp.final_price || 0
+          const pts = sp.points != null ? sp.points : Math.ceil(price / 2)
+          pointsToAdd += pts
+          pointsDetail.push({
+            service: sp.service_name || 'Servicio',
+            price,
+            points: pts,
+          })
+        }
+      }
+      // If no services info at all, no points are awarded (staff must provide price data)
+      if (pointsToAdd === 0 && (!service_prices || service_prices.length === 0)) {
+        return new Response(JSON.stringify({ 
+          error: 'No appointment_id or service_prices provided. Cannot calculate points.' 
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
+
     // Update loyalty account: increment visits and points
     const { data: loyaltyBefore } = await supabaseAuth
       .from('loyalty_accounts')
@@ -100,7 +229,7 @@ Deno.serve(async (req) => {
       .single()
 
     const newVisits = (loyaltyBefore?.visits_total || 0) + 1
-    const newPoints = (loyaltyBefore?.points_balance || 0) + POINTS_PER_VISIT
+    const newPoints = (loyaltyBefore?.points_balance || 0) + pointsToAdd
 
     await supabaseAuth
       .from('loyalty_accounts')
@@ -118,9 +247,10 @@ Deno.serve(async (req) => {
       .insert({
         customer_id: customer.id,
         type: 'EARN',
-        points: POINTS_PER_VISIT,
-        reason: 'Visita certificada',
-        ref_type: 'visit',
+        points: pointsToAdd,
+        reason: `Visita verificada: ${pointsDetail.map(d => d.service).join(', ')}`,
+        ref_type: appointment_id ? 'appointment' : 'walk_in',
+        ref_id: appointment_id || null,
       })
 
     // Record audit log
@@ -133,7 +263,12 @@ Deno.serve(async (req) => {
         entity: 'loyalty_accounts',
         entity_id: customer.id,
         location_id,
-        metadata: { visits_total: newVisits, points_added: POINTS_PER_VISIT },
+        metadata: { 
+          visits_total: newVisits, 
+          points_added: pointsToAdd, 
+          points_detail: pointsDetail,
+          appointment_id: appointment_id || null,
+        },
       })
 
     // Check milestone rewards (3, 5, 8, 10 visits)
@@ -172,7 +307,7 @@ Deno.serve(async (req) => {
 
     const { data: activeSub } = await supabaseAuth
       .from('subscriptions')
-      .select('id, plan, status, current_period_start, current_period_end')
+      .select('id, plan, status, current_period_start, current_period_end, created_at')
       .eq('customer_id', customer.id)
       .eq('status', 'ACTIVE')
       .limit(1)
@@ -183,7 +318,6 @@ Deno.serve(async (req) => {
       const periodStart = activeSub.current_period_start || activeSub.created_at
       const periodEnd = activeSub.current_period_end || now
 
-      // Get usages in current billing period
       const { data: usages } = await supabaseAuth
         .from('club_benefit_usages')
         .select('benefit_key, used_at')
@@ -213,7 +347,8 @@ Deno.serve(async (req) => {
       customer: { id: customer.id, name: `${customer.first_name} ${customer.last_name}` },
       visits_total: newVisits,
       points_balance: newPoints,
-      points_added: POINTS_PER_VISIT,
+      points_added: pointsToAdd,
+      points_detail: pointsDetail,
       unlocked_reward: unlockedReward,
       premium,
     }), {
