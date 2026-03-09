@@ -20,9 +20,9 @@ const stripePromise = loadStripe('pk_test_51PjF2DRwEJFCE84fkHMGhRxIvGLHxPEVCxQdZ
 const PLANS = [
   {
     key: 'ladies' as const,
-    plan: 'LADIES_59' as const,
-    price: 59,
-    benefits: ['club.ladiesBenefits.1', 'club.ladiesBenefits.2', 'club.ladiesBenefits.3', 'club.ladiesBenefits.4'],
+    plan: 'LADIES_39' as const,
+    price: 39,
+    benefits: ['club.ladiesBenefits.1', 'club.ladiesBenefits.2', 'club.ladiesBenefits.3', 'club.ladiesBenefits.4', 'club.ladiesBenefits.5', 'club.ladiesBenefits.6', 'club.ladiesBenefits.7'],
     detailKey: 'club.ladiesDetail',
   },
   {
@@ -173,7 +173,7 @@ const Club = () => {
               </span>
             </div>
             <p className="text-2xl font-display text-gold mb-1">
-              {subscription.plan === 'LADIES_59' ? t('club.ladies') : t('club.men')}
+              {subscription.plan === 'LADIES_39' ? t('club.ladies') : t('club.men')}
               <span className="text-sm text-muted-foreground ml-1">
                 {subscription.price_cents / 100}€{t('club.perMonth')}
               </span>
@@ -197,7 +197,7 @@ const Club = () => {
           {/* Detail text */}
           <div className="rounded-xl border border-border bg-card p-4">
             <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
-              {t(subscription.plan === 'LADIES_59' ? 'club.ladiesDetail' : 'club.menDetail')}
+              {t(subscription.plan === 'LADIES_39' ? 'club.ladiesDetail' : 'club.menDetail')}
             </pre>
           </div>
         </div>
@@ -213,7 +213,7 @@ const Club = () => {
                 className="rounded-xl border border-gold/20 bg-card p-5"
               >
                 <h3 className="font-display text-lg text-foreground mb-4">
-                  {selectedPlan === 'LADIES_59' ? t('club.ladies') : t('club.men')} — {t('club.confirmPayment')}
+                  {selectedPlan === 'LADIES_39' ? t('club.ladies') : t('club.men')} — {t('club.confirmPayment')}
                 </h3>
                 <Elements
                   stripe={stripePromise}
