@@ -243,65 +243,114 @@ const Club = () => {
             )}
           </AnimatePresence>
 
+          {/* Billing period toggle */}
+          {!clientSecret && (
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <span className={`text-sm font-medium transition-colors ${billingPeriod === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                {t('club.monthly')}
+              </span>
+              <button
+                onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'annual' : 'monthly')}
+                className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${billingPeriod === 'annual' ? 'bg-emerald-500' : 'bg-muted-foreground/30'}`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 ${billingPeriod === 'annual' ? 'translate-x-7' : 'translate-x-0'}`}
+                />
+              </button>
+              <span className={`text-sm font-medium transition-colors ${billingPeriod === 'annual' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                {t('club.annual')}
+              </span>
+              {billingPeriod === 'annual' && (
+                <span className="text-xs font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                  -20% {t('club.discount')}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Plan cards (hidden when checkout is open) */}
-          {!clientSecret && PLANS.map((plan, i) => (
-            <motion.div
-              key={plan.key}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="rounded-xl border border-border bg-card p-5"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-display text-xl text-foreground">
-                  {t(`club.${plan.key}`)}
-                </h3>
-                <p className="font-display text-2xl text-gold">
-                  {plan.price}€<span className="text-sm text-muted-foreground">{t('club.perMonth')}</span>
-                </p>
-              </div>
+          {!clientSecret && PLANS.map((plan, i) => {
+            const monthlyPrice = plan.price;
+            const annualFull = monthlyPrice * 12;
+            const annualDiscounted = Math.round(annualFull * 0.8);
+            const isAnnual = billingPeriod === 'annual';
+            const displayPrice = isAnnual ? annualDiscounted : monthlyPrice;
+            const priceCents = displayPrice * 100;
 
-              <div className="space-y-2 mb-4">
-                {plan.benefits.map((b) => (
-                  <div key={b} className="flex items-center gap-2">
-                    <Check size={14} className="text-gold" />
-                    <span className="text-sm text-muted-foreground">{t(b)}</span>
+            return (
+              <motion.div
+                key={plan.key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="rounded-xl border border-border bg-card p-5"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-display text-xl text-foreground">
+                    {t(`club.${plan.key}`)}
+                  </h3>
+                  <div className="text-right">
+                    {isAnnual ? (
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="text-sm text-muted-foreground line-through">{annualFull}€{t('club.perYear')}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-semibold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                            -20%
+                          </span>
+                          <span className="font-display text-2xl text-gold">{annualDiscounted}€</span>
+                          <span className="text-sm text-muted-foreground">{t('club.perYear')}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="font-display text-2xl text-gold">
+                        {monthlyPrice}€<span className="text-sm text-muted-foreground">{t('club.perMonth')}</span>
+                      </p>
+                    )}
                   </div>
-                ))}
-              </div>
-
-              {/* Detail text (collapsible) */}
-              {expandedPlan === plan.key ? (
-                <div className="rounded-lg border border-border bg-muted/50 p-3 mb-3">
-                  <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
-                    {t(plan.detailKey)}
-                  </pre>
                 </div>
-              ) : null}
 
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => setExpandedPlan(expandedPlan === plan.key ? null : plan.key)}
-                  variant="outline"
-                  size="icon"
-                  className="border-gold/20 text-muted-foreground shrink-0"
-                >
-                  <Info size={18} />
-                </Button>
-                <Button
-                  onClick={() => handleSubscribe(plan.plan, plan.price * 100)}
-                  disabled={subscribing}
-                  className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
-                >
-                  {subscribing && selectedPlan === plan.plan ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    t('club.subscribe')
-                  )}
-                </Button>
-              </div>
-            </motion.div>
-          ))}
+                <div className="space-y-2 mb-4">
+                  {plan.benefits.map((b) => (
+                    <div key={b} className="flex items-center gap-2">
+                      <Check size={14} className="text-gold" />
+                      <span className="text-sm text-muted-foreground">{t(b)}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Detail text (collapsible) */}
+                {expandedPlan === plan.key ? (
+                  <div className="rounded-lg border border-border bg-muted/50 p-3 mb-3">
+                    <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
+                      {t(plan.detailKey)}
+                    </pre>
+                  </div>
+                ) : null}
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setExpandedPlan(expandedPlan === plan.key ? null : plan.key)}
+                    variant="outline"
+                    size="icon"
+                    className="border-gold/20 text-muted-foreground shrink-0"
+                  >
+                    <Info size={18} />
+                  </Button>
+                  <Button
+                    onClick={() => handleSubscribe(plan.plan, priceCents)}
+                    disabled={subscribing}
+                    className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
+                  >
+                    {subscribing && selectedPlan === plan.plan ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      t('club.subscribe')
+                    )}
+                  </Button>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       )}
 
