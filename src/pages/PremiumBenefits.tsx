@@ -85,7 +85,7 @@ const PremiumBenefits = () => {
     }
   };
 
-  const benefits = subscription?.plan === 'LADIES_59' ? LADIES_BENEFITS : MEN_BENEFITS;
+  const benefits = subscription?.plan === 'LADIES_39' ? LADIES_BENEFITS : MEN_BENEFITS;
   const isBirthday = false; // Could check user's DOB vs current date
 
   return (
