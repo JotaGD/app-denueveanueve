@@ -71,8 +71,18 @@ Deno.serve(async (req) => {
       metadata: { plan, user_id: user.id },
     })
 
-    const invoice = subscription.latest_invoice as Stripe.Invoice
-    const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent
+    const invoice = subscription.latest_invoice as any
+    const paymentIntent = invoice?.payment_intent as any
+    
+    if (!paymentIntent?.client_secret) {
+      console.error('Missing payment_intent or client_secret', { 
+        hasInvoice: !!invoice, 
+        invoiceId: invoice?.id,
+        hasPaymentIntent: !!invoice?.payment_intent,
+        paymentIntentType: typeof invoice?.payment_intent,
+      })
+      throw new Error('Could not create payment intent for subscription')
+    }
 
     // Get customer record from our DB
     const { data: customer } = await supabaseClient
