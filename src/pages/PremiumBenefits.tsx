@@ -13,10 +13,10 @@ import type { Tables } from '@/integrations/supabase/types';
 type Subscription = Tables<'subscriptions'>;
 
 const LADIES_BENEFITS = [
-  { icon: Scissors, key: 'premium.cutIncluded' },
-  { icon: Palette, key: 'premium.colorDiscount' },
-  { icon: CalendarCheck, key: 'premium.priorityAccess' },
+  { icon: Sparkles, key: 'premium.washBlowDry' },
   { icon: Sparkles, key: 'premium.monthlyTreatment' },
+  { icon: Palette, key: 'premium.colorDiscount' },
+  { icon: Scissors, key: 'premium.cutDiscount' },
   { icon: PartyPopper, key: 'premium.birthdayBenefit' },
   { icon: Tag, key: 'premium.exclusivePromos' },
   { icon: Ticket, key: 'premium.exclusiveGiveaways' },
