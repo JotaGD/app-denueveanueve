@@ -4,7 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift } from 'lucide-react';
+import { CalendarPlus, Star, Tag, ChevronRight, Gift } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BottomNav from '@/components/BottomNav';
 import logoImg from '@/assets/logo.png';
@@ -24,7 +24,6 @@ const Home = () => {
   const { user } = useAuth();
   const [points, setPoints] = useState(0);
   const [visits, setVisits] = useState(0);
-  const [isClubMember, setIsClubMember] = useState(false);
 
   const rawName = user?.user_metadata?.first_name || 'Cliente';
   const firstName = rawName
@@ -50,14 +49,6 @@ const Home = () => {
         setPoints(account.points_balance);
         setVisits(account.visits_total);
       }
-
-      const { data: sub } = await supabase
-        .from('subscriptions')
-        .select('status')
-        .eq('customer_id', customer.id)
-        .in('status', ['ACTIVE', 'CANCELLED_END_OF_PERIOD'])
-        .maybeSingle();
-      setIsClubMember(!!sub);
     };
     load();
   }, [user]);
@@ -70,33 +61,11 @@ const Home = () => {
         <div className="relative flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">{t('home.greeting')},</p>
-            <div className="flex items-center gap-1.5">
-              <h1 className="font-display text-xl text-foreground">{firstName}</h1>
-              {isClubMember && (
-                <Crown className="h-4 w-4 text-gold" />
-              )}
-            </div>
+            <h1 className="font-display text-xl text-foreground">{firstName}</h1>
           </div>
           <img src={logoImg} alt="denueveanueve" className="h-5 w-auto opacity-70" />
         </div>
       </div>
-
-      {/* Premium Banner */}
-      {isClubMember && (
-        <div className="px-6 mb-4">
-          <motion.button
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            onClick={() => navigate('/premium')}
-            className="w-full rounded-xl gradient-gold p-3.5 flex items-center justify-center gap-2 shadow-gold hover:opacity-90 transition-opacity"
-          >
-            <Crown className="h-5 w-5 text-primary-foreground" />
-            <span className="font-display text-base text-primary-foreground tracking-wide">
-              de<span className="opacity-90">nueve</span>a<span className="opacity-90">nueve</span> Premium
-            </span>
-          </motion.button>
-        </div>
-      )}
 
       <div className="space-y-4 px-6">
         {/* Welcome Coupon */}
@@ -156,7 +125,7 @@ const Home = () => {
           </div>
           <div className="flex gap-6">
             <div>
-            <p className="font-display text-2xl text-gold">{points}</p>
+              <p className="font-display text-2xl text-gold">{points}</p>
               <p className="text-xs text-muted-foreground">{t('home.points')}</p>
             </div>
             <div>
@@ -166,34 +135,18 @@ const Home = () => {
           </div>
         </motion.div>
 
-        {/* Quick actions */}
-        <div className={`grid ${isClubMember ? 'grid-cols-1' : 'grid-cols-2'} gap-3`}>
-          {!isClubMember && (
-            <motion.div
-              custom={3}
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              onClick={() => navigate('/club')}
-              className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-colors hover:border-gold/20"
-            >
-              <Crown className="mb-2 h-5 w-5 text-gold" />
-              <p className="text-sm font-medium text-foreground">{t('home.club')}</p>
-            </motion.div>
-          )}
-
-          <motion.div
-            custom={4}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            onClick={() => navigate('/promos')}
-            className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-colors hover:border-gold/20"
-          >
-            <Tag className="mb-2 h-5 w-5 text-gold" />
-            <p className="text-sm font-medium text-foreground">{t('home.promos')}</p>
-          </motion.div>
-        </div>
+        {/* Promos */}
+        <motion.div
+          custom={3}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          onClick={() => navigate('/promos')}
+          className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-colors hover:border-gold/20"
+        >
+          <Tag className="mb-2 h-5 w-5 text-gold" />
+          <p className="text-sm font-medium text-foreground">{t('home.promos')}</p>
+        </motion.div>
       </div>
 
       <BottomNav />
