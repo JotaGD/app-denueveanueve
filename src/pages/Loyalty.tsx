@@ -191,17 +191,17 @@ const Loyalty = () => {
           {/* Milestones */}
           <div className="px-6 mb-4">
             <h3 className="text-sm font-medium text-foreground mb-3">{t('loyalty.milestones')}</h3>
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               {MILESTONES.map((m) => {
                 const Icon = m.icon;
                 const reached = (account?.visits_total || 0) >= m.visits;
                 return (
-                  <div key={m.key} className="flex flex-col items-center gap-1 flex-1">
+                  <div key={m.key} className="flex flex-col items-center flex-1">
                     <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${reached ? 'border-gold bg-gold/20' : 'border-border bg-card'}`}>
                       <Icon size={18} className={reached ? 'text-gold' : 'text-muted-foreground'} />
                     </div>
-                    <span className="text-[10px] text-muted-foreground">{m.visits}v</span>
-                    <span className="text-[9px] text-muted-foreground text-center leading-tight w-[60px]">
+                    <span className="text-[10px] text-muted-foreground mt-1">{m.visits}v</span>
+                    <span className="text-[9px] text-muted-foreground text-center leading-tight h-[24px] flex items-start justify-center w-[60px]">
                       {t(`loyalty.milestone.${m.key}`)}
                     </span>
                   </div>
