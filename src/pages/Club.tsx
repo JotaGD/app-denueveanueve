@@ -213,7 +213,7 @@ const Club = () => {
                 className="rounded-xl border border-gold/20 bg-card p-5"
               >
                 <h3 className="font-display text-lg text-foreground mb-4">
-                  {selectedPlan === 'LADIES_59' ? t('club.ladies') : t('club.men')} — {t('club.confirmPayment')}
+                  {selectedPlan === 'LADIES_39' ? t('club.ladies') : t('club.men')} — {t('club.confirmPayment')}
                 </h3>
                 <Elements
                   stripe={stripePromise}

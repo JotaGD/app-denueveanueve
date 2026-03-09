@@ -9,8 +9,8 @@ const PLAN_BENEFITS: Record<string, { key: string; label: string; limit: number 
   MEN_19: [
     { key: 'monthly_cut', label: 'Corte de pelo mensual', limit: 1 },
   ],
-  LADIES_59: [
-    { key: 'monthly_cut', label: 'Corte de pelo mensual', limit: 1 },
+  LADIES_39: [
+    { key: 'monthly_wash_blowdry', label: 'Lavado + peinado mensual', limit: 1 },
     { key: 'monthly_treatment', label: 'Tratamiento capilar mensual', limit: 1 },
   ],
 }
