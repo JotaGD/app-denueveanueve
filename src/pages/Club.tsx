@@ -22,7 +22,7 @@ const PLANS = [
     key: 'ladies' as const,
     plan: 'LADIES_39' as const,
     price: 39,
-    benefits: ['club.ladiesBenefits.1', 'club.ladiesBenefits.2', 'club.ladiesBenefits.3', 'club.ladiesBenefits.4', 'club.ladiesBenefits.5', 'club.ladiesBenefits.6', 'club.ladiesBenefits.7'],
+    benefits: ['club.ladiesBenefits.1', 'club.ladiesBenefits.2', 'club.ladiesBenefits.3', 'club.ladiesBenefits.4', 'club.ladiesBenefits.6'],
     detailKey: 'club.ladiesDetail',
   },
   {
