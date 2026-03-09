@@ -25,6 +25,7 @@ const PLANS = [
     benefits: ['club.ladiesBenefits.1', 'club.ladiesBenefits.2', 'club.ladiesBenefits.3', 'club.ladiesBenefits.4', 'club.ladiesBenefits.6'],
     annualOnlyBenefits: ['club.ladiesBenefits.5'],
     detailKey: 'club.ladiesDetail',
+    detailKeyAnnual: 'club.ladiesDetailAnnual',
   },
   {
     key: 'men' as const,
@@ -33,6 +34,7 @@ const PLANS = [
     benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3', 'club.menBenefits.4'],
     annualOnlyBenefits: ['club.menBenefits.birthday'],
     detailKey: 'club.menDetail',
+    detailKeyAnnual: 'club.menDetailAnnual',
   },
 ];
 
@@ -330,7 +332,7 @@ const Club = () => {
                 {expandedPlan === plan.key ? (
                   <div className="rounded-lg border border-border bg-muted/50 p-3 mb-3">
                     <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
-                      {t(plan.detailKey)}
+                      {t(isAnnual ? plan.detailKeyAnnual : plan.detailKey)}
                     </pre>
                   </div>
                 ) : null}
