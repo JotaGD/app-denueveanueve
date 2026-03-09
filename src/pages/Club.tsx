@@ -332,7 +332,7 @@ const Club = () => {
                 {expandedPlan === plan.key ? (
                   <div className="rounded-lg border border-border bg-muted/50 p-3 mb-3">
                     <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
-                      {t(plan.detailKey)}
+                      {t(isAnnual ? plan.detailKeyAnnual : plan.detailKey)}
                     </pre>
                   </div>
                 ) : null}
