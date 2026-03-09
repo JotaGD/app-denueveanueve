@@ -191,8 +191,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'club.menBenefits.3': 'Acceso prioritario a citas',
     'club.menBenefits.4': 'Beneficios exclusivos para socios',
     'club.menBenefits.birthday': 'En tu cumpleaños: corte gratis + regalo',
-    'club.ladiesDetail': '💆 1 lavado + peinado al mes\n💇 1 tratamiento capilar al mes\n🎨 10% dto. en color, mechas o matiz\n✂️ 5€ dto. en corte\n\n🎁 Beneficios exclusivos para socias:\n🎂 En tu cumpleaños: tratamiento + regalo de cortesía\n🏷️ Promociones exclusivas para socias\n🎰 Sorteos exclusivos',
-    'club.menDetail': '✂️ 1 corte de pelo incluido al mes\n💰 2€ dto. en cortes extra\n📅 Acceso prioritario a citas\n\n🎁 Beneficios exclusivos para socios:\n🎂 Corte gratis + regalo en tu cumpleaños\n🏷️ Promociones exclusivas para socios\n🎰 Sorteos exclusivos',
+    'club.ladiesDetail': '💆 1 lavado + peinado al mes\n💇 1 tratamiento capilar al mes\n🎨 10% dto. en color, mechas o matiz\n✂️ 5€ dto. en corte\n\n🎁 Beneficios exclusivos para socias:\n🏷️ Promociones exclusivas para socias\n🎰 Sorteos exclusivos',
+    'club.ladiesDetailAnnual': '💆 1 lavado + peinado al mes\n💇 1 tratamiento capilar al mes\n🎨 10% dto. en color, mechas o matiz\n✂️ 5€ dto. en corte\n\n🎁 Beneficios exclusivos para socias:\n🎂 En tu cumpleaños: tratamiento + regalo de cortesía\n🏷️ Promociones exclusivas para socias\n🎰 Sorteos exclusivos',
+    'club.menDetail': '✂️ 1 corte de pelo incluido al mes\n💰 2€ dto. en cortes extra\n📅 Acceso prioritario a citas\n\n🎁 Beneficios exclusivos para socios:\n🏷️ Promociones exclusivas para socios\n🎰 Sorteos exclusivos',
+    'club.menDetailAnnual': '✂️ 1 corte de pelo incluido al mes\n💰 2€ dto. en cortes extra\n📅 Acceso prioritario a citas\n\n🎁 Beneficios exclusivos para socios:\n🎂 Corte gratis + regalo en tu cumpleaños\n🏷️ Promociones exclusivas para socios\n🎰 Sorteos exclusivos',
     'club.confirmPayment': 'Confirmar pago',
     // Premium
     'premium.yourBenefits': 'Tus beneficios',
