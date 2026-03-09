@@ -173,7 +173,7 @@ const Club = () => {
               </span>
             </div>
             <p className="text-2xl font-display text-gold mb-1">
-              {subscription.plan === 'LADIES_59' ? t('club.ladies') : t('club.men')}
+              {subscription.plan === 'LADIES_39' ? t('club.ladies') : t('club.men')}
               <span className="text-sm text-muted-foreground ml-1">
                 {subscription.price_cents / 100}€{t('club.perMonth')}
               </span>
