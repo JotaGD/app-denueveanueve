@@ -5,15 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
-const PLAN_BENEFITS: Record<string, { key: string; label: string; limit: number }[]> = {
-  MEN_19: [
-    { key: 'monthly_cut', label: 'Corte de pelo mensual', limit: 1 },
-  ],
-  LADIES_59: [
-    { key: 'monthly_cut', label: 'Corte de pelo mensual', limit: 1 },
-    { key: 'monthly_treatment', label: 'Tratamiento capilar mensual', limit: 1 },
-  ],
-}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -297,51 +288,6 @@ Deno.serve(async (req) => {
       unlockedReward = rewardType
     }
 
-    // === PREMIUM / CLUB SUBSCRIPTION INFO ===
-    let premium: {
-      is_premium: boolean
-      plan: string | null
-      subscription_id: string | null
-      benefits: { key: string; label: string; limit: number; used: boolean; used_at: string | null }[]
-    } = { is_premium: false, plan: null, subscription_id: null, benefits: [] }
-
-    const { data: activeSub } = await supabaseAuth
-      .from('subscriptions')
-      .select('id, plan, status, current_period_start, current_period_end, created_at')
-      .eq('customer_id', customer.id)
-      .eq('status', 'ACTIVE')
-      .limit(1)
-      .maybeSingle()
-
-    if (activeSub) {
-      const planBenefits = PLAN_BENEFITS[activeSub.plan] || []
-      const periodStart = activeSub.current_period_start || activeSub.created_at
-      const periodEnd = activeSub.current_period_end || now
-
-      const { data: usages } = await supabaseAuth
-        .from('club_benefit_usages')
-        .select('benefit_key, used_at')
-        .eq('subscription_id', activeSub.id)
-        .gte('used_at', periodStart)
-        .lte('used_at', periodEnd)
-
-      const usageMap = new Map<string, string>()
-      for (const u of usages || []) {
-        usageMap.set(u.benefit_key, u.used_at)
-      }
-
-      premium = {
-        is_premium: true,
-        plan: activeSub.plan,
-        subscription_id: activeSub.id,
-        benefits: planBenefits.map(b => ({
-          ...b,
-          used: usageMap.has(b.key),
-          used_at: usageMap.get(b.key) || null,
-        })),
-      }
-    }
-
     return new Response(JSON.stringify({
       success: true,
       customer: { id: customer.id, name: `${customer.first_name} ${customer.last_name}` },
@@ -350,7 +296,6 @@ Deno.serve(async (req) => {
       points_added: pointsToAdd,
       points_detail: pointsDetail,
       unlocked_reward: unlockedReward,
-      premium,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
