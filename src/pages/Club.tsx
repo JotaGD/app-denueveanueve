@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Crown, Check, ArrowLeft, Loader2 } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import BottomNav from '@/components/BottomNav';
+import CheckoutForm from '@/components/CheckoutForm';
 import { toast } from 'sonner';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Subscription = Tables<'subscriptions'>;
+
+const stripePromise = loadStripe('pk_test_51PjF2DRwEJFCE84fkHMGhRxIvGLHxPEVCxQdZeILFDODRdrjyZx0XBSAdJTh0YGClKj3qwdLDAKqvVjqX3Xa6CkW004m3JIhCj');
 
 const PLANS = [
   {
@@ -44,6 +49,8 @@ const Club = () => {
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(false);
   const [customerId, setCustomerId] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -72,19 +79,33 @@ const Club = () => {
     load();
   }, [user]);
 
+  // Check for checkout success in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      toast.success(t('club.checkoutSuccess'), { description: t('club.checkoutSuccessDesc') });
+      // Clean URL
+      window.history.replaceState({}, '', '/club');
+      // Reload subscription
+      setTimeout(() => window.location.reload(), 1000);
+    }
+  }, []);
+
   const handleSubscribe = async (plan: string, priceCents: number) => {
     if (!user || !customerId) return;
     setSubscribing(true);
+    setSelectedPlan(plan);
     try {
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
+      const { data, error } = await supabase.functions.invoke('create-subscription-intent', {
         body: { plan, price_cents: priceCents },
       });
       if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, '_blank');
+      if (data?.clientSecret) {
+        setClientSecret(data.clientSecret);
       }
     } catch (err: any) {
       toast.error(err.message || 'Error al iniciar el pago');
+      setSelectedPlan(null);
     } finally {
       setSubscribing(false);
     }
@@ -100,6 +121,18 @@ const Club = () => {
     } catch (err: any) {
       toast.error(err.message || 'Error al abrir el portal');
     }
+  };
+
+  const handleCheckoutSuccess = () => {
+    setClientSecret(null);
+    setSelectedPlan(null);
+    // Reload to show updated subscription
+    setTimeout(() => window.location.reload(), 1500);
+  };
+
+  const handleCheckoutCancel = () => {
+    setClientSecret(null);
+    setSelectedPlan(null);
   };
 
   const getStatusLabel = (status: string) => {
@@ -129,7 +162,7 @@ const Club = () => {
         <div className="px-6 space-y-3">
           {[1, 2].map((i) => <div key={i} className="h-48 animate-pulse rounded-xl bg-muted" />)}
         </div>
-      ) : subscription ? (
+      ) : subscription && subscription.status !== 'PAYMENT_DUE' ? (
         <div className="px-6 space-y-4">
           {/* Active subscription card */}
           <div className="rounded-xl border border-gold/20 bg-gradient-to-br from-gold/10 to-gold/5 p-5">
@@ -170,7 +203,46 @@ const Club = () => {
         </div>
       ) : (
         <div className="px-6 space-y-4">
-          {PLANS.map((plan, i) => (
+          {/* Inline checkout form */}
+          <AnimatePresence>
+            {clientSecret && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="rounded-xl border border-gold/20 bg-card p-5"
+              >
+                <h3 className="font-display text-lg text-foreground mb-4">
+                  {selectedPlan === 'LADIES_59' ? t('club.ladies') : t('club.men')} — {t('club.confirmPayment')}
+                </h3>
+                <Elements
+                  stripe={stripePromise}
+                  options={{
+                    clientSecret,
+                    appearance: {
+                      theme: 'night',
+                      variables: {
+                        colorPrimary: '#c8a97e',
+                        colorBackground: '#1a1712',
+                        colorText: '#e8e0d4',
+                        colorDanger: '#ef4444',
+                        fontFamily: 'Josefin Sans, sans-serif',
+                        borderRadius: '12px',
+                      },
+                    },
+                  }}
+                >
+                  <CheckoutForm
+                    onSuccess={handleCheckoutSuccess}
+                    onCancel={handleCheckoutCancel}
+                  />
+                </Elements>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Plan cards (hidden when checkout is open) */}
+          {!clientSecret && PLANS.map((plan, i) => (
             <motion.div
               key={plan.key}
               initial={{ opacity: 0, y: 20 }}
@@ -201,7 +273,11 @@ const Club = () => {
                 disabled={subscribing}
                 className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
               >
-                {subscribing ? <Loader2 className="h-4 w-4 animate-spin" /> : t('club.subscribe')}
+                {subscribing && selectedPlan === plan.plan ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  t('club.subscribe')
+                )}
               </Button>
             </motion.div>
           ))}
