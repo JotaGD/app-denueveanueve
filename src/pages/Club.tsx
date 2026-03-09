@@ -51,6 +51,7 @@ const Club = () => {
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
