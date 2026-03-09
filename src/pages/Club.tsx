@@ -31,7 +31,7 @@ const PLANS = [
     plan: 'MEN_19' as const,
     price: 19,
     benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3', 'club.menBenefits.4'],
-    annualOnlyBenefits: [] as string[],
+    annualOnlyBenefits: ['club.menBenefits.birthday'],
     detailKey: 'club.menDetail',
   },
 ];
