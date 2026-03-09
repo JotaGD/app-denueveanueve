@@ -42,7 +42,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'home.promos': 'Promociones',
     'home.services': 'Servicios',
     'home.welcomeCoupon': 'Cupón de bienvenida',
-    'home.couponDesc': '5% de descuento en tu primera visita',
+    'home.couponDesc': '3€ de descuento en tu primera visita',
     // Booking
     'book.title': 'Reservar cita',
     'book.selectLocation': 'Elige tu centro',
