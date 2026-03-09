@@ -23,6 +23,7 @@ const PLANS = [
     plan: 'LADIES_39' as const,
     price: 39,
     benefits: ['club.ladiesBenefits.1', 'club.ladiesBenefits.2', 'club.ladiesBenefits.3', 'club.ladiesBenefits.4', 'club.ladiesBenefits.6'],
+    annualOnlyBenefits: ['club.ladiesBenefits.5'],
     detailKey: 'club.ladiesDetail',
   },
   {
@@ -30,6 +31,7 @@ const PLANS = [
     plan: 'MEN_19' as const,
     price: 19,
     benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3', 'club.menBenefits.4'],
+    annualOnlyBenefits: [] as string[],
     detailKey: 'club.menDetail',
   },
 ];
@@ -311,6 +313,12 @@ const Club = () => {
 
                 <div className="space-y-2 mb-4">
                   {plan.benefits.map((b) => (
+                    <div key={b} className="flex items-center gap-2">
+                      <Check size={14} className="text-gold" />
+                      <span className="text-sm text-muted-foreground">{t(b)}</span>
+                    </div>
+                  ))}
+                  {isAnnual && plan.annualOnlyBenefits.map((b) => (
                     <div key={b} className="flex items-center gap-2">
                       <Check size={14} className="text-gold" />
                       <span className="text-sm text-muted-foreground">{t(b)}</span>
