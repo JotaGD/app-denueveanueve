@@ -7,6 +7,16 @@ const corsHeaders = {
 
 const POINTS_PER_VISIT = 10
 
+const PLAN_BENEFITS: Record<string, { key: string; label: string; limit: number }[]> = {
+  MEN_19: [
+    { key: 'monthly_cut', label: 'Corte de pelo mensual', limit: 1 },
+  ],
+  LADIES_59: [
+    { key: 'monthly_cut', label: 'Corte de pelo mensual', limit: 1 },
+    { key: 'monthly_treatment', label: 'Tratamiento capilar mensual', limit: 1 },
+  ],
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -16,7 +26,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-    // Authenticate the calling user (staff)
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'No authorization header' }), {
@@ -27,7 +36,6 @@ Deno.serve(async (req) => {
 
     const supabaseAuth = createClient(supabaseUrl, serviceRoleKey)
 
-    // Verify staff token
     const token = authHeader.replace('Bearer ', '')
     const { data: { user: staffUser }, error: authError } = await supabaseAuth.auth.getUser(token)
     if (authError || !staffUser) {
@@ -154,17 +162,65 @@ Deno.serve(async (req) => {
       unlockedReward = rewardType
     }
 
+    // === PREMIUM / CLUB SUBSCRIPTION INFO ===
+    let premium: {
+      is_premium: boolean
+      plan: string | null
+      subscription_id: string | null
+      benefits: { key: string; label: string; limit: number; used: boolean; used_at: string | null }[]
+    } = { is_premium: false, plan: null, subscription_id: null, benefits: [] }
+
+    const { data: activeSub } = await supabaseAuth
+      .from('subscriptions')
+      .select('id, plan, status, current_period_start, current_period_end')
+      .eq('customer_id', customer.id)
+      .eq('status', 'ACTIVE')
+      .limit(1)
+      .maybeSingle()
+
+    if (activeSub) {
+      const planBenefits = PLAN_BENEFITS[activeSub.plan] || []
+      const periodStart = activeSub.current_period_start || activeSub.created_at
+      const periodEnd = activeSub.current_period_end || now
+
+      // Get usages in current billing period
+      const { data: usages } = await supabaseAuth
+        .from('club_benefit_usages')
+        .select('benefit_key, used_at')
+        .eq('subscription_id', activeSub.id)
+        .gte('used_at', periodStart)
+        .lte('used_at', periodEnd)
+
+      const usageMap = new Map<string, string>()
+      for (const u of usages || []) {
+        usageMap.set(u.benefit_key, u.used_at)
+      }
+
+      premium = {
+        is_premium: true,
+        plan: activeSub.plan,
+        subscription_id: activeSub.id,
+        benefits: planBenefits.map(b => ({
+          ...b,
+          used: usageMap.has(b.key),
+          used_at: usageMap.get(b.key) || null,
+        })),
+      }
+    }
+
     return new Response(JSON.stringify({
       success: true,
-      customer: { name: `${customer.first_name} ${customer.last_name}` },
+      customer: { id: customer.id, name: `${customer.first_name} ${customer.last_name}` },
       visits_total: newVisits,
       points_balance: newPoints,
       points_added: POINTS_PER_VISIT,
       unlocked_reward: unlockedReward,
+      premium,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
+    console.error('verify-visit error:', err)
     return new Response(JSON.stringify({ error: 'Internal error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
