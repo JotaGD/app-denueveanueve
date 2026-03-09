@@ -434,8 +434,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'club.menBenefits.3': 'Priority appointment access',
     'club.menBenefits.4': 'Exclusive member benefits',
     'club.menBenefits.birthday': 'Birthday: free haircut + gift',
-    'club.ladiesDetail': '💆 1 wash + blow-dry per month\n💇 1 hair treatment per month\n🎨 10% off color, highlights or toner\n✂️ 5€ off haircut\n\n🎁 Exclusive member benefits:\n🎂 Birthday: treatment + complimentary gift\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
-    'club.menDetail': '✂️ 1 included haircut per month\n💰 2€ off extra haircuts\n📅 Priority appointment access\n\n🎁 Exclusive member benefits:\n🎂 Free haircut + gift on your birthday\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
+    'club.ladiesDetail': '💆 1 wash + blow-dry per month\n💇 1 hair treatment per month\n🎨 10% off color, highlights or toner\n✂️ 5€ off haircut\n\n🎁 Exclusive member benefits:\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
+    'club.ladiesDetailAnnual': '💆 1 wash + blow-dry per month\n💇 1 hair treatment per month\n🎨 10% off color, highlights or toner\n✂️ 5€ off haircut\n\n🎁 Exclusive member benefits:\n🎂 Birthday: treatment + complimentary gift\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
+    'club.menDetail': '✂️ 1 included haircut per month\n💰 2€ off extra haircuts\n📅 Priority appointment access\n\n🎁 Exclusive member benefits:\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
+    'club.menDetailAnnual': '✂️ 1 included haircut per month\n💰 2€ off extra haircuts\n📅 Priority appointment access\n\n🎁 Exclusive member benefits:\n🎂 Free haircut + gift on your birthday\n🏷️ Exclusive promotions for members\n🎰 Exclusive giveaways',
     'club.confirmPayment': 'Confirm payment',
     // Premium
     'premium.yourBenefits': 'Your benefits',
