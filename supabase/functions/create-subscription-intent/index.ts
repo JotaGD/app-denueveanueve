@@ -68,40 +68,18 @@ Deno.serve(async (req) => {
       payment_behavior: 'default_incomplete',
       payment_settings: { save_default_payment_method: 'on_subscription' },
       metadata: { plan, user_id: user.id },
+      expand: ['latest_invoice.payment_intent'],
     })
 
-    // Retrieve the latest invoice to get the payment intent
-    const invoiceId = typeof subscription.latest_invoice === 'string' 
-      ? subscription.latest_invoice 
-      : subscription.latest_invoice?.id
-    
-    if (!invoiceId) {
-      throw new Error('No invoice created for subscription')
-    }
-
-    // Finalize the invoice to create the payment intent
-    let invoice = await stripe.invoices.retrieve(invoiceId)
-    
-    if (invoice.status === 'draft') {
-      invoice = await stripe.invoices.finalizeInvoice(invoiceId)
-    }
-    
-    // Get payment intent
-    let clientSecret: string | null = null
-    const piRef = (invoice as any).payment_intent
-    
-    if (typeof piRef === 'string') {
-      const pi = await stripe.paymentIntents.retrieve(piRef)
-      clientSecret = pi.client_secret
-    } else if (piRef?.client_secret) {
-      clientSecret = piRef.client_secret
-    }
+    // Get client secret from expanded invoice
+    const invoice = subscription.latest_invoice as any
+    const paymentIntent = invoice?.payment_intent
+    let clientSecret: string | null = paymentIntent?.client_secret || null
 
     if (!clientSecret) {
-      console.error('No client_secret after finalize', { 
-        invoiceId, 
-        invoiceStatus: invoice.status,
-        piRef: piRef,
+      console.error('No client_secret from subscription', { 
+        invoiceId: invoice?.id,
+        piId: paymentIntent?.id,
       })
       throw new Error('Could not obtain payment client secret')
     }
@@ -136,7 +114,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({
       subscriptionId: subscription.id,
-      clientSecret: paymentIntent.client_secret,
+      clientSecret,
       customerId,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
