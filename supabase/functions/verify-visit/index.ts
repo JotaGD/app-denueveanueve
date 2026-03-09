@@ -5,15 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
-const PLAN_BENEFITS: Record<string, { key: string; label: string; limit: number }[]> = {
-  MEN_19: [
-    { key: 'monthly_cut', label: 'Corte de pelo mensual', limit: 1 },
-  ],
-  LADIES_59: [
-    { key: 'monthly_cut', label: 'Corte de pelo mensual', limit: 1 },
-    { key: 'monthly_treatment', label: 'Tratamiento capilar mensual', limit: 1 },
-  ],
-}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
