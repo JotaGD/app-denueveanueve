@@ -268,17 +268,36 @@ const Club = () => {
                 ))}
               </div>
 
-              <Button
-                onClick={() => handleSubscribe(plan.plan, plan.price * 100)}
-                disabled={subscribing}
-                className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
-              >
-                {subscribing && selectedPlan === plan.plan ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  t('club.subscribe')
-                )}
-              </Button>
+              {/* Detail text (collapsible) */}
+              {expandedPlan === plan.key ? (
+                <div className="rounded-lg border border-border bg-muted/50 p-3 mb-3">
+                  <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
+                    {t(plan.detailKey)}
+                  </pre>
+                </div>
+              ) : null}
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setExpandedPlan(expandedPlan === plan.key ? null : plan.key)}
+                  variant="outline"
+                  size="icon"
+                  className="border-gold/20 text-muted-foreground shrink-0"
+                >
+                  <Info size={18} />
+                </Button>
+                <Button
+                  onClick={() => handleSubscribe(plan.plan, plan.price * 100)}
+                  disabled={subscribing}
+                  className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
+                >
+                  {subscribing && selectedPlan === plan.plan ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    t('club.subscribe')
+                  )}
+                </Button>
+              </div>
             </motion.div>
           ))}
         </div>
