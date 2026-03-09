@@ -227,7 +227,7 @@ const Loyalty = () => {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <Gift className={`h-5 w-5 ${coupon.status === 'ACTIVE' ? 'text-gold' : 'text-muted-foreground'}`} />
-                        <span className="text-sm font-medium text-foreground">{coupon.percent_off}% {t('loyalty.coupon')}</span>
+                        <span className="text-sm font-medium text-foreground">3€ {t('loyalty.coupon')}</span>
                       </div>
                       <span className={`text-xs font-medium ${coupon.status === 'ACTIVE' ? 'text-gold' : 'text-muted-foreground'}`}>
                         {t(`loyalty.coupon${coupon.status === 'ACTIVE' ? 'Active' : coupon.status === 'USED' ? 'Used' : 'Expired'}`)}
