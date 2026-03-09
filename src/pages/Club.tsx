@@ -25,6 +25,7 @@ const PLANS = [
     benefits: ['club.ladiesBenefits.1', 'club.ladiesBenefits.2', 'club.ladiesBenefits.3', 'club.ladiesBenefits.4', 'club.ladiesBenefits.6'],
     annualOnlyBenefits: ['club.ladiesBenefits.5'],
     detailKey: 'club.ladiesDetail',
+    detailKeyAnnual: 'club.ladiesDetailAnnual',
   },
   {
     key: 'men' as const,
@@ -33,6 +34,7 @@ const PLANS = [
     benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3', 'club.menBenefits.4'],
     annualOnlyBenefits: ['club.menBenefits.birthday'],
     detailKey: 'club.menDetail',
+    detailKeyAnnual: 'club.menDetailAnnual',
   },
 ];
 
