@@ -93,9 +93,9 @@ Deno.serve(async (req) => {
           status: 'PAYMENT_DUE',
           stripe_customer_id: customerId,
           stripe_subscription_id: subscription.id,
-          current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-          next_renewal_at: new Date(subscription.current_period_end * 1000).toISOString(),
+          current_period_start: subscription.current_period_start ? new Date(typeof subscription.current_period_start === 'number' ? subscription.current_period_start * 1000 : subscription.current_period_start).toISOString() : null,
+          current_period_end: subscription.current_period_end ? new Date(typeof subscription.current_period_end === 'number' ? subscription.current_period_end * 1000 : subscription.current_period_end).toISOString() : null,
+          next_renewal_at: subscription.current_period_end ? new Date(typeof subscription.current_period_end === 'number' ? subscription.current_period_end * 1000 : subscription.current_period_end).toISOString() : null,
         }, {
           onConflict: 'customer_id',
           ignoreDuplicates: false,
