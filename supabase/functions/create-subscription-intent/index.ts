@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({
       subscriptionId: subscription.id,
-      clientSecret: paymentIntent.client_secret,
+      clientSecret,
       customerId,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
