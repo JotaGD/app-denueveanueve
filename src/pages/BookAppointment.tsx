@@ -487,21 +487,52 @@ const BookAppointment = () => {
               </div>
               {selectedDate && (
                 <div className="space-y-2">
+                  {loadingSlots && (
+                    <p className="text-xs text-muted-foreground animate-pulse text-center">Comprobando disponibilidad...</p>
+                  )}
                   <h3 className="text-sm font-medium text-foreground">{t('book.morning')}</h3>
                   <div className="grid grid-cols-4 gap-2">
-                    {TIME_SLOTS.filter((t) => parseInt(t) < 14).map((slot) => (
-                      <button key={slot} onClick={() => setSelectedTime(slot)} className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${selectedTime === slot ? 'border-gold gradient-gold text-primary-foreground' : 'border-border bg-card text-foreground hover:border-gold/20'}`}>
-                        {slot}
-                      </button>
-                    ))}
+                    {TIME_SLOTS.filter((t) => parseInt(t) < 14).map((slot) => {
+                      const available = isSlotAvailable(slot);
+                      return (
+                        <button
+                          key={slot}
+                          onClick={() => available && setSelectedTime(slot)}
+                          disabled={!available}
+                          className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
+                            !available
+                              ? 'border-border bg-muted text-muted-foreground/40 cursor-not-allowed line-through'
+                              : selectedTime === slot
+                              ? 'border-gold gradient-gold text-primary-foreground'
+                              : 'border-border bg-card text-foreground hover:border-gold/20'
+                          }`}
+                        >
+                          {slot}
+                        </button>
+                      );
+                    })}
                   </div>
                   <h3 className="text-sm font-medium text-foreground mt-3">{t('book.afternoon')}</h3>
                   <div className="grid grid-cols-4 gap-2">
-                    {TIME_SLOTS.filter((t) => parseInt(t) >= 14).map((slot) => (
-                      <button key={slot} onClick={() => setSelectedTime(slot)} className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${selectedTime === slot ? 'border-gold gradient-gold text-primary-foreground' : 'border-border bg-card text-foreground hover:border-gold/20'}`}>
-                        {slot}
-                      </button>
-                    ))}
+                    {TIME_SLOTS.filter((t) => parseInt(t) >= 14).map((slot) => {
+                      const available = isSlotAvailable(slot);
+                      return (
+                        <button
+                          key={slot}
+                          onClick={() => available && setSelectedTime(slot)}
+                          disabled={!available}
+                          className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
+                            !available
+                              ? 'border-border bg-muted text-muted-foreground/40 cursor-not-allowed line-through'
+                              : selectedTime === slot
+                              ? 'border-gold gradient-gold text-primary-foreground'
+                              : 'border-border bg-card text-foreground hover:border-gold/20'
+                          }`}
+                        >
+                          {slot}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
