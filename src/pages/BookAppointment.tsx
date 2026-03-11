@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import BottomNav from '@/components/BottomNav';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -32,6 +33,13 @@ const formatPrice = (svc: Service) => {
   if (svc.price_type === 'on_request') return 'Consultar';
   if (svc.price_type === 'from_price') return `Desde ${svc.base_price?.toFixed(2)} €`;
   return `${svc.base_price?.toFixed(2)} €`;
+};
+
+const formatLocalDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 const calcPoints = (svc: Service) => svc.fixed_points || (svc.base_price ? Math.ceil(svc.base_price / 2) : 0);
@@ -117,7 +125,7 @@ const BookAppointment = () => {
     const fetchBusySlots = async () => {
       setLoadingSlots(true);
       try {
-        const dateStr = selectedDate.toISOString().split('T')[0];
+        const dateStr = formatLocalDate(selectedDate);
 
         // Use edge function (service role) to check ALL appointments + GCal
         const { data, error } = await supabase.functions.invoke('gcal-sync-appointments', {
@@ -144,8 +152,7 @@ const BookAppointment = () => {
   const isSlotAvailable = (slot: string): boolean => {
     if (!selectedDate || busySlots.length === 0) return true;
 
-    const dateStr = selectedDate.toISOString().split('T')[0];
-    const [h, m] = slot.split(':').map(Number);
+    const dateStr = formatLocalDate(selectedDate);
     const slotStart = new Date(`${dateStr}T${slot}:00`);
     const slotEnd = new Date(slotStart.getTime() + (totals.duration || 30) * 60000);
 
@@ -188,7 +195,32 @@ const BookAppointment = () => {
       const [hours, minutes] = selectedTime.split(':').map(Number);
       const startAt = new Date(selectedDate);
       startAt.setHours(hours, minutes, 0, 0);
-      const endAt = new Date(startAt.getTime() + totals.duration * 60000);
+      const bookingDuration = totals.duration > 0 ? totals.duration : 30;
+      const endAt = new Date(startAt.getTime() + bookingDuration * 60000);
+
+      // Final availability re-check before insert (prevents double booking race conditions)
+      if (selectedStaff?.id) {
+        const dateStr = formatLocalDate(selectedDate);
+        const { data: availabilityData, error: availabilityError } = await supabase.functions.invoke('gcal-sync-appointments', {
+          body: { action: 'check-availability', staff_member_id: selectedStaff.id, date: dateStr },
+        });
+
+        if (availabilityError) {
+          throw new Error('No se pudo comprobar disponibilidad. Inténtalo de nuevo.');
+        }
+
+        const hasOverlap = (availabilityData?.busy_slots || []).some((busy: { start: string; end: string }) => {
+          const busyStart = new Date(busy.start);
+          const busyEnd = new Date(busy.end);
+          return startAt < busyEnd && endAt > busyStart;
+        });
+
+        if (hasOverlap) {
+          toast.error('Ese horario ya no está disponible con este profesional. Elige otra hora.');
+          setSelectedTime(null);
+          return;
+        }
+      }
 
       const { data: appointment, error } = await supabase
         .from('appointments')
@@ -200,7 +232,7 @@ const BookAppointment = () => {
           end_at: endAt.toISOString(),
           customer_notes: notes || null,
           estimated_total_price: totals.price || null,
-          estimated_total_duration: totals.duration || null,
+          estimated_total_duration: bookingDuration,
           estimated_pending_points: totals.points || null,
         })
         .select()
