@@ -30,28 +30,22 @@ const TIME_SLOTS = [
 ];
 
 // Parse closing time from location hours_json for a given day
+// Format: { weekdays: {open, close}, wednesday: {open, close}, saturday: {open, close}, sunday: null }
 const getClosingTime = (location: Location | null, date: Date | undefined): string | null => {
   if (!location || !date) return null;
   try {
     const hours = location.hours_json as Record<string, any>;
     if (!hours) return null;
-    const dayNames = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-    const dayKey = dayNames[date.getDay()];
+    const dayIndex = date.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    const dayKeyMap: Record<number, string> = {
+      0: 'sunday', 1: 'weekdays', 2: 'weekdays', 3: 'wednesday',
+      4: 'weekdays', 5: 'weekdays', 6: 'saturday',
+    };
+    const dayKey = dayKeyMap[dayIndex];
     const dayHours = hours[dayKey];
-    if (!dayHours) return null;
-    // dayHours can be string like "09:00-21:00" or array of periods like ["09:00-14:00","16:00-20:00"]
-    if (typeof dayHours === 'string') {
-      if (dayHours.toLowerCase() === 'cerrado') return null;
-      const parts = dayHours.split('-');
-      return parts[parts.length - 1]?.trim() || null;
-    }
-    if (Array.isArray(dayHours)) {
-      if (dayHours.length === 0) return null;
-      const lastPeriod = dayHours[dayHours.length - 1];
-      if (typeof lastPeriod === 'string') {
-        const parts = lastPeriod.split('-');
-        return parts[parts.length - 1]?.trim() || null;
-      }
+    if (!dayHours || dayHours === null) return null;
+    if (typeof dayHours === 'object' && dayHours.close) {
+      return dayHours.close;
     }
     return null;
   } catch {
