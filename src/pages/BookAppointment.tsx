@@ -152,8 +152,7 @@ const BookAppointment = () => {
   const isSlotAvailable = (slot: string): boolean => {
     if (!selectedDate || busySlots.length === 0) return true;
 
-    const dateStr = selectedDate.toISOString().split('T')[0];
-    const [h, m] = slot.split(':').map(Number);
+    const dateStr = formatLocalDate(selectedDate);
     const slotStart = new Date(`${dateStr}T${slot}:00`);
     const slotEnd = new Date(slotStart.getTime() + (totals.duration || 30) * 60000);
 
