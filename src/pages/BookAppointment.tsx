@@ -189,7 +189,32 @@ const BookAppointment = () => {
       const [hours, minutes] = selectedTime.split(':').map(Number);
       const startAt = new Date(selectedDate);
       startAt.setHours(hours, minutes, 0, 0);
-      const endAt = new Date(startAt.getTime() + totals.duration * 60000);
+      const bookingDuration = totals.duration > 0 ? totals.duration : 30;
+      const endAt = new Date(startAt.getTime() + bookingDuration * 60000);
+
+      // Final availability re-check before insert (prevents double booking race conditions)
+      if (selectedStaff?.id) {
+        const dateStr = selectedDate.toISOString().split('T')[0];
+        const { data: availabilityData, error: availabilityError } = await supabase.functions.invoke('gcal-sync-appointments', {
+          body: { action: 'check-availability', staff_member_id: selectedStaff.id, date: dateStr },
+        });
+
+        if (availabilityError) {
+          throw new Error('No se pudo comprobar disponibilidad. Inténtalo de nuevo.');
+        }
+
+        const hasOverlap = (availabilityData?.busy_slots || []).some((busy: { start: string; end: string }) => {
+          const busyStart = new Date(busy.start);
+          const busyEnd = new Date(busy.end);
+          return startAt < busyEnd && endAt > busyStart;
+        });
+
+        if (hasOverlap) {
+          toast.error('Ese horario ya no está disponible con este profesional. Elige otra hora.');
+          setSelectedTime(null);
+          return;
+        }
+      }
 
       const { data: appointment, error } = await supabase
         .from('appointments')
@@ -201,7 +226,7 @@ const BookAppointment = () => {
           end_at: endAt.toISOString(),
           customer_notes: notes || null,
           estimated_total_price: totals.price || null,
-          estimated_total_duration: totals.duration || null,
+          estimated_total_duration: bookingDuration,
           estimated_pending_points: totals.points || null,
         })
         .select()
