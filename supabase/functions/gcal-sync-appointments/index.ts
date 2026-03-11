@@ -263,7 +263,11 @@ Deno.serve(async (req) => {
         })
       }
 
-      const serviceAccount = JSON.parse(saJson)
+      let cleanJson3 = saJson.trim()
+      if (cleanJson3.startsWith('"') && cleanJson3.endsWith('"')) {
+        cleanJson3 = JSON.parse(cleanJson3)
+      }
+      const serviceAccount = typeof cleanJson3 === 'string' ? JSON.parse(cleanJson3) : cleanJson3
       const accessToken = await getAccessToken(serviceAccount)
       const calendarId = encodeURIComponent(mapping.google_calendar_id)
 
