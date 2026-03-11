@@ -838,6 +838,35 @@ export type Database = {
           },
         ]
       }
+      staff_calendar_mappings: {
+        Row: {
+          created_at: string
+          google_calendar_id: string
+          id: string
+          staff_member_id: string
+        }
+        Insert: {
+          created_at?: string
+          google_calendar_id: string
+          id?: string
+          staff_member_id: string
+        }
+        Update: {
+          created_at?: string
+          google_calendar_id?: string
+          id?: string
+          staff_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_calendar_mappings_staff_member_id_fkey"
+            columns: ["staff_member_id"]
+            isOneToOne: true
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_members: {
         Row: {
           active: boolean
