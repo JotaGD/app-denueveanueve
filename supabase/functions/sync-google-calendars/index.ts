@@ -115,12 +115,27 @@ Deno.serve(async (req) => {
     const serviceAccount = typeof cleanJson === 'string' ? JSON.parse(cleanJson) : cleanJson
     const accessToken = await getAccessToken(serviceAccount)
 
-    // List all calendars accessible by the service account
-    const calRes = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
+    // List all calendars accessible by the service account (include shared/hidden)
+    const calRes = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?showHidden=true&showDeleted=false&minAccessRole=writer', {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
     const calData = await calRes.json()
-    const calendars = calData.items || []
+    let calendars = calData.items || []
+    console.log(`calendarList returned ${calendars.length} calendars:`, calendars.map((c: any) => c.summary))
+
+    // If no calendars found, try to discover shared calendars by checking
+    // known calendar patterns. Service accounts may need explicit subscription.
+    // We'll also try the settings approach to see all available calendars.
+    if (calendars.length === 0) {
+      console.log('No calendars in list. Checking if there are pending shared calendars...')
+      // Try listing with different params
+      const calRes2 = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?showHidden=true', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      const calData2 = await calRes2.json()
+      calendars = calData2.items || []
+      console.log(`Second attempt returned ${calendars.length} calendars`)
+    }
 
     // Get staff members with locations
     const { data: staffMembers } = await supabase
