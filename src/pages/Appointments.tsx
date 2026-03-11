@@ -92,6 +92,10 @@ const Appointments = () => {
   const handleCancel = async (id: string) => {
     if (!confirm(t('appointments.cancelConfirm'))) return;
     await supabase.from('appointments').update({ status: 'CANCELLED' }).eq('id', id);
+    // Sync cancellation to Google Calendar
+    supabase.functions.invoke('gcal-sync-appointments', {
+      body: { action: 'delete', appointment_id: id },
+    }).catch((err) => console.warn('GCal delete sync failed (non-blocking):', err));
     setAppointments((prev) => prev.filter((a) => a.id !== id));
   };
 
