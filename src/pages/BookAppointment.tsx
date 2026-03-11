@@ -55,6 +55,8 @@ const BookAppointment = () => {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [busySlots, setBusySlots] = useState<{ start: string; end: string }[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const stepIndex = STEPS.indexOf(step);
 
@@ -104,6 +106,78 @@ const BookAppointment = () => {
       });
     }
   }, [selectedLocation, selectedSection]);
+
+  // Fetch busy slots when date or staff changes
+  useEffect(() => {
+    if (!selectedDate || !selectedStaff) {
+      setBusySlots([]);
+      return;
+    }
+
+    const fetchBusySlots = async () => {
+      setLoadingSlots(true);
+      try {
+        const dateStr = selectedDate.toISOString().split('T')[0];
+        const dayStart = `${dateStr}T00:00:00`;
+        const dayEnd = `${dateStr}T23:59:59`;
+
+        // Query existing appointments for this staff member on this date
+        // Exclude cancelled/no-show appointments
+        const { data: existingAppts } = await supabase
+          .from('appointments')
+          .select('start_at, end_at, status')
+          .eq('staff_member_id', selectedStaff.id)
+          .gte('start_at', dayStart)
+          .lte('start_at', dayEnd)
+          .in('status', ['CONFIRMED', 'RESCHEDULED']);
+
+        const slots: { start: string; end: string }[] = (existingAppts || []).map((a) => ({
+          start: a.start_at,
+          end: a.end_at,
+        }));
+
+        // Also check Google Calendar busy slots
+        try {
+          const { data: gcalData } = await supabase.functions.invoke('gcal-sync-appointments', {
+            body: { action: 'check-availability', staff_member_id: selectedStaff.id, date: dateStr },
+          });
+          if (gcalData?.busy_slots) {
+            // Only add GCal slots that don't already overlap with DB appointments
+            gcalData.busy_slots.forEach((gs: { start: string; end: string }) => {
+              slots.push({ start: gs.start, end: gs.end });
+            });
+          }
+        } catch {
+          // Non-blocking: GCal check is optional
+        }
+
+        setBusySlots(slots);
+      } catch (err) {
+        console.error('Error fetching busy slots:', err);
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+
+    fetchBusySlots();
+  }, [selectedDate, selectedStaff]);
+
+  // Check if a time slot is available considering the total duration of selected services
+  const isSlotAvailable = (slot: string): boolean => {
+    if (!selectedDate || busySlots.length === 0) return true;
+
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    const [h, m] = slot.split(':').map(Number);
+    const slotStart = new Date(`${dateStr}T${slot}:00`);
+    const slotEnd = new Date(slotStart.getTime() + (totals.duration || 30) * 60000);
+
+    return !busySlots.some((busy) => {
+      const busyStart = new Date(busy.start);
+      const busyEnd = new Date(busy.end);
+      // Overlap: slotStart < busyEnd AND slotEnd > busyStart
+      return slotStart < busyEnd && slotEnd > busyStart;
+    });
+  };
 
   // Group services by category
   const servicesByCategory = useMemo(() => {
@@ -413,21 +487,52 @@ const BookAppointment = () => {
               </div>
               {selectedDate && (
                 <div className="space-y-2">
+                  {loadingSlots && (
+                    <p className="text-xs text-muted-foreground animate-pulse text-center">Comprobando disponibilidad...</p>
+                  )}
                   <h3 className="text-sm font-medium text-foreground">{t('book.morning')}</h3>
                   <div className="grid grid-cols-4 gap-2">
-                    {TIME_SLOTS.filter((t) => parseInt(t) < 14).map((slot) => (
-                      <button key={slot} onClick={() => setSelectedTime(slot)} className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${selectedTime === slot ? 'border-gold gradient-gold text-primary-foreground' : 'border-border bg-card text-foreground hover:border-gold/20'}`}>
-                        {slot}
-                      </button>
-                    ))}
+                    {TIME_SLOTS.filter((t) => parseInt(t) < 14).map((slot) => {
+                      const available = isSlotAvailable(slot);
+                      return (
+                        <button
+                          key={slot}
+                          onClick={() => available && setSelectedTime(slot)}
+                          disabled={!available}
+                          className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
+                            !available
+                              ? 'border-border bg-muted text-muted-foreground/40 cursor-not-allowed line-through'
+                              : selectedTime === slot
+                              ? 'border-gold gradient-gold text-primary-foreground'
+                              : 'border-border bg-card text-foreground hover:border-gold/20'
+                          }`}
+                        >
+                          {slot}
+                        </button>
+                      );
+                    })}
                   </div>
                   <h3 className="text-sm font-medium text-foreground mt-3">{t('book.afternoon')}</h3>
                   <div className="grid grid-cols-4 gap-2">
-                    {TIME_SLOTS.filter((t) => parseInt(t) >= 14).map((slot) => (
-                      <button key={slot} onClick={() => setSelectedTime(slot)} className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${selectedTime === slot ? 'border-gold gradient-gold text-primary-foreground' : 'border-border bg-card text-foreground hover:border-gold/20'}`}>
-                        {slot}
-                      </button>
-                    ))}
+                    {TIME_SLOTS.filter((t) => parseInt(t) >= 14).map((slot) => {
+                      const available = isSlotAvailable(slot);
+                      return (
+                        <button
+                          key={slot}
+                          onClick={() => available && setSelectedTime(slot)}
+                          disabled={!available}
+                          className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
+                            !available
+                              ? 'border-border bg-muted text-muted-foreground/40 cursor-not-allowed line-through'
+                              : selectedTime === slot
+                              ? 'border-gold gradient-gold text-primary-foreground'
+                              : 'border-border bg-card text-foreground hover:border-gold/20'
+                          }`}
+                        >
+                          {slot}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
