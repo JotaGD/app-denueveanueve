@@ -118,40 +118,18 @@ const BookAppointment = () => {
       setLoadingSlots(true);
       try {
         const dateStr = selectedDate.toISOString().split('T')[0];
-        const dayStart = `${dateStr}T00:00:00`;
-        const dayEnd = `${dateStr}T23:59:59`;
 
-        // Query existing appointments for this staff member on this date
-        // Exclude cancelled/no-show appointments
-        const { data: existingAppts } = await supabase
-          .from('appointments')
-          .select('start_at, end_at, status')
-          .eq('staff_member_id', selectedStaff.id)
-          .gte('start_at', dayStart)
-          .lte('start_at', dayEnd)
-          .in('status', ['CONFIRMED', 'RESCHEDULED']);
+        // Use edge function (service role) to check ALL appointments + GCal
+        const { data, error } = await supabase.functions.invoke('gcal-sync-appointments', {
+          body: { action: 'check-availability', staff_member_id: selectedStaff.id, date: dateStr },
+        });
 
-        const slots: { start: string; end: string }[] = (existingAppts || []).map((a) => ({
-          start: a.start_at,
-          end: a.end_at,
-        }));
-
-        // Also check Google Calendar busy slots
-        try {
-          const { data: gcalData } = await supabase.functions.invoke('gcal-sync-appointments', {
-            body: { action: 'check-availability', staff_member_id: selectedStaff.id, date: dateStr },
-          });
-          if (gcalData?.busy_slots) {
-            // Only add GCal slots that don't already overlap with DB appointments
-            gcalData.busy_slots.forEach((gs: { start: string; end: string }) => {
-              slots.push({ start: gs.start, end: gs.end });
-            });
-          }
-        } catch {
-          // Non-blocking: GCal check is optional
+        if (error) {
+          console.error('Availability check error:', error);
+          setBusySlots([]);
+        } else {
+          setBusySlots(data?.busy_slots || []);
         }
-
-        setBusySlots(slots);
       } catch (err) {
         console.error('Error fetching busy slots:', err);
       } finally {
