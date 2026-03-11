@@ -113,7 +113,11 @@ Deno.serve(async (req) => {
         })
       }
 
-      const serviceAccount = JSON.parse(saJson)
+      let cleanJson = saJson.trim()
+      if (cleanJson.startsWith('"') && cleanJson.endsWith('"')) {
+        cleanJson = JSON.parse(cleanJson)
+      }
+      const serviceAccount = typeof cleanJson === 'string' ? JSON.parse(cleanJson) : cleanJson
       const accessToken = await getAccessToken(serviceAccount)
 
       const customer = appt.customers as any

@@ -99,7 +99,13 @@ Deno.serve(async (req) => {
       })
     }
 
-    const serviceAccount = JSON.parse(saJson)
+    // Handle possible double-encoding or extra whitespace
+    let cleanJson = saJson.trim()
+    // If wrapped in extra quotes, unwrap
+    if (cleanJson.startsWith('"') && cleanJson.endsWith('"')) {
+      cleanJson = JSON.parse(cleanJson)
+    }
+    const serviceAccount = typeof cleanJson === 'string' ? JSON.parse(cleanJson) : cleanJson
     const accessToken = await getAccessToken(serviceAccount)
 
     // List all calendars accessible by the service account
