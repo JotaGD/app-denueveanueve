@@ -121,11 +121,24 @@ Deno.serve(async (req) => {
       const accessToken = await getAccessToken(serviceAccount)
 
       const customer = appt.customers as any
-      const services = (appt.appointment_services as any[])?.map((s: any) => s.service_name_snapshot).filter(Boolean).join(', ') || 'Cita'
+      const apptServices = (appt.appointment_services as any[]) || []
+      const servicesSummary = apptServices
+        .filter((s: any) => s.service_name_snapshot)
+        .map((s: any) => s.service_name_snapshot)
+        .join(', ') || 'Cita'
+      const servicesDetail = apptServices
+        .filter((s: any) => s.service_name_snapshot)
+        .map((s: any) => {
+          const dur = s.duration_minutes_snapshot ? ` (${s.duration_minutes_snapshot} min)` : ''
+          const price = s.price_type_snapshot === 'on_request' ? ' - Consultar' : s.unit_price_snapshot ? ` - ${s.unit_price_snapshot} €` : ''
+          return `• ${s.service_name_snapshot}${dur}${price}`
+        })
+        .join('\n') || 'Sin servicios'
+      const totalDuration = appt.estimated_total_duration ? `${appt.estimated_total_duration} min` : ''
 
       const event = {
-        summary: `${customer?.first_name} ${customer?.last_name} - ${services}`,
-        description: `Cliente: ${customer?.first_name} ${customer?.last_name}\nTeléfono: ${customer?.phone || ''}\nEmail: ${customer?.email || ''}\nServicios: ${services}\nNotas: ${appt.customer_notes || ''}`,
+        summary: `${customer?.first_name} ${customer?.last_name} - ${servicesSummary}`,
+        description: `Cliente: ${customer?.first_name} ${customer?.last_name}\nTeléfono: ${customer?.phone || ''}\nEmail: ${customer?.email || ''}\n\nServicios:\n${servicesDetail}\n\nDuración total: ${totalDuration}\nNotas: ${appt.customer_notes || ''}`,
         start: { dateTime: appt.start_at, timeZone: 'Europe/Madrid' },
         end: { dateTime: appt.end_at, timeZone: 'Europe/Madrid' },
         extendedProperties: {
