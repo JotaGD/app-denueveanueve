@@ -125,7 +125,7 @@ const BookAppointment = () => {
     const fetchBusySlots = async () => {
       setLoadingSlots(true);
       try {
-        const dateStr = selectedDate.toISOString().split('T')[0];
+        const dateStr = formatLocalDate(selectedDate);
 
         // Use edge function (service role) to check ALL appointments + GCal
         const { data, error } = await supabase.functions.invoke('gcal-sync-appointments', {
