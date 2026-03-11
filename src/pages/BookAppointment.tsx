@@ -55,6 +55,8 @@ const BookAppointment = () => {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [busySlots, setBusySlots] = useState<{ start: string; end: string }[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const stepIndex = STEPS.indexOf(step);
 
