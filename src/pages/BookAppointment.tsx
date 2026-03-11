@@ -178,18 +178,28 @@ const BookAppointment = () => {
     fetchBusySlots();
   }, [selectedDate, selectedStaff]);
 
+  const closingTime = useMemo(() => getClosingTime(selectedLocation, selectedDate), [selectedLocation, selectedDate]);
+
   // Check if a time slot is available considering the total duration of selected services
   const isSlotAvailable = (slot: string): boolean => {
-    if (!selectedDate || busySlots.length === 0) return true;
+    if (!selectedDate) return true;
 
     const dateStr = formatLocalDate(selectedDate);
     const slotStart = new Date(`${dateStr}T${slot}:00`);
     const slotEnd = new Date(slotStart.getTime() + (totals.duration || 30) * 60000);
 
+    // Check if appointment would exceed closing time
+    if (closingTime) {
+      const closingDate = new Date(`${dateStr}T${closingTime}:00`);
+      if (slotEnd > closingDate) return false;
+      if (slotStart >= closingDate) return false;
+    }
+
+    if (busySlots.length === 0) return true;
+
     return !busySlots.some((busy) => {
       const busyStart = new Date(busy.start);
       const busyEnd = new Date(busy.end);
-      // Overlap: slotStart < busyEnd AND slotEnd > busyStart
       return slotStart < busyEnd && slotEnd > busyStart;
     });
   };
