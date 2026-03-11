@@ -99,7 +99,20 @@ Deno.serve(async (req) => {
       })
     }
 
-    const serviceAccount = JSON.parse(saJson)
+    // Debug: log first 20 chars to diagnose format
+    console.log('saJson type:', typeof saJson, 'first 20 chars:', saJson?.substring(0, 20))
+    
+    // Handle possible double-encoding or extra whitespace
+    let cleanJson = saJson.trim()
+    // If wrapped in extra quotes, unwrap
+    if (cleanJson.startsWith('"') && cleanJson.endsWith('"')) {
+      cleanJson = JSON.parse(cleanJson)
+    }
+    // Handle escaped JSON string
+    if (typeof cleanJson === 'string' && !cleanJson.startsWith('{')) {
+      try { cleanJson = JSON.parse(cleanJson) } catch {}
+    }
+    const serviceAccount = typeof cleanJson === 'string' ? JSON.parse(cleanJson) : cleanJson
     const accessToken = await getAccessToken(serviceAccount)
 
     // List all calendars accessible by the service account

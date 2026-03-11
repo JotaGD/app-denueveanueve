@@ -113,7 +113,11 @@ Deno.serve(async (req) => {
         })
       }
 
-      const serviceAccount = JSON.parse(saJson)
+      let cleanJson = saJson.trim()
+      if (cleanJson.startsWith('"') && cleanJson.endsWith('"')) {
+        cleanJson = JSON.parse(cleanJson)
+      }
+      const serviceAccount = typeof cleanJson === 'string' ? JSON.parse(cleanJson) : cleanJson
       const accessToken = await getAccessToken(serviceAccount)
 
       const customer = appt.customers as any
@@ -223,7 +227,11 @@ Deno.serve(async (req) => {
       } catch {}
 
       if (mapping && gcalEventId) {
-        const serviceAccount = JSON.parse(saJson)
+        let cleanJson2 = saJson.trim()
+        if (cleanJson2.startsWith('"') && cleanJson2.endsWith('"')) {
+          cleanJson2 = JSON.parse(cleanJson2)
+        }
+        const serviceAccount = typeof cleanJson2 === 'string' ? JSON.parse(cleanJson2) : cleanJson2
         const accessToken = await getAccessToken(serviceAccount)
         const calendarId = encodeURIComponent(mapping.google_calendar_id)
         await fetch(
@@ -255,7 +263,11 @@ Deno.serve(async (req) => {
         })
       }
 
-      const serviceAccount = JSON.parse(saJson)
+      let cleanJson3 = saJson.trim()
+      if (cleanJson3.startsWith('"') && cleanJson3.endsWith('"')) {
+        cleanJson3 = JSON.parse(cleanJson3)
+      }
+      const serviceAccount = typeof cleanJson3 === 'string' ? JSON.parse(cleanJson3) : cleanJson3
       const accessToken = await getAccessToken(serviceAccount)
       const calendarId = encodeURIComponent(mapping.google_calendar_id)
 
