@@ -172,6 +172,13 @@ const BookAppointment = () => {
         );
       }
 
+      // Sync to Google Calendar
+      if (appointment?.staff_member_id) {
+        supabase.functions.invoke('gcal-sync-appointments', {
+          body: { action: 'create', appointment_id: appointment.id },
+        }).catch((err) => console.warn('GCal sync failed (non-blocking):', err));
+      }
+
       setSuccess(true);
     } catch (err) {
       console.error('Booking error:', err);
