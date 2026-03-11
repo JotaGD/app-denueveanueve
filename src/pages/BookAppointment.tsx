@@ -26,8 +26,38 @@ const TIME_SLOTS = [
   '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
   '12:00', '12:30', '13:00', '13:30',
   '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-  '18:00', '18:30', '19:00', '19:30',
+  '18:00', '18:30', '19:00', '19:30', '20:00', '20:30',
 ];
+
+// Parse closing time from location hours_json for a given day
+const getClosingTime = (location: Location | null, date: Date | undefined): string | null => {
+  if (!location || !date) return null;
+  try {
+    const hours = location.hours_json as Record<string, any>;
+    if (!hours) return null;
+    const dayNames = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const dayKey = dayNames[date.getDay()];
+    const dayHours = hours[dayKey];
+    if (!dayHours) return null;
+    // dayHours can be string like "09:00-21:00" or array of periods like ["09:00-14:00","16:00-20:00"]
+    if (typeof dayHours === 'string') {
+      if (dayHours.toLowerCase() === 'cerrado') return null;
+      const parts = dayHours.split('-');
+      return parts[parts.length - 1]?.trim() || null;
+    }
+    if (Array.isArray(dayHours)) {
+      if (dayHours.length === 0) return null;
+      const lastPeriod = dayHours[dayHours.length - 1];
+      if (typeof lastPeriod === 'string') {
+        const parts = lastPeriod.split('-');
+        return parts[parts.length - 1]?.trim() || null;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 const formatPrice = (svc: Service) => {
   if (svc.price_type === 'on_request') return 'Consultar';
