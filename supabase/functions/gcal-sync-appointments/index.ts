@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       // Get appointment with staff and customer info
       const { data: appt, error: apptErr } = await supabase
         .from('appointments')
-        .select('*, customers(first_name, last_name, phone, email), staff_members(name), appointment_services(service_name_snapshot)')
+        .select('*, customers(first_name, last_name, phone, email), staff_members(name), appointment_services(service_name_snapshot, duration_minutes_snapshot, unit_price_snapshot, price_type_snapshot, quantity)')
         .eq('id', appointment_id)
         .single()
 
