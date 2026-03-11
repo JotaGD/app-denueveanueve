@@ -227,7 +227,11 @@ Deno.serve(async (req) => {
       } catch {}
 
       if (mapping && gcalEventId) {
-        const serviceAccount = JSON.parse(saJson)
+        let cleanJson2 = saJson.trim()
+        if (cleanJson2.startsWith('"') && cleanJson2.endsWith('"')) {
+          cleanJson2 = JSON.parse(cleanJson2)
+        }
+        const serviceAccount = typeof cleanJson2 === 'string' ? JSON.parse(cleanJson2) : cleanJson2
         const accessToken = await getAccessToken(serviceAccount)
         const calendarId = encodeURIComponent(mapping.google_calendar_id)
         await fetch(
