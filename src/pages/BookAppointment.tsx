@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import BottomNav from '@/components/BottomNav';
 import type { Tables } from '@/integrations/supabase/types';
 
