@@ -250,43 +250,63 @@ Deno.serve(async (req) => {
 
     if (action === 'check-availability') {
       const { staff_member_id, date } = body
-      
+
+      // 1. Get booked appointments from DB (using service role, bypasses RLS)
+      const dayStart = `${date}T00:00:00`
+      const dayEnd = `${date}T23:59:59`
+      const { data: existingAppts } = await supabase
+        .from('appointments')
+        .select('start_at, end_at')
+        .eq('staff_member_id', staff_member_id)
+        .gte('start_at', dayStart)
+        .lte('start_at', dayEnd)
+        .in('status', ['CONFIRMED', 'RESCHEDULED'])
+
+      const busySlots: { start: string; end: string; source: string }[] = (existingAppts || []).map((a: any) => ({
+        start: a.start_at,
+        end: a.end_at,
+        source: 'db',
+      }))
+
+      // 2. Get Google Calendar busy slots
       const { data: mapping } = await supabase
         .from('staff_calendar_mappings')
         .select('google_calendar_id')
         .eq('staff_member_id', staff_member_id)
         .single()
 
-      if (!mapping) {
-        return new Response(JSON.stringify({ busy_slots: [] }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
+      if (mapping) {
+        try {
+          let cleanJsonAvail = saJson.trim()
+          if (cleanJsonAvail.startsWith('"') && cleanJsonAvail.endsWith('"')) {
+            cleanJsonAvail = JSON.parse(cleanJsonAvail)
+          }
+          const serviceAccount = typeof cleanJsonAvail === 'string' ? JSON.parse(cleanJsonAvail) : cleanJsonAvail
+          const accessToken = await getAccessToken(serviceAccount)
+          const calendarId = encodeURIComponent(mapping.google_calendar_id)
+
+          const timeMin = `${date}T00:00:00+01:00`
+          const timeMax = `${date}T23:59:59+01:00`
+
+          const res = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime`,
+            { headers: { Authorization: `Bearer ${accessToken}` } }
+          )
+          const data = await res.json()
+
+          ;(data.items || [])
+            .filter((e: any) => e.status !== 'cancelled')
+            .forEach((e: any) => {
+              busySlots.push({
+                start: e.start?.dateTime || e.start?.date,
+                end: e.end?.dateTime || e.end?.date,
+                source: 'gcal',
+              })
+            })
+        } catch (gcalErr) {
+          console.warn('GCal availability check failed (non-blocking):', gcalErr)
+        }
       }
-
-      let cleanJson3 = saJson.trim()
-      if (cleanJson3.startsWith('"') && cleanJson3.endsWith('"')) {
-        cleanJson3 = JSON.parse(cleanJson3)
-      }
-      const serviceAccount = typeof cleanJson3 === 'string' ? JSON.parse(cleanJson3) : cleanJson3
-      const accessToken = await getAccessToken(serviceAccount)
-      const calendarId = encodeURIComponent(mapping.google_calendar_id)
-
-      const timeMin = `${date}T00:00:00+01:00`
-      const timeMax = `${date}T23:59:59+01:00`
-
-      const res = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      )
-      const data = await res.json()
-
-      const busySlots = (data.items || [])
-        .filter((e: any) => e.status !== 'cancelled')
-        .map((e: any) => ({
-          start: e.start?.dateTime || e.start?.date,
-          end: e.end?.dateTime || e.end?.date,
-          summary: e.summary,
-        }))
 
       return new Response(JSON.stringify({ busy_slots: busySlots }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
