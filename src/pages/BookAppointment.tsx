@@ -200,7 +200,7 @@ const BookAppointment = () => {
 
       // Final availability re-check before insert (prevents double booking race conditions)
       if (selectedStaff?.id) {
-        const dateStr = selectedDate.toISOString().split('T')[0];
+        const dateStr = formatLocalDate(selectedDate);
         const { data: availabilityData, error: availabilityError } = await supabase.functions.invoke('gcal-sync-appointments', {
           body: { action: 'check-availability', staff_member_id: selectedStaff.id, date: dateStr },
         });
