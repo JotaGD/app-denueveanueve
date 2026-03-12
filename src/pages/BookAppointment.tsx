@@ -284,9 +284,9 @@ const BookAppointment = () => {
 
       if (!customer) throw new Error('Customer not found');
 
-      const [hours, minutes] = selectedTime.split(':').map(Number);
-      const startAt = new Date(selectedDate);
-      startAt.setHours(hours, minutes, 0, 0);
+      const dateStr = formatLocalDate(selectedDate);
+      const madridOffset = getMadridOffset(dateStr);
+      const startAt = new Date(`${dateStr}T${selectedTime}:00${madridOffset}`);
       const bookingDuration = totals.duration > 0 ? totals.duration : 30;
       const endAt = new Date(startAt.getTime() + bookingDuration * 60000);
 
