@@ -10,6 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import BottomNav from '@/components/BottomNav';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from '@/components/ui/alert-dialog';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Location = Tables<'locations'>;
@@ -106,8 +107,35 @@ const BookAppointment = () => {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [staffSchedule, setStaffSchedule] = useState<{ entry_type: string; start_time: string | null; end_time: string | null } | null>(null);
   const [monthSchedules, setMonthSchedules] = useState<Record<string, string>>({});
+  const [hasActiveAppointment, setHasActiveAppointment] = useState(false);
+  const [checkingAppointment, setCheckingAppointment] = useState(true);
 
   const stepIndex = STEPS.indexOf(step);
+
+  // Check if user already has an active appointment
+  useEffect(() => {
+    if (!user) return;
+    const checkExisting = async () => {
+      setCheckingAppointment(true);
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (!customer) { setCheckingAppointment(false); return; }
+
+      const { data } = await supabase
+        .from('appointments')
+        .select('id')
+        .eq('customer_id', customer.id)
+        .in('status', ['CONFIRMED', 'RESCHEDULED'])
+        .limit(1);
+
+      setHasActiveAppointment((data?.length || 0) > 0);
+      setCheckingAppointment(false);
+    };
+    checkExisting();
+  }, [user]);
 
   // Computed totals and phase info
   const totals = useMemo(() => {
@@ -488,6 +516,31 @@ const BookAppointment = () => {
 
   return (
     <div className="min-h-screen bg-background pb-48">
+      {/* Active appointment warning dialog */}
+      <AlertDialog open={hasActiveAppointment && !checkingAppointment}>
+        <AlertDialogContent className="max-w-sm mx-auto">
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/20">
+                <CalendarDays className="h-6 w-6 text-warning" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center">{t('book.existingAppointment')}</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              {t('book.existingAppointmentDesc')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
+            <AlertDialogAction onClick={() => navigate('/appointments')} className="gradient-gold text-primary-foreground shadow-gold">
+              {t('book.goToMyAppointments')}
+            </AlertDialogAction>
+            <Button variant="ghost" onClick={() => navigate(-1)} className="text-muted-foreground">
+              {t('book.previous')}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Header */}
       <div className="px-6 pt-12 pb-4">
         <button onClick={() => (stepIndex > 0 ? goPrev() : navigate(-1))} className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
