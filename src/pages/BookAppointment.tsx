@@ -491,12 +491,6 @@ const BookAppointment = () => {
                     <span className="text-foreground font-medium">{totals.duration} min</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground flex items-center gap-1.5"><Euro size={12} /> {t('book.estimatedPrice')}</span>
-                    <span className="text-foreground font-medium">
-                      {totals.hasOnRequest && '~'}{totals.price.toFixed(2)} €
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
                     <span className="text-gold flex items-center gap-1.5"><Star size={12} /> {t('book.pendingPoints')}</span>
                     <span className="text-gold font-medium">{totals.points} pts</span>
                   </div>
