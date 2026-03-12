@@ -91,13 +91,8 @@ const BookAppointment = () => {
   // Computed totals
   const totals = useMemo(() => {
     const duration = selectedServices.reduce((sum, s) => sum + (s.duration_min || 0), 0);
-    const price = selectedServices.reduce((sum, s) => {
-      if (s.price_type === 'on_request') return sum;
-      return sum + (s.base_price || 0);
-    }, 0);
     const points = selectedServices.reduce((sum, s) => sum + calcPoints(s), 0);
-    const hasOnRequest = selectedServices.some((s) => s.price_type === 'on_request');
-    return { duration, price, points, hasOnRequest };
+    return { duration, points };
   }, [selectedServices]);
 
   useEffect(() => {
