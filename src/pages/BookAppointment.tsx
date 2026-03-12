@@ -104,6 +104,8 @@ const BookAppointment = () => {
   const [success, setSuccess] = useState(false);
   const [busySlots, setBusySlots] = useState<{ start: string; end: string }[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [staffSchedule, setStaffSchedule] = useState<{ entry_type: string; start_time: string | null; end_time: string | null } | null>(null);
+  const [monthSchedules, setMonthSchedules] = useState<Record<string, string>>({});
 
   const stepIndex = STEPS.indexOf(step);
 
