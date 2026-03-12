@@ -200,22 +200,39 @@ const BookAppointment = () => {
 
     const dateStr = formatLocalDate(selectedDate);
     const slotStart = new Date(`${dateStr}T${slot}:00`);
-    const slotEnd = new Date(slotStart.getTime() + (totals.duration || 30) * 60000);
+    const fullEnd = new Date(slotStart.getTime() + (totals.duration || 30) * 60000);
 
     // Check if appointment would exceed closing time
     if (closingTime) {
       const closingDate = new Date(`${dateStr}T${closingTime}:00`);
-      if (slotEnd > closingDate) return false;
+      if (fullEnd > closingDate) return false;
       if (slotStart >= closingDate) return false;
     }
 
     if (busySlots.length === 0) return true;
 
-    return !busySlots.some((busy) => {
-      const busyStart = new Date(busy.start);
-      const busyEnd = new Date(busy.end);
-      return slotStart < busyEnd && slotEnd > busyStart;
-    });
+    // Build active work windows for the NEW appointment
+    const newWindows: { start: Date; end: Date }[] = [];
+    if (totals.hasPhases) {
+      const appEnd = new Date(slotStart.getTime() + totals.applicationMin * 60000);
+      newWindows.push({ start: slotStart, end: appEnd });
+      if (totals.postMin > 0) {
+        const postStart = new Date(appEnd.getTime() + totals.exposureMin * 60000);
+        const postEnd = new Date(postStart.getTime() + totals.postMin * 60000);
+        newWindows.push({ start: postStart, end: postEnd });
+      }
+    } else {
+      newWindows.push({ start: slotStart, end: fullEnd });
+    }
+
+    // Check if ANY active work window overlaps with ANY busy slot
+    return !newWindows.some(win =>
+      busySlots.some(busy => {
+        const busyStart = new Date(busy.start);
+        const busyEnd = new Date(busy.end);
+        return win.start < busyEnd && win.end > busyStart;
+      })
+    );
   };
 
   // Group services by category
