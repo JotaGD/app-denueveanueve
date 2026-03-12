@@ -206,29 +206,19 @@ const BookAppointment = () => {
     if (!selectedDate) return true;
 
     const dateStr = formatLocalDate(selectedDate);
-    const slotStart = new Date(`${dateStr}T${slot}:00`);
+    // Use Madrid timezone (+01:00 CET / +02:00 CEST) to match server busy slots
+    const madridOffset = getMadridOffset(dateStr);
+    const slotStart = new Date(`${dateStr}T${slot}:00${madridOffset}`);
     const fullEnd = new Date(slotStart.getTime() + (totals.duration || 30) * 60000);
 
     // Check if appointment would exceed closing time
     if (closingTime) {
-      const closingDate = new Date(`${dateStr}T${closingTime}:00`);
+      const closingDate = new Date(`${dateStr}T${closingTime}:00${madridOffset}`);
       if (fullEnd > closingDate) return false;
       if (slotStart >= closingDate) return false;
     }
 
     if (busySlots.length === 0) return true;
-    if (slot === '10:10' || slot === '11:30') {
-      const dateStr2 = formatLocalDate(selectedDate!);
-      const ss = new Date(`${dateStr2}T${slot}:00`);
-      const ae = new Date(ss.getTime() + totals.applicationMin * 60000);
-      const ps = new Date(ae.getTime() + totals.exposureMin * 60000);
-      const pe = new Date(ps.getTime() + totals.postMin * 60000);
-      const b0s = new Date(busySlots[0].start);
-      const b0e = new Date(busySlots[0].end);
-      console.log(`[DEBUG2] slot=${slot} slotStart=${ss.toISOString()} appEnd=${ae.toISOString()} postStart=${ps.toISOString()} postEnd=${pe.toISOString()}`);
-      console.log(`[DEBUG2] busy0: ${b0s.toISOString()} - ${b0e.toISOString()}`);
-      console.log(`[DEBUG2] app overlap: ${ss.getTime() < b0e.getTime()} && ${ae.getTime() > b0s.getTime()} = ${ss.getTime() < b0e.getTime() && ae.getTime() > b0s.getTime()}`);
-    }
 
     // Build active work windows for the NEW appointment
     const newWindows: { start: Date; end: Date }[] = [];
