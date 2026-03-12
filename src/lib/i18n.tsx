@@ -83,6 +83,9 @@ const translations: Record<Locale, Record<string, string>> = {
     'book.selectStaff': 'Elige tu profesional',
     'book.staff': 'Profesional',
     'book.noStaff': 'No hay profesionales disponibles',
+    'book.existingAppointment': 'Ya tienes una cita activa',
+    'book.existingAppointmentDesc': 'Solo puedes tener una cita a la vez. Cancela tu cita actual o espera a que se complete para reservar otra.',
+    'book.goToMyAppointments': 'Ver mi cita',
     // Appointments
     'appointments.title': 'Mis Citas',
     'appointments.upcoming': 'Próximas',
