@@ -256,7 +256,7 @@ const BookAppointment = () => {
           start_at: startAt.toISOString(),
           end_at: endAt.toISOString(),
           customer_notes: notes || null,
-          estimated_total_price: totals.price || null,
+          estimated_total_price: null,
           estimated_total_duration: bookingDuration,
           estimated_pending_points: totals.points || null,
         })
