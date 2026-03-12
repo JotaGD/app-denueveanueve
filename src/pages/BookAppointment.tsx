@@ -217,6 +217,9 @@ const BookAppointment = () => {
     }
 
     if (busySlots.length === 0) return true;
+    if (slot === '10:10' || slot === '11:30') {
+      console.log(`[DEBUG] slot=${slot}, busySlots=`, JSON.stringify(busySlots), 'hasPhases=', totals.hasPhases, 'appMin=', totals.applicationMin, 'expMin=', totals.exposureMin, 'postMin=', totals.postMin);
+    }
 
     // Build active work windows for the NEW appointment
     const newWindows: { start: Date; end: Date }[] = [];
