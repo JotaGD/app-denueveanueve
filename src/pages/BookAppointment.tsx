@@ -180,6 +180,38 @@ const BookAppointment = () => {
     }
   }, [selectedLocation, selectedSection]);
 
+  // Fetch monthly schedules for calendar disabled days
+  useEffect(() => {
+    if (!selectedStaff) { setMonthSchedules({}); return; }
+    const now = new Date();
+    const startDate = formatLocalDate(now);
+    const endDate = formatLocalDate(new Date(now.getFullYear(), now.getMonth() + 2, 0));
+    supabase
+      .from('employee_schedules')
+      .select('date, entry_type')
+      .eq('staff_member_id', selectedStaff.id)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .then(({ data }) => {
+        const map: Record<string, string> = {};
+        data?.forEach(e => { map[e.date] = e.entry_type; });
+        setMonthSchedules(map);
+      });
+  }, [selectedStaff]);
+
+  // Fetch staff schedule for selected date
+  useEffect(() => {
+    if (!selectedDate || !selectedStaff) { setStaffSchedule(null); return; }
+    const dateStr = formatLocalDate(selectedDate);
+    supabase
+      .from('employee_schedules')
+      .select('entry_type, start_time, end_time')
+      .eq('staff_member_id', selectedStaff.id)
+      .eq('date', dateStr)
+      .maybeSingle()
+      .then(({ data }) => setStaffSchedule(data));
+  }, [selectedDate, selectedStaff]);
+
   // Fetch busy slots when date or staff changes
   useEffect(() => {
     if (!selectedDate || !selectedStaff) {
