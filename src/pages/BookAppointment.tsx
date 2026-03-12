@@ -516,6 +516,31 @@ const BookAppointment = () => {
 
   return (
     <div className="min-h-screen bg-background pb-48">
+      {/* Active appointment warning dialog */}
+      <AlertDialog open={hasActiveAppointment && !checkingAppointment}>
+        <AlertDialogContent className="max-w-sm mx-auto">
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/20">
+                <CalendarDays className="h-6 w-6 text-warning" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center">{t('book.existingAppointment')}</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              {t('book.existingAppointmentDesc')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
+            <AlertDialogAction onClick={() => navigate('/appointments')} className="gradient-gold text-primary-foreground shadow-gold">
+              {t('book.goToMyAppointments')}
+            </AlertDialogAction>
+            <Button variant="ghost" onClick={() => navigate(-1)} className="text-muted-foreground">
+              {t('book.previous')}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Header */}
       <div className="px-6 pt-12 pb-4">
         <button onClick={() => (stepIndex > 0 ? goPrev() : navigate(-1))} className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
