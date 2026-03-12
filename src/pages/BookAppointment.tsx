@@ -696,7 +696,9 @@ const BookAppointment = () => {
                   selected={selectedDate}
                   onSelect={(d) => { setSelectedDate(d); setSelectedTime(null); }}
                   disabled={(date) => {
-                    if (date < new Date() || date.getDay() === 0) return true;
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (date < today || date.getDay() === 0) return true;
                     if (selectedStaff) {
                       const ds = formatLocalDate(date);
                       return monthSchedules[ds] !== 'availability';
