@@ -610,7 +610,7 @@ const BookAppointment = () => {
                     })}
                   </div>
                   <h3 className="text-sm font-medium text-foreground mt-3">{t('book.afternoon')}</h3>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-6 gap-1.5">
                     {TIME_SLOTS.filter((t) => parseInt(t) >= 14).map((slot) => {
                       const available = isSlotAvailable(slot);
                       return (
