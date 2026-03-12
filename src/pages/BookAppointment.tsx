@@ -107,8 +107,35 @@ const BookAppointment = () => {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [staffSchedule, setStaffSchedule] = useState<{ entry_type: string; start_time: string | null; end_time: string | null } | null>(null);
   const [monthSchedules, setMonthSchedules] = useState<Record<string, string>>({});
+  const [hasActiveAppointment, setHasActiveAppointment] = useState(false);
+  const [checkingAppointment, setCheckingAppointment] = useState(true);
 
   const stepIndex = STEPS.indexOf(step);
+
+  // Check if user already has an active appointment
+  useEffect(() => {
+    if (!user) return;
+    const checkExisting = async () => {
+      setCheckingAppointment(true);
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (!customer) { setCheckingAppointment(false); return; }
+
+      const { data } = await supabase
+        .from('appointments')
+        .select('id')
+        .eq('customer_id', customer.id)
+        .in('status', ['CONFIRMED', 'RESCHEDULED'])
+        .limit(1);
+
+      setHasActiveAppointment((data?.length || 0) > 0);
+      setCheckingAppointment(false);
+    };
+    checkExisting();
+  }, [user]);
 
   // Computed totals and phase info
   const totals = useMemo(() => {
