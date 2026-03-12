@@ -218,7 +218,16 @@ const BookAppointment = () => {
 
     if (busySlots.length === 0) return true;
     if (slot === '10:10' || slot === '11:30') {
-      console.log(`[DEBUG] slot=${slot}, busySlots=`, JSON.stringify(busySlots), 'hasPhases=', totals.hasPhases, 'appMin=', totals.applicationMin, 'expMin=', totals.exposureMin, 'postMin=', totals.postMin);
+      const dateStr2 = formatLocalDate(selectedDate!);
+      const ss = new Date(`${dateStr2}T${slot}:00`);
+      const ae = new Date(ss.getTime() + totals.applicationMin * 60000);
+      const ps = new Date(ae.getTime() + totals.exposureMin * 60000);
+      const pe = new Date(ps.getTime() + totals.postMin * 60000);
+      const b0s = new Date(busySlots[0].start);
+      const b0e = new Date(busySlots[0].end);
+      console.log(`[DEBUG2] slot=${slot} slotStart=${ss.toISOString()} appEnd=${ae.toISOString()} postStart=${ps.toISOString()} postEnd=${pe.toISOString()}`);
+      console.log(`[DEBUG2] busy0: ${b0s.toISOString()} - ${b0e.toISOString()}`);
+      console.log(`[DEBUG2] app overlap: ${ss.getTime() < b0e.getTime()} && ${ae.getTime() > b0s.getTime()} = ${ss.getTime() < b0e.getTime() && ae.getTime() > b0s.getTime()}`);
     }
 
     // Build active work windows for the NEW appointment
