@@ -104,6 +104,8 @@ const BookAppointment = () => {
   const [success, setSuccess] = useState(false);
   const [busySlots, setBusySlots] = useState<{ start: string; end: string }[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [staffSchedule, setStaffSchedule] = useState<{ entry_type: string; start_time: string | null; end_time: string | null } | null>(null);
+  const [monthSchedules, setMonthSchedules] = useState<Record<string, string>>({});
 
   const stepIndex = STEPS.indexOf(step);
 
@@ -178,6 +180,38 @@ const BookAppointment = () => {
     }
   }, [selectedLocation, selectedSection]);
 
+  // Fetch monthly schedules for calendar disabled days
+  useEffect(() => {
+    if (!selectedStaff) { setMonthSchedules({}); return; }
+    const now = new Date();
+    const startDate = formatLocalDate(now);
+    const endDate = formatLocalDate(new Date(now.getFullYear(), now.getMonth() + 2, 0));
+    supabase
+      .from('employee_schedules')
+      .select('date, entry_type')
+      .eq('staff_member_id', selectedStaff.id)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .then(({ data }) => {
+        const map: Record<string, string> = {};
+        data?.forEach(e => { map[e.date] = e.entry_type; });
+        setMonthSchedules(map);
+      });
+  }, [selectedStaff]);
+
+  // Fetch staff schedule for selected date
+  useEffect(() => {
+    if (!selectedDate || !selectedStaff) { setStaffSchedule(null); return; }
+    const dateStr = formatLocalDate(selectedDate);
+    supabase
+      .from('employee_schedules')
+      .select('entry_type, start_time, end_time')
+      .eq('staff_member_id', selectedStaff.id)
+      .eq('date', dateStr)
+      .maybeSingle()
+      .then(({ data }) => setStaffSchedule(data));
+  }, [selectedDate, selectedStaff]);
+
   // Fetch busy slots when date or staff changes
   useEffect(() => {
     if (!selectedDate || !selectedStaff) {
@@ -216,6 +250,22 @@ const BookAppointment = () => {
   // Check if a time slot is available considering the total duration of selected services
   const isSlotAvailable = (slot: string): boolean => {
     if (!selectedDate) return true;
+
+    // Check employee schedule: must be 'availability' with valid time range
+    if (!staffSchedule || staffSchedule.entry_type !== 'availability') return false;
+    if (staffSchedule.start_time && slot < staffSchedule.start_time.substring(0, 5)) return false;
+    if (staffSchedule.end_time && slot >= staffSchedule.end_time.substring(0, 5)) return false;
+
+    // Also check that the service end doesn't exceed the employee's end_time
+    if (staffSchedule.end_time) {
+      const totalDur = totals.duration || 30;
+      const [sh, sm] = slot.split(':').map(Number);
+      const slotMinutes = sh * 60 + sm;
+      const endMinutes = slotMinutes + totalDur;
+      const [eh, em] = staffSchedule.end_time.substring(0, 5).split(':').map(Number);
+      const scheduleEndMinutes = eh * 60 + em;
+      if (endMinutes > scheduleEndMinutes) return false;
+    }
 
     const dateStr = formatLocalDate(selectedDate);
     // Use Madrid timezone (+01:00 CET / +02:00 CEST) to match server busy slots
@@ -592,7 +642,14 @@ const BookAppointment = () => {
                   mode="single"
                   selected={selectedDate}
                   onSelect={(d) => { setSelectedDate(d); setSelectedTime(null); }}
-                  disabled={(date) => date < new Date() || date.getDay() === 0}
+                  disabled={(date) => {
+                    if (date < new Date() || date.getDay() === 0) return true;
+                    if (selectedStaff) {
+                      const ds = formatLocalDate(date);
+                      return monthSchedules[ds] !== 'availability';
+                    }
+                    return false;
+                  }}
                   className="text-foreground pointer-events-auto"
                 />
               </div>
