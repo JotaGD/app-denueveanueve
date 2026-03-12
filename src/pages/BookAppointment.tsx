@@ -618,7 +618,7 @@ const BookAppointment = () => {
                           key={slot}
                           onClick={() => available && setSelectedTime(slot)}
                           disabled={!available}
-                          className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
+                          className={`rounded-lg border px-1.5 py-2 text-xs font-medium transition-all ${
                             !available
                               ? 'border-border bg-muted text-muted-foreground/40 cursor-not-allowed line-through'
                               : selectedTime === slot
