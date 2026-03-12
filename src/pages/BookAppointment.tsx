@@ -623,10 +623,6 @@ const BookAppointment = () => {
                 </div>
                 <div className="border-t border-border mt-3 pt-3 space-y-1">
                   <div className="flex justify-between text-sm font-medium">
-                    <span className="text-muted-foreground">{t('book.total')}</span>
-                    <span className="text-foreground">{totals.hasOnRequest && '~'}{totals.price.toFixed(2)} €</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-medium">
                     <span className="text-muted-foreground">{t('book.totalDuration')}</span>
                     <span className="text-foreground">{totals.duration} min</span>
                   </div>

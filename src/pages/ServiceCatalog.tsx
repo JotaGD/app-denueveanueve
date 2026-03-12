@@ -115,9 +115,6 @@ const ServiceCatalog = () => {
                                   )}
                                 </div>
                               </div>
-                              <span className="text-sm font-medium text-gold ml-3 whitespace-nowrap">
-                                {formatPrice(svc)}
-                              </span>
                             </div>
                           </div>
                         ))}
