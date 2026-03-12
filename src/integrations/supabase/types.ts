@@ -771,6 +771,7 @@ export type Database = {
       services: {
         Row: {
           active: boolean
+          application_min: number | null
           base_price: number | null
           category: string | null
           category_id: string | null
@@ -778,15 +779,18 @@ export type Database = {
           description: string | null
           duration_min: number | null
           excluded_from_discount: boolean
+          exposure_min: number | null
           fixed_points: number | null
           id: string
           location_id: string | null
           name: string
+          post_exposure_min: number | null
           price_type: string
           section: Database["public"]["Enums"]["salon_section"] | null
         }
         Insert: {
           active?: boolean
+          application_min?: number | null
           base_price?: number | null
           category?: string | null
           category_id?: string | null
@@ -794,15 +798,18 @@ export type Database = {
           description?: string | null
           duration_min?: number | null
           excluded_from_discount?: boolean
+          exposure_min?: number | null
           fixed_points?: number | null
           id?: string
           location_id?: string | null
           name: string
+          post_exposure_min?: number | null
           price_type?: string
           section?: Database["public"]["Enums"]["salon_section"] | null
         }
         Update: {
           active?: boolean
+          application_min?: number | null
           base_price?: number | null
           category?: string | null
           category_id?: string | null
@@ -810,10 +817,12 @@ export type Database = {
           description?: string | null
           duration_min?: number | null
           excluded_from_discount?: boolean
+          exposure_min?: number | null
           fixed_points?: number | null
           id?: string
           location_id?: string | null
           name?: string
+          post_exposure_min?: number | null
           price_type?: string
           section?: Database["public"]["Enums"]["salon_section"] | null
         }
