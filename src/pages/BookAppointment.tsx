@@ -22,6 +22,18 @@ type SalonSection = 'CABALLEROS' | 'SENORAS' | 'ESTETICA';
 const STEPS = ['location', 'section', 'staff', 'services', 'datetime', 'confirm'] as const;
 type Step = typeof STEPS[number];
 
+// Determine Madrid timezone offset for a given date (CET +01:00 or CEST +02:00)
+function getMadridOffset(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00Z');
+  const month = d.getUTCMonth();
+  if (month > 2 && month < 9) return '+02:00';
+  if (month < 2 || month > 9) return '+01:00';
+  const lastDay = new Date(Date.UTC(d.getUTCFullYear(), month + 1, 0));
+  const lastSunday = lastDay.getUTCDate() - lastDay.getUTCDay();
+  if (month === 2) return d.getUTCDate() >= lastSunday ? '+02:00' : '+01:00';
+  return d.getUTCDate() < lastSunday ? '+02:00' : '+01:00';
+}
+
 const TIME_SLOTS = [
   '09:00', '09:10', '09:20', '09:30', '09:40', '09:50',
   '10:00', '10:10', '10:20', '10:30', '10:40', '10:50',
@@ -206,12 +218,14 @@ const BookAppointment = () => {
     if (!selectedDate) return true;
 
     const dateStr = formatLocalDate(selectedDate);
-    const slotStart = new Date(`${dateStr}T${slot}:00`);
+    // Use Madrid timezone (+01:00 CET / +02:00 CEST) to match server busy slots
+    const madridOffset = getMadridOffset(dateStr);
+    const slotStart = new Date(`${dateStr}T${slot}:00${madridOffset}`);
     const fullEnd = new Date(slotStart.getTime() + (totals.duration || 30) * 60000);
 
     // Check if appointment would exceed closing time
     if (closingTime) {
-      const closingDate = new Date(`${dateStr}T${closingTime}:00`);
+      const closingDate = new Date(`${dateStr}T${closingTime}:00${madridOffset}`);
       if (fullEnd > closingDate) return false;
       if (slotStart >= closingDate) return false;
     }
@@ -270,9 +284,9 @@ const BookAppointment = () => {
 
       if (!customer) throw new Error('Customer not found');
 
-      const [hours, minutes] = selectedTime.split(':').map(Number);
-      const startAt = new Date(selectedDate);
-      startAt.setHours(hours, minutes, 0, 0);
+      const dateStr = formatLocalDate(selectedDate);
+      const madridOffset = getMadridOffset(dateStr);
+      const startAt = new Date(`${dateStr}T${selectedTime}:00${madridOffset}`);
       const bookingDuration = totals.duration > 0 ? totals.duration : 30;
       const endAt = new Date(startAt.getTime() + bookingDuration * 60000);
 
