@@ -472,7 +472,6 @@ const BookAppointment = () => {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 ml-2">
-                                <span className="text-xs font-medium text-gold whitespace-nowrap">{formatPrice(svc)}</span>
                                 {isSelected && <Check className="h-4 w-4 text-gold" />}
                               </div>
                             </div>
