@@ -616,8 +616,7 @@ const BookAppointment = () => {
                         <p className="text-[10px] text-muted-foreground">{s.duration_min ? `${s.duration_min} min` : ''}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-gold">{formatPrice(s)}</p>
-                        <p className="text-[10px] text-gold/70">{calcPoints(s)} pts</p>
+                        <p className="text-[10px] text-gold">{calcPoints(s)} pts</p>
                       </div>
                     </div>
                   ))}
