@@ -588,7 +588,7 @@ const BookAppointment = () => {
                     <p className="text-xs text-muted-foreground animate-pulse text-center">Comprobando disponibilidad...</p>
                   )}
                   <h3 className="text-sm font-medium text-foreground">{t('book.morning')}</h3>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-6 gap-1.5">
                     {TIME_SLOTS.filter((t) => parseInt(t) < 14).map((slot) => {
                       const available = isSlotAvailable(slot);
                       return (
