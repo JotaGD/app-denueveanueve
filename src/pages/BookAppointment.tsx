@@ -23,10 +23,17 @@ const STEPS = ['location', 'section', 'staff', 'services', 'datetime', 'confirm'
 type Step = typeof STEPS[number];
 
 const TIME_SLOTS = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '12:00', '12:30', '13:00', '13:30',
-  '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-  '18:00', '18:30', '19:00', '19:30', '20:00', '20:30',
+  '09:00', '09:10', '09:20', '09:30', '09:40', '09:50',
+  '10:00', '10:10', '10:20', '10:30', '10:40', '10:50',
+  '11:00', '11:10', '11:20', '11:30', '11:40', '11:50',
+  '12:00', '12:10', '12:20', '12:30', '12:40', '12:50',
+  '13:00', '13:10', '13:20', '13:30', '13:40', '13:50',
+  '15:00', '15:10', '15:20', '15:30', '15:40', '15:50',
+  '16:00', '16:10', '16:20', '16:30', '16:40', '16:50',
+  '17:00', '17:10', '17:20', '17:30', '17:40', '17:50',
+  '18:00', '18:10', '18:20', '18:30', '18:40', '18:50',
+  '19:00', '19:10', '19:20', '19:30', '19:40', '19:50',
+  '20:00', '20:10', '20:20', '20:30', '20:40', '20:50',
 ];
 
 // Parse closing time from location hours_json for a given day
@@ -581,7 +588,7 @@ const BookAppointment = () => {
                     <p className="text-xs text-muted-foreground animate-pulse text-center">Comprobando disponibilidad...</p>
                   )}
                   <h3 className="text-sm font-medium text-foreground">{t('book.morning')}</h3>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-6 gap-1.5">
                     {TIME_SLOTS.filter((t) => parseInt(t) < 14).map((slot) => {
                       const available = isSlotAvailable(slot);
                       return (
@@ -589,7 +596,7 @@ const BookAppointment = () => {
                           key={slot}
                           onClick={() => available && setSelectedTime(slot)}
                           disabled={!available}
-                          className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
+                          className={`rounded-lg border px-1.5 py-2 text-xs font-medium transition-all ${
                             !available
                               ? 'border-border bg-muted text-muted-foreground/40 cursor-not-allowed line-through'
                               : selectedTime === slot
@@ -603,7 +610,7 @@ const BookAppointment = () => {
                     })}
                   </div>
                   <h3 className="text-sm font-medium text-foreground mt-3">{t('book.afternoon')}</h3>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-6 gap-1.5">
                     {TIME_SLOTS.filter((t) => parseInt(t) >= 14).map((slot) => {
                       const available = isSlotAvailable(slot);
                       return (
@@ -611,7 +618,7 @@ const BookAppointment = () => {
                           key={slot}
                           onClick={() => available && setSelectedTime(slot)}
                           disabled={!available}
-                          className={`rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
+                          className={`rounded-lg border px-1.5 py-2 text-xs font-medium transition-all ${
                             !available
                               ? 'border-border bg-muted text-muted-foreground/40 cursor-not-allowed line-through'
                               : selectedTime === slot
