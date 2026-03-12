@@ -53,11 +53,7 @@ const getClosingTime = (location: Location | null, date: Date | undefined): stri
   }
 };
 
-const formatPrice = (svc: Service) => {
-  if (svc.price_type === 'on_request') return 'Consultar';
-  if (svc.price_type === 'from_price') return `Desde ${svc.base_price?.toFixed(2)} €`;
-  return `${svc.base_price?.toFixed(2)} €`;
-};
+// Prices removed from catalog display
 
 const formatLocalDate = (date: Date) => {
   const year = date.getFullYear();
