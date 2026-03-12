@@ -642,7 +642,14 @@ const BookAppointment = () => {
                   mode="single"
                   selected={selectedDate}
                   onSelect={(d) => { setSelectedDate(d); setSelectedTime(null); }}
-                  disabled={(date) => date < new Date() || date.getDay() === 0}
+                  disabled={(date) => {
+                    if (date < new Date() || date.getDay() === 0) return true;
+                    if (selectedStaff) {
+                      const ds = formatLocalDate(date);
+                      return monthSchedules[ds] !== 'availability';
+                    }
+                    return false;
+                  }}
                   className="text-foreground pointer-events-auto"
                 />
               </div>
