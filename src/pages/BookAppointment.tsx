@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock, Check, ChevronRight, CalendarDays, StickyNote, User, Scissors, Star, Euro } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Check, ChevronRight, CalendarDays, StickyNote, User, Scissors, Star } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,11 +53,7 @@ const getClosingTime = (location: Location | null, date: Date | undefined): stri
   }
 };
 
-const formatPrice = (svc: Service) => {
-  if (svc.price_type === 'on_request') return 'Consultar';
-  if (svc.price_type === 'from_price') return `Desde ${svc.base_price?.toFixed(2)} €`;
-  return `${svc.base_price?.toFixed(2)} €`;
-};
+// Prices removed from catalog display
 
 const formatLocalDate = (date: Date) => {
   const year = date.getFullYear();
@@ -95,13 +91,8 @@ const BookAppointment = () => {
   // Computed totals
   const totals = useMemo(() => {
     const duration = selectedServices.reduce((sum, s) => sum + (s.duration_min || 0), 0);
-    const price = selectedServices.reduce((sum, s) => {
-      if (s.price_type === 'on_request') return sum;
-      return sum + (s.base_price || 0);
-    }, 0);
     const points = selectedServices.reduce((sum, s) => sum + calcPoints(s), 0);
-    const hasOnRequest = selectedServices.some((s) => s.price_type === 'on_request');
-    return { duration, price, points, hasOnRequest };
+    return { duration, points };
   }, [selectedServices]);
 
   useEffect(() => {
@@ -265,7 +256,7 @@ const BookAppointment = () => {
           start_at: startAt.toISOString(),
           end_at: endAt.toISOString(),
           customer_notes: notes || null,
-          estimated_total_price: totals.price || null,
+          estimated_total_price: null,
           estimated_total_duration: bookingDuration,
           estimated_pending_points: totals.points || null,
         })
@@ -481,7 +472,6 @@ const BookAppointment = () => {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 ml-2">
-                                <span className="text-xs font-medium text-gold whitespace-nowrap">{formatPrice(svc)}</span>
                                 {isSelected && <Check className="h-4 w-4 text-gold" />}
                               </div>
                             </div>
@@ -499,12 +489,6 @@ const BookAppointment = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground flex items-center gap-1.5"><Clock size={12} /> {t('book.totalDuration')}</span>
                     <span className="text-foreground font-medium">{totals.duration} min</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground flex items-center gap-1.5"><Euro size={12} /> {t('book.estimatedPrice')}</span>
-                    <span className="text-foreground font-medium">
-                      {totals.hasOnRequest && '~'}{totals.price.toFixed(2)} €
-                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gold flex items-center gap-1.5"><Star size={12} /> {t('book.pendingPoints')}</span>
@@ -632,17 +616,12 @@ const BookAppointment = () => {
                         <p className="text-[10px] text-muted-foreground">{s.duration_min ? `${s.duration_min} min` : ''}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-gold">{formatPrice(s)}</p>
-                        <p className="text-[10px] text-gold/70">{calcPoints(s)} pts</p>
+                        <p className="text-[10px] text-gold">{calcPoints(s)} pts</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="border-t border-border mt-3 pt-3 space-y-1">
-                  <div className="flex justify-between text-sm font-medium">
-                    <span className="text-muted-foreground">{t('book.total')}</span>
-                    <span className="text-foreground">{totals.hasOnRequest && '~'}{totals.price.toFixed(2)} €</span>
-                  </div>
                   <div className="flex justify-between text-sm font-medium">
                     <span className="text-muted-foreground">{t('book.totalDuration')}</span>
                     <span className="text-foreground">{totals.duration} min</span>

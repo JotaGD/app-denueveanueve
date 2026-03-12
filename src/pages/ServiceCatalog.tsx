@@ -11,11 +11,7 @@ import type { Tables } from '@/integrations/supabase/types';
 type Service = Tables<'services'>;
 type ServiceCategory = Tables<'service_categories'>;
 
-const formatPrice = (service: Service) => {
-  if (service.price_type === 'on_request') return 'Consultar';
-  if (service.price_type === 'from_price') return `Desde ${service.base_price?.toFixed(2)} €`;
-  return `${service.base_price?.toFixed(2)} €`;
-};
+// Prices removed from catalog
 
 const ServiceCatalog = () => {
   const navigate = useNavigate();
@@ -119,9 +115,6 @@ const ServiceCatalog = () => {
                                   )}
                                 </div>
                               </div>
-                              <span className="text-sm font-medium text-gold ml-3 whitespace-nowrap">
-                                {formatPrice(svc)}
-                              </span>
                             </div>
                           </div>
                         ))}
