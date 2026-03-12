@@ -88,11 +88,40 @@ const BookAppointment = () => {
 
   const stepIndex = STEPS.indexOf(step);
 
-  // Computed totals
+  // Computed totals and phase info
   const totals = useMemo(() => {
     const duration = selectedServices.reduce((sum, s) => sum + (s.duration_min || 0), 0);
     const points = selectedServices.reduce((sum, s) => sum + calcPoints(s), 0);
-    return { duration, points };
+
+    // Phase-aware: compute active work windows
+    const phasedSvcs = selectedServices.filter(s => s.application_min && s.exposure_min);
+    const hasPhases = phasedSvcs.length > 0;
+
+    if (hasPhases) {
+      const totalApp = phasedSvcs.reduce((sum, s) => sum + (s.application_min || 0), 0);
+      const maxExposure = Math.max(...phasedSvcs.map(s => s.exposure_min || 0));
+      const totalPost = selectedServices.reduce((sum, s) => {
+        if (s.post_exposure_min) return sum + s.post_exposure_min;
+        if (!s.application_min) return sum + (s.duration_min || 0);
+        return sum;
+      }, 0);
+      // Non-phased services without post_exposure go into application block
+      const nonPhasedDur = selectedServices
+        .filter(s => !s.application_min || !s.exposure_min)
+        .filter(s => !s.post_exposure_min)
+        .reduce((sum, s) => sum + (s.duration_min || 0), 0);
+
+      return {
+        duration,
+        points,
+        hasPhases: true,
+        applicationMin: totalApp + nonPhasedDur,
+        exposureMin: maxExposure,
+        postMin: totalPost,
+      };
+    }
+
+    return { duration, points, hasPhases: false, applicationMin: 0, exposureMin: 0, postMin: 0 };
   }, [selectedServices]);
 
   useEffect(() => {
