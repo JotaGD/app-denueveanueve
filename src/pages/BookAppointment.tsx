@@ -22,6 +22,18 @@ type SalonSection = 'CABALLEROS' | 'SENORAS' | 'ESTETICA';
 const STEPS = ['location', 'section', 'staff', 'services', 'datetime', 'confirm'] as const;
 type Step = typeof STEPS[number];
 
+// Determine Madrid timezone offset for a given date (CET +01:00 or CEST +02:00)
+function getMadridOffset(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00Z');
+  const month = d.getUTCMonth();
+  if (month > 2 && month < 9) return '+02:00';
+  if (month < 2 || month > 9) return '+01:00';
+  const lastDay = new Date(Date.UTC(d.getUTCFullYear(), month + 1, 0));
+  const lastSunday = lastDay.getUTCDate() - lastDay.getUTCDay();
+  if (month === 2) return d.getUTCDate() >= lastSunday ? '+02:00' : '+01:00';
+  return d.getUTCDate() < lastSunday ? '+02:00' : '+01:00';
+}
+
 const TIME_SLOTS = [
   '09:00', '09:10', '09:20', '09:30', '09:40', '09:50',
   '10:00', '10:10', '10:20', '10:30', '10:40', '10:50',
