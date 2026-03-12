@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock, Check, ChevronRight, CalendarDays, StickyNote, User, Scissors, Star, Euro } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Check, ChevronRight, CalendarDays, StickyNote, User, Scissors, Star } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
