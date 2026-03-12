@@ -88,11 +88,40 @@ const BookAppointment = () => {
 
   const stepIndex = STEPS.indexOf(step);
 
-  // Computed totals
+  // Computed totals and phase info
   const totals = useMemo(() => {
     const duration = selectedServices.reduce((sum, s) => sum + (s.duration_min || 0), 0);
     const points = selectedServices.reduce((sum, s) => sum + calcPoints(s), 0);
-    return { duration, points };
+
+    // Phase-aware: compute active work windows
+    const phasedSvcs = selectedServices.filter(s => s.application_min && s.exposure_min);
+    const hasPhases = phasedSvcs.length > 0;
+
+    if (hasPhases) {
+      const totalApp = phasedSvcs.reduce((sum, s) => sum + (s.application_min || 0), 0);
+      const maxExposure = Math.max(...phasedSvcs.map(s => s.exposure_min || 0));
+      const totalPost = selectedServices.reduce((sum, s) => {
+        if (s.post_exposure_min) return sum + s.post_exposure_min;
+        if (!s.application_min) return sum + (s.duration_min || 0);
+        return sum;
+      }, 0);
+      // Non-phased services without post_exposure go into application block
+      const nonPhasedDur = selectedServices
+        .filter(s => !s.application_min || !s.exposure_min)
+        .filter(s => !s.post_exposure_min)
+        .reduce((sum, s) => sum + (s.duration_min || 0), 0);
+
+      return {
+        duration,
+        points,
+        hasPhases: true,
+        applicationMin: totalApp + nonPhasedDur,
+        exposureMin: maxExposure,
+        postMin: totalPost,
+      };
+    }
+
+    return { duration, points, hasPhases: false, applicationMin: 0, exposureMin: 0, postMin: 0 };
   }, [selectedServices]);
 
   useEffect(() => {
@@ -171,22 +200,39 @@ const BookAppointment = () => {
 
     const dateStr = formatLocalDate(selectedDate);
     const slotStart = new Date(`${dateStr}T${slot}:00`);
-    const slotEnd = new Date(slotStart.getTime() + (totals.duration || 30) * 60000);
+    const fullEnd = new Date(slotStart.getTime() + (totals.duration || 30) * 60000);
 
     // Check if appointment would exceed closing time
     if (closingTime) {
       const closingDate = new Date(`${dateStr}T${closingTime}:00`);
-      if (slotEnd > closingDate) return false;
+      if (fullEnd > closingDate) return false;
       if (slotStart >= closingDate) return false;
     }
 
     if (busySlots.length === 0) return true;
 
-    return !busySlots.some((busy) => {
-      const busyStart = new Date(busy.start);
-      const busyEnd = new Date(busy.end);
-      return slotStart < busyEnd && slotEnd > busyStart;
-    });
+    // Build active work windows for the NEW appointment
+    const newWindows: { start: Date; end: Date }[] = [];
+    if (totals.hasPhases) {
+      const appEnd = new Date(slotStart.getTime() + totals.applicationMin * 60000);
+      newWindows.push({ start: slotStart, end: appEnd });
+      if (totals.postMin > 0) {
+        const postStart = new Date(appEnd.getTime() + totals.exposureMin * 60000);
+        const postEnd = new Date(postStart.getTime() + totals.postMin * 60000);
+        newWindows.push({ start: postStart, end: postEnd });
+      }
+    } else {
+      newWindows.push({ start: slotStart, end: fullEnd });
+    }
+
+    // Check if ANY active work window overlaps with ANY busy slot
+    return !newWindows.some(win =>
+      busySlots.some(busy => {
+        const busyStart = new Date(busy.start);
+        const busyEnd = new Date(busy.end);
+        return win.start < busyEnd && win.end > busyStart;
+      })
+    );
   };
 
   // Group services by category
@@ -234,11 +280,27 @@ const BookAppointment = () => {
           throw new Error('No se pudo comprobar disponibilidad. Inténtalo de nuevo.');
         }
 
-        const hasOverlap = (availabilityData?.busy_slots || []).some((busy: { start: string; end: string }) => {
-          const busyStart = new Date(busy.start);
-          const busyEnd = new Date(busy.end);
-          return startAt < busyEnd && endAt > busyStart;
-        });
+        // Phase-aware overlap check for new appointment
+        const newWindows: { start: Date; end: Date }[] = [];
+        if (totals.hasPhases) {
+          const appEnd = new Date(startAt.getTime() + totals.applicationMin * 60000);
+          newWindows.push({ start: startAt, end: appEnd });
+          if (totals.postMin > 0) {
+            const postStart = new Date(appEnd.getTime() + totals.exposureMin * 60000);
+            const postEnd = new Date(postStart.getTime() + totals.postMin * 60000);
+            newWindows.push({ start: postStart, end: postEnd });
+          }
+        } else {
+          newWindows.push({ start: startAt, end: endAt });
+        }
+
+        const hasOverlap = newWindows.some(win =>
+          (availabilityData?.busy_slots || []).some((busy: { start: string; end: string }) => {
+            const busyStart = new Date(busy.start);
+            const busyEnd = new Date(busy.end);
+            return win.start < busyEnd && win.end > busyStart;
+          })
+        );
 
         if (hasOverlap) {
           toast.error('Ese horario ya no está disponible con este profesional. Elige otra hora.');

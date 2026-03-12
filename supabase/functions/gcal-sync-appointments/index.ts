@@ -264,22 +264,53 @@ Deno.serve(async (req) => {
     if (action === 'check-availability') {
       const { staff_member_id, date } = body
 
-      // 1. Get booked appointments from DB (using service role, bypasses RLS)
+      // 1. Get booked appointments with service phase data
       const dayStart = `${date}T00:00:00`
       const dayEnd = `${date}T23:59:59`
       const { data: existingAppts } = await supabase
         .from('appointments')
-        .select('start_at, end_at')
+        .select('start_at, end_at, appointment_services(service_id, services(application_min, exposure_min, post_exposure_min, duration_min))')
         .eq('staff_member_id', staff_member_id)
         .gte('start_at', dayStart)
         .lte('start_at', dayEnd)
         .in('status', ['CONFIRMED', 'RESCHEDULED'])
 
-      const busySlots: { start: string; end: string; source: string }[] = (existingAppts || []).map((a: any) => ({
-        start: a.start_at,
-        end: a.end_at,
-        source: 'db',
-      }))
+      const busySlots: { start: string; end: string; source: string }[] = []
+
+      for (const appt of (existingAppts || [])) {
+        const svcs = (appt.appointment_services || []) as any[]
+        const phasedSvcs = svcs.filter((s: any) => s.services?.application_min && s.services?.exposure_min)
+
+        if (phasedSvcs.length > 0) {
+          // Compute active work windows, freeing exposure time
+          const totalApp = phasedSvcs.reduce((sum: number, s: any) => sum + (s.services.application_min || 0), 0)
+          const maxExposure = Math.max(...phasedSvcs.map((s: any) => s.services.exposure_min || 0))
+          const totalPost = svcs.reduce((sum: number, s: any) => {
+            if (s.services?.post_exposure_min) return sum + s.services.post_exposure_min
+            if (!s.services?.application_min) return sum + (s.services?.duration_min || 0)
+            return sum
+          }, 0)
+          // Non-phased services add to application block
+          const nonPhasedDur = svcs
+            .filter((s: any) => !s.services?.application_min || !s.services?.exposure_min)
+            .filter((s: any) => !s.services?.post_exposure_min)
+            .reduce((sum: number, s: any) => sum + (s.services?.duration_min || 0), 0)
+
+          const start = new Date(appt.start_at).getTime()
+          const appEnd = start + (totalApp + nonPhasedDur) * 60000
+          const postStart = appEnd + maxExposure * 60000
+
+          // Application phase → BUSY
+          busySlots.push({ start: appt.start_at, end: new Date(appEnd).toISOString(), source: 'db' })
+          // Post-exposure phase → BUSY (only if there's post work)
+          if (totalPost > 0) {
+            busySlots.push({ start: new Date(postStart).toISOString(), end: appt.end_at, source: 'db' })
+          }
+        } else {
+          // No phases → full block busy
+          busySlots.push({ start: appt.start_at, end: appt.end_at, source: 'db' })
+        }
+      }
 
       // 2. Get Google Calendar busy slots
       const { data: mapping } = await supabase
