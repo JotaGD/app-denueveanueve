@@ -456,6 +456,50 @@ export type Database = {
           },
         ]
       }
+      employee_schedules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date: string
+          end_time: string | null
+          entry_type: string
+          id: string
+          notes: string | null
+          staff_member_id: string
+          start_time: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date: string
+          end_time?: string | null
+          entry_type: string
+          id?: string
+          notes?: string | null
+          staff_member_id: string
+          start_time?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          end_time?: string | null
+          entry_type?: string
+          id?: string
+          notes?: string | null
+          staff_member_id?: string
+          start_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_schedules_staff_member_id_fkey"
+            columns: ["staff_member_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           address: string
@@ -876,6 +920,7 @@ export type Database = {
           location_id: string
           name: string
           section: Database["public"]["Enums"]["salon_section"]
+          user_id: string | null
         }
         Insert: {
           active?: boolean
@@ -885,6 +930,7 @@ export type Database = {
           location_id: string
           name: string
           section: Database["public"]["Enums"]["salon_section"]
+          user_id?: string | null
         }
         Update: {
           active?: boolean
@@ -894,6 +940,7 @@ export type Database = {
           location_id?: string
           name?: string
           section?: Database["public"]["Enums"]["salon_section"]
+          user_id?: string | null
         }
         Relationships: [
           {
