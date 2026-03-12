@@ -280,11 +280,27 @@ const BookAppointment = () => {
           throw new Error('No se pudo comprobar disponibilidad. Inténtalo de nuevo.');
         }
 
-        const hasOverlap = (availabilityData?.busy_slots || []).some((busy: { start: string; end: string }) => {
-          const busyStart = new Date(busy.start);
-          const busyEnd = new Date(busy.end);
-          return startAt < busyEnd && endAt > busyStart;
-        });
+        // Phase-aware overlap check for new appointment
+        const newWindows: { start: Date; end: Date }[] = [];
+        if (totals.hasPhases) {
+          const appEnd = new Date(startAt.getTime() + totals.applicationMin * 60000);
+          newWindows.push({ start: startAt, end: appEnd });
+          if (totals.postMin > 0) {
+            const postStart = new Date(appEnd.getTime() + totals.exposureMin * 60000);
+            const postEnd = new Date(postStart.getTime() + totals.postMin * 60000);
+            newWindows.push({ start: postStart, end: postEnd });
+          }
+        } else {
+          newWindows.push({ start: startAt, end: endAt });
+        }
+
+        const hasOverlap = newWindows.some(win =>
+          (availabilityData?.busy_slots || []).some((busy: { start: string; end: string }) => {
+            const busyStart = new Date(busy.start);
+            const busyEnd = new Date(busy.end);
+            return win.start < busyEnd && win.end > busyStart;
+          })
+        );
 
         if (hasOverlap) {
           toast.error('Ese horario ya no está disponible con este profesional. Elige otra hora.');
