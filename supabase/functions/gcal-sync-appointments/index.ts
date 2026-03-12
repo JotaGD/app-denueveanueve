@@ -340,6 +340,11 @@ Deno.serve(async (req) => {
 
           ;(data.items || [])
             .filter((e: any) => e.status !== 'cancelled')
+            .filter((e: any) => {
+              // Exclude events created by our system (already handled with phase-aware logic from DB)
+              const supabaseId = e.extendedProperties?.private?.supabase_appointment_id
+              return !supabaseId
+            })
             .forEach((e: any) => {
               busySlots.push({
                 start: e.start?.dateTime || e.start?.date,
