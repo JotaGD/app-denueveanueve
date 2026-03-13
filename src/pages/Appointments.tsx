@@ -50,11 +50,25 @@ const Appointments = () => {
     if (!customerId) return;
     const channel = supabase
       .channel(`appointments-${customerId}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments', filter: `customer_id=eq.${customerId}` }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments', filter: `customer_id=eq.${customerId}` }, () => {
         setRefreshKey((k) => k + 1);
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    // Fallback: refresh when user returns to the app (e.g. after showing QR to staff)
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') setRefreshKey((k) => k + 1);
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // Periodic poll every 15s as extra fallback
+    const interval = setInterval(() => setRefreshKey((k) => k + 1), 15000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      document.removeEventListener('visibilitychange', onVisibility);
+      clearInterval(interval);
+    };
   }, [customerId]);
 
   useEffect(() => {

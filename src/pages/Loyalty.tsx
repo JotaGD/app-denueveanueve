@@ -74,7 +74,21 @@ const Loyalty = () => {
         setRefreshKey((k) => k + 1);
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    // Fallback: refresh when user returns to the app
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') setRefreshKey((k) => k + 1);
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // Periodic poll every 15s
+    const interval = setInterval(() => setRefreshKey((k) => k + 1), 15000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      document.removeEventListener('visibilitychange', onVisibility);
+      clearInterval(interval);
+    };
   }, [customerId]);
 
   useEffect(() => {
