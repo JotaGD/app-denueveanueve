@@ -700,7 +700,7 @@ const BookAppointment = () => {
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={(d) => { setSelectedDate(d); setSelectedTime(null); }}
+                  onSelect={(d) => { setSelectedDate(d); setSelectedTime(null); setSelectedHour(null); setSelectedMinute(null); }}
                   disabled={(date) => {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
