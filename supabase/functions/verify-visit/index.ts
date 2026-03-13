@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    const { qr_token, location_id, appointment_id, service_prices } = await req.json()
+    const { qr_token, location_id, appointment_id, service_prices, redeem_coupon } = await req.json()
 
     if (!qr_token || !location_id) {
       return new Response(JSON.stringify({ error: 'qr_token and location_id are required' }), {
@@ -342,6 +342,45 @@ Deno.serve(async (req) => {
       }
     }
 
+    // === COUPON INFO & REDEMPTION ===
+    let coupon_redeemed = false
+    let has_active_coupon = false
+
+    // Check if customer has an active coupon
+    const { data: activeCoupon } = await supabaseAuth
+      .from('welcome_coupons')
+      .select('id, status, percent_off')
+      .eq('customer_id', customer.id)
+      .eq('status', 'ACTIVE')
+      .maybeSingle()
+
+    if (activeCoupon) {
+      has_active_coupon = true
+    }
+
+    if (redeem_coupon === true && activeCoupon) {
+      await supabaseAuth
+        .from('welcome_coupons')
+        .update({ status: 'USED', used_at: now })
+        .eq('id', activeCoupon.id)
+
+      coupon_redeemed = true
+      has_active_coupon = false
+
+      // Audit log for coupon redemption
+      await supabaseAuth
+        .from('audit_logs')
+        .insert({
+          action: 'REDEEM_COUPON',
+          actor_id: staffUser.id,
+          actor_role: 'STAFF',
+          entity: 'welcome_coupons',
+          entity_id: activeCoupon.id,
+          location_id,
+          metadata: { customer_id: customer.id },
+        })
+    }
+
     return new Response(JSON.stringify({
       success: true,
       customer: { id: customer.id, name: `${customer.first_name} ${customer.last_name}` },
@@ -351,6 +390,8 @@ Deno.serve(async (req) => {
       points_detail: pointsDetail,
       unlocked_reward: unlockedReward,
       premium,
+      has_active_coupon,
+      coupon_redeemed,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
