@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    const { qr_token, location_id, appointment_id, service_prices } = await req.json()
+    const { qr_token, location_id, appointment_id, service_prices, redeem_coupon } = await req.json()
 
     if (!qr_token || !location_id) {
       return new Response(JSON.stringify({ error: 'qr_token and location_id are required' }), {
