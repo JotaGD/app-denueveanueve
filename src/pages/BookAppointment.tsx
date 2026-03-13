@@ -39,19 +39,19 @@ function getMadridOffset(dateStr: string): string {
 }
 
 const TIME_SLOTS = [
-  '09:00', '09:10', '09:20', '09:30', '09:40', '09:50',
-  '10:00', '10:10', '10:20', '10:30', '10:40', '10:50',
-  '11:00', '11:10', '11:20', '11:30', '11:40', '11:50',
-  '12:00', '12:10', '12:20', '12:30', '12:40', '12:50',
-  '13:00', '13:10', '13:20', '13:30', '13:40', '13:50',
-  '14:00', '14:10', '14:20', '14:30', '14:40', '14:50',
-  '15:00', '15:10', '15:20', '15:30', '15:40', '15:50',
-  '16:00', '16:10', '16:20', '16:30', '16:40', '16:50',
-  '17:00', '17:10', '17:20', '17:30', '17:40', '17:50',
-  '18:00', '18:10', '18:20', '18:30', '18:40', '18:50',
-  '19:00', '19:10', '19:20', '19:30', '19:40', '19:50',
-  '20:00', '20:10', '20:20', '20:30', '20:40', '20:50',
-];
+'09:00', '09:10', '09:20', '09:30', '09:40', '09:50',
+'10:00', '10:10', '10:20', '10:30', '10:40', '10:50',
+'11:00', '11:10', '11:20', '11:30', '11:40', '11:50',
+'12:00', '12:10', '12:20', '12:30', '12:40', '12:50',
+'13:00', '13:10', '13:20', '13:30', '13:40', '13:50',
+'14:00', '14:10', '14:20', '14:30', '14:40', '14:50',
+'15:00', '15:10', '15:20', '15:30', '15:40', '15:50',
+'16:00', '16:10', '16:20', '16:30', '16:40', '16:50',
+'17:00', '17:10', '17:20', '17:30', '17:40', '17:50',
+'18:00', '18:10', '18:20', '18:30', '18:40', '18:50',
+'19:00', '19:10', '19:20', '19:30', '19:40', '19:50',
+'20:00', '20:10', '20:20', '20:30', '20:40', '20:50'];
+
 
 const getClosingTime = (location: Location | null, date: Date | undefined): string | null => {
   if (!location || !date) return null;
@@ -61,7 +61,7 @@ const getClosingTime = (location: Location | null, date: Date | undefined): stri
     const dayIndex = date.getDay();
     const dayKeyMap: Record<number, string> = {
       0: 'sunday', 1: 'weekdays', 2: 'weekdays', 3: 'wednesday',
-      4: 'weekdays', 5: 'weekdays', 6: 'saturday',
+      4: 'weekdays', 5: 'weekdays', 6: 'saturday'
     };
     const dayKey = dayKeyMap[dayIndex];
     const dayHours = hours[dayKey];
@@ -104,16 +104,16 @@ const BookAppointment = () => {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [busySlots, setBusySlots] = useState<{ start: string; end: string }[]>([]);
+  const [busySlots, setBusySlots] = useState<{start: string;end: string;}[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [staffSchedules, setStaffSchedules] = useState<{ entry_type: string; start_time: string | null; end_time: string | null }[]>([]);
+  const [staffSchedules, setStaffSchedules] = useState<{entry_type: string;start_time: string | null;end_time: string | null;}[]>([]);
   const [monthSchedules, setMonthSchedules] = useState<Record<string, string>>({});
   const [hasActiveAppointment, setHasActiveAppointment] = useState(false);
   const [checkingAppointment, setCheckingAppointment] = useState(true);
 
   // For "first available" mode: track per-staff availability
-  const [allStaffBusySlots, setAllStaffBusySlots] = useState<Record<string, { start: string; end: string }[]>>({});
-  const [allStaffSchedules, setAllStaffSchedules] = useState<Record<string, { entry_type: string; start_time: string | null; end_time: string | null }[]>>({});
+  const [allStaffBusySlots, setAllStaffBusySlots] = useState<Record<string, {start: string;end: string;}[]>>({});
+  const [allStaffSchedules, setAllStaffSchedules] = useState<Record<string, {entry_type: string;start_time: string | null;end_time: string | null;}[]>>({});
   const [allStaffMonthSchedules, setAllStaffMonthSchedules] = useState<Record<string, Record<string, string>>>({});
   // The staff member auto-assigned when "first available" finds a slot
   const [autoAssignedStaff, setAutoAssignedStaff] = useState<StaffMember | null>(null);
@@ -125,18 +125,18 @@ const BookAppointment = () => {
     if (!user) return;
     const checkExisting = async () => {
       setCheckingAppointment(true);
-      const { data: customer } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-      if (!customer) { setCheckingAppointment(false); return; }
-      const { data } = await supabase
-        .from('appointments')
-        .select('id')
-        .eq('customer_id', customer.id)
-        .in('status', ['CONFIRMED', 'RESCHEDULED'])
-        .limit(1);
+      const { data: customer } = await supabase.
+      from('customers').
+      select('id').
+      eq('user_id', user.id).
+      single();
+      if (!customer) {setCheckingAppointment(false);return;}
+      const { data } = await supabase.
+      from('appointments').
+      select('id').
+      eq('customer_id', customer.id).
+      in('status', ['CONFIRMED', 'RESCHEDULED']).
+      limit(1);
       setHasActiveAppointment((data?.length || 0) > 0);
       setCheckingAppointment(false);
     };
@@ -147,53 +147,53 @@ const BookAppointment = () => {
   const totals = useMemo(() => {
     const duration = selectedServices.reduce((sum, s) => sum + (s.duration_min || 0), 0);
     const points = selectedServices.reduce((sum, s) => sum + calcPoints(s), 0);
-    const phasedSvcs = selectedServices.filter(s => s.application_min && s.exposure_min);
+    const phasedSvcs = selectedServices.filter((s) => s.application_min && s.exposure_min);
     const hasPhases = phasedSvcs.length > 0;
     if (hasPhases) {
       const totalApp = phasedSvcs.reduce((sum, s) => sum + (s.application_min || 0), 0);
-      const maxExposure = Math.max(...phasedSvcs.map(s => s.exposure_min || 0));
+      const maxExposure = Math.max(...phasedSvcs.map((s) => s.exposure_min || 0));
       const totalPost = selectedServices.reduce((sum, s) => {
         if (s.post_exposure_min) return sum + s.post_exposure_min;
         if (!s.application_min) return sum + (s.duration_min || 0);
         return sum;
       }, 0);
-      const nonPhasedDur = selectedServices
-        .filter(s => !s.application_min || !s.exposure_min)
-        .filter(s => !s.post_exposure_min)
-        .reduce((sum, s) => sum + (s.duration_min || 0), 0);
+      const nonPhasedDur = selectedServices.
+      filter((s) => !s.application_min || !s.exposure_min).
+      filter((s) => !s.post_exposure_min).
+      reduce((sum, s) => sum + (s.duration_min || 0), 0);
       return { duration, points, hasPhases: true, applicationMin: totalApp + nonPhasedDur, exposureMin: maxExposure, postMin: totalPost };
     }
     return { duration, points, hasPhases: false, applicationMin: 0, exposureMin: 0, postMin: 0 };
   }, [selectedServices]);
 
   useEffect(() => {
-    supabase.from('locations').select('*').then(({ data }) => { if (data) setLocations(data); });
+    supabase.from('locations').select('*').then(({ data }) => {if (data) setLocations(data);});
   }, []);
 
   // Load staff & services when section is selected (needed for services step which now comes before staff)
   useEffect(() => {
     if (selectedLocation && selectedSection) {
-      supabase
-        .from('staff_members')
-        .select('*')
-        .eq('location_id', selectedLocation.id)
-        .eq('section', selectedSection)
-        .eq('active', true)
-        .then(({ data }) => { if (data) setStaffMembers(data); });
+      supabase.
+      from('staff_members').
+      select('*').
+      eq('location_id', selectedLocation.id).
+      eq('section', selectedSection).
+      eq('active', true).
+      then(({ data }) => {if (data) setStaffMembers(data);});
     }
   }, [selectedLocation, selectedSection]);
 
   useEffect(() => {
     if (selectedLocation && selectedSection) {
       Promise.all([
-        supabase
-          .from('services')
-          .select('*')
-          .eq('active', true)
-          .eq('section', selectedSection)
-          .or(`location_id.eq.${selectedLocation.id},location_id.is.null`),
-        supabase.from('service_categories').select('*').order('sort_order'),
-      ]).then(([svcRes, catRes]) => {
+      supabase.
+      from('services').
+      select('*').
+      eq('active', true).
+      eq('section', selectedSection).
+      or(`location_id.eq.${selectedLocation.id},location_id.is.null`),
+      supabase.from('service_categories').select('*').order('sort_order')]
+      ).then(([svcRes, catRes]) => {
         if (svcRes.data) setServices(svcRes.data);
         if (catRes.data) setCategories(catRes.data);
       });
@@ -207,80 +207,80 @@ const BookAppointment = () => {
       const now = new Date();
       const startDate = formatLocalDate(now);
       const endDate = formatLocalDate(new Date(now.getFullYear(), now.getMonth() + 2, 0));
-      const staffIds = staffMembers.map(s => s.id);
-      supabase
-        .from('employee_schedules')
-        .select('staff_member_id, date, entry_type')
-        .in('staff_member_id', staffIds)
-        .gte('date', startDate)
-        .lte('date', endDate)
-        .then(({ data }) => {
-          const perStaff: Record<string, Record<string, string>> = {};
-          // Combined: a date is available if ANY staff has availability
-          const combined: Record<string, string> = {};
-          data?.forEach(e => {
-            if (!perStaff[e.staff_member_id]) perStaff[e.staff_member_id] = {};
-            perStaff[e.staff_member_id][e.date] = e.entry_type;
-            if (e.entry_type === 'availability') combined[e.date] = 'availability';
-          });
-          setAllStaffMonthSchedules(perStaff);
-          setMonthSchedules(combined);
+      const staffIds = staffMembers.map((s) => s.id);
+      supabase.
+      from('employee_schedules').
+      select('staff_member_id, date, entry_type').
+      in('staff_member_id', staffIds).
+      gte('date', startDate).
+      lte('date', endDate).
+      then(({ data }) => {
+        const perStaff: Record<string, Record<string, string>> = {};
+        // Combined: a date is available if ANY staff has availability
+        const combined: Record<string, string> = {};
+        data?.forEach((e) => {
+          if (!perStaff[e.staff_member_id]) perStaff[e.staff_member_id] = {};
+          perStaff[e.staff_member_id][e.date] = e.entry_type;
+          if (e.entry_type === 'availability') combined[e.date] = 'availability';
         });
+        setAllStaffMonthSchedules(perStaff);
+        setMonthSchedules(combined);
+      });
       return;
     }
 
-    if (!selectedStaff) { setMonthSchedules({}); return; }
+    if (!selectedStaff) {setMonthSchedules({});return;}
     const now = new Date();
     const startDate = formatLocalDate(now);
     const endDate = formatLocalDate(new Date(now.getFullYear(), now.getMonth() + 2, 0));
-    supabase
-      .from('employee_schedules')
-      .select('date, entry_type')
-      .eq('staff_member_id', selectedStaff.id)
-      .gte('date', startDate)
-      .lte('date', endDate)
-      .then(({ data }) => {
-        const map: Record<string, string> = {};
-        data?.forEach(e => { map[e.date] = e.entry_type; });
-        setMonthSchedules(map);
-      });
+    supabase.
+    from('employee_schedules').
+    select('date, entry_type').
+    eq('staff_member_id', selectedStaff.id).
+    gte('date', startDate).
+    lte('date', endDate).
+    then(({ data }) => {
+      const map: Record<string, string> = {};
+      data?.forEach((e) => {map[e.date] = e.entry_type;});
+      setMonthSchedules(map);
+    });
   }, [selectedStaff, isFirstAvailable, staffMembers]);
 
   // Fetch staff schedule(s) for selected date
   useEffect(() => {
-    if (!selectedDate) { setStaffSchedules([]); setAllStaffSchedules({}); return; }
+    if (!selectedDate) {setStaffSchedules([]);setAllStaffSchedules({});return;}
     const dateStr = formatLocalDate(selectedDate);
 
     if (isFirstAvailable && staffMembers.length > 0) {
-      const staffIds = staffMembers.map(s => s.id);
-      supabase
-        .from('employee_schedules')
-        .select('staff_member_id, entry_type, start_time, end_time')
-        .in('staff_member_id', staffIds)
-        .eq('date', dateStr)
-        .then(({ data }) => {
-          const perStaff: Record<string, { entry_type: string; start_time: string | null; end_time: string | null }[]> = {};
-          data?.forEach(e => {
-            if (!perStaff[e.staff_member_id]) perStaff[e.staff_member_id] = [];
-            perStaff[e.staff_member_id].push({ entry_type: e.entry_type, start_time: e.start_time, end_time: e.end_time });
-          });
-          setAllStaffSchedules(perStaff);
+      const staffIds = staffMembers.map((s) => s.id);
+      supabase.
+      from('employee_schedules').
+      select('staff_member_id, entry_type, start_time, end_time').
+      in('staff_member_id', staffIds).
+      eq('date', dateStr).
+      then(({ data }) => {
+        const perStaff: Record<string, {entry_type: string;start_time: string | null;end_time: string | null;}[]> = {};
+        data?.forEach((e) => {
+          if (!perStaff[e.staff_member_id]) perStaff[e.staff_member_id] = [];
+          perStaff[e.staff_member_id].push({ entry_type: e.entry_type, start_time: e.start_time, end_time: e.end_time });
         });
+        setAllStaffSchedules(perStaff);
+      });
       return;
     }
 
-    if (!selectedStaff) { setStaffSchedules([]); return; }
-    supabase
-      .from('employee_schedules')
-      .select('entry_type, start_time, end_time')
-      .eq('staff_member_id', selectedStaff.id)
-      .eq('date', dateStr)
-      .then(({ data }) => setStaffSchedules(data || []));
+    if (!selectedStaff) {setStaffSchedules([]);return;}
+    supabase.
+    from('employee_schedules').
+    select('entry_type, start_time, end_time').
+    eq('staff_member_id', selectedStaff.id).
+    eq('date', dateStr).
+    then(({ data }) => setStaffSchedules(data || []));
   }, [selectedDate, selectedStaff, isFirstAvailable, staffMembers]);
 
   // Fetch busy slots when date or staff changes
   useEffect(() => {
-    if (!selectedDate) { setBusySlots([]); setAllStaffBusySlots({}); return; }
+    if (!selectedDate) {setBusySlots([]);setAllStaffBusySlots({});return;}
 
     if (isFirstAvailable && staffMembers.length > 0) {
       const dateStr = formatLocalDate(selectedDate);
@@ -288,28 +288,28 @@ const BookAppointment = () => {
       Promise.all(
         staffMembers.map(async (member) => {
           const { data, error } = await supabase.functions.invoke('gcal-sync-appointments', {
-            body: { action: 'check-availability', staff_member_id: member.id, date: dateStr },
+            body: { action: 'check-availability', staff_member_id: member.id, date: dateStr }
           });
-          return { staffId: member.id, slots: error ? [] : (data?.busy_slots || []) };
+          return { staffId: member.id, slots: error ? [] : data?.busy_slots || [] };
         })
-      ).then(results => {
-        const map: Record<string, { start: string; end: string }[]> = {};
-        results.forEach(r => { map[r.staffId] = r.slots; });
+      ).then((results) => {
+        const map: Record<string, {start: string;end: string;}[]> = {};
+        results.forEach((r) => {map[r.staffId] = r.slots;});
         setAllStaffBusySlots(map);
         setLoadingSlots(false);
       });
       return;
     }
 
-    if (!selectedStaff) { setBusySlots([]); return; }
+    if (!selectedStaff) {setBusySlots([]);return;}
     const fetchBusySlots = async () => {
       setLoadingSlots(true);
       try {
         const dateStr = formatLocalDate(selectedDate);
         const { data, error } = await supabase.functions.invoke('gcal-sync-appointments', {
-          body: { action: 'check-availability', staff_member_id: selectedStaff.id, date: dateStr },
+          body: { action: 'check-availability', staff_member_id: selectedStaff.id, date: dateStr }
         });
-        if (error) { setBusySlots([]); } else { setBusySlots(data?.busy_slots || []); }
+        if (error) {setBusySlots([]);} else {setBusySlots(data?.busy_slots || []);}
       } catch (err) {
         console.error('Error fetching busy slots:', err);
       } finally {
@@ -322,9 +322,9 @@ const BookAppointment = () => {
   const closingTime = useMemo(() => getClosingTime(selectedLocation, selectedDate), [selectedLocation, selectedDate]);
 
   // Check if a time slot is available for a specific staff member
-  const isSlotAvailableForStaff = (slot: string, staffId: string, schedules: { entry_type: string; start_time: string | null; end_time: string | null }[], busy: { start: string; end: string }[]): boolean => {
+  const isSlotAvailableForStaff = (slot: string, staffId: string, schedules: {entry_type: string;start_time: string | null;end_time: string | null;}[], busy: {start: string;end: string;}[]): boolean => {
     if (!selectedDate) return true;
-    const availBlocks = schedules.filter(s => s.entry_type === 'availability');
+    const availBlocks = schedules.filter((s) => s.entry_type === 'availability');
     if (availBlocks.length === 0) return false;
 
     const [sh, sm] = slot.split(':').map(Number);
@@ -332,7 +332,7 @@ const BookAppointment = () => {
     const totalDur = totals.duration || 30;
     const endMinutes = slotMinutes + totalDur;
 
-    const fitsAnyBlock = availBlocks.some(block => {
+    const fitsAnyBlock = availBlocks.some((block) => {
       if (!block.start_time || !block.end_time) return false;
       const [bsh, bsm] = block.start_time.substring(0, 5).split(':').map(Number);
       const [beh, bem] = block.end_time.substring(0, 5).split(':').map(Number);
@@ -354,7 +354,7 @@ const BookAppointment = () => {
 
     if (busy.length === 0) return true;
 
-    const newWindows: { start: Date; end: Date }[] = [];
+    const newWindows: {start: Date;end: Date;}[] = [];
     if (totals.hasPhases) {
       const appEnd = new Date(slotStart.getTime() + totals.applicationMin * 60000);
       newWindows.push({ start: slotStart, end: appEnd });
@@ -367,12 +367,12 @@ const BookAppointment = () => {
       newWindows.push({ start: slotStart, end: fullEnd });
     }
 
-    return !newWindows.some(win =>
-      busy.some(b => {
-        const busyStart = new Date(b.start);
-        const busyEnd = new Date(b.end);
-        return win.start < busyEnd && win.end > busyStart;
-      })
+    return !newWindows.some((win) =>
+    busy.some((b) => {
+      const busyStart = new Date(b.start);
+      const busyEnd = new Date(b.end);
+      return win.start < busyEnd && win.end > busyStart;
+    })
     );
   };
 
@@ -400,7 +400,7 @@ const BookAppointment = () => {
 
   // Group services by category
   const servicesByCategory = useMemo(() => {
-    const map = new Map<string, { category: ServiceCategory; services: Service[] }>();
+    const map = new Map<string, {category: ServiceCategory;services: Service[];}>();
     categories.forEach((cat) => {
       const catServices = services.filter((s) => s.category_id === cat.id);
       if (catServices.length > 0) map.set(cat.id, { category: cat, services: catServices });
@@ -420,11 +420,11 @@ const BookAppointment = () => {
 
     setLoading(true);
     try {
-      const { data: customer } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+      const { data: customer } = await supabase.
+      from('customers').
+      select('id').
+      eq('user_id', user.id).
+      single();
       if (!customer) throw new Error('Customer not found');
 
       const dateStr = formatLocalDate(selectedDate);
@@ -435,11 +435,11 @@ const BookAppointment = () => {
 
       // Final availability re-check
       const { data: availabilityData, error: availabilityError } = await supabase.functions.invoke('gcal-sync-appointments', {
-        body: { action: 'check-availability', staff_member_id: finalStaff.id, date: dateStr },
+        body: { action: 'check-availability', staff_member_id: finalStaff.id, date: dateStr }
       });
       if (availabilityError) throw new Error('No se pudo comprobar disponibilidad. Inténtalo de nuevo.');
 
-      const newWindows: { start: Date; end: Date }[] = [];
+      const newWindows: {start: Date;end: Date;}[] = [];
       if (totals.hasPhases) {
         const appEnd = new Date(startAt.getTime() + totals.applicationMin * 60000);
         newWindows.push({ start: startAt, end: appEnd });
@@ -452,12 +452,12 @@ const BookAppointment = () => {
         newWindows.push({ start: startAt, end: endAt });
       }
 
-      const hasOverlap = newWindows.some(win =>
-        (availabilityData?.busy_slots || []).some((busy: { start: string; end: string }) => {
-          const busyStart = new Date(busy.start);
-          const busyEnd = new Date(busy.end);
-          return win.start < busyEnd && win.end > busyStart;
-        })
+      const hasOverlap = newWindows.some((win) =>
+      (availabilityData?.busy_slots || []).some((busy: {start: string;end: string;}) => {
+        const busyStart = new Date(busy.start);
+        const busyEnd = new Date(busy.end);
+        return win.start < busyEnd && win.end > busyStart;
+      })
       );
 
       if (hasOverlap) {
@@ -466,21 +466,21 @@ const BookAppointment = () => {
         return;
       }
 
-      const { data: appointment, error } = await supabase
-        .from('appointments')
-        .insert({
-          customer_id: customer.id,
-          location_id: selectedLocation.id,
-          staff_member_id: finalStaff.id,
-          start_at: startAt.toISOString(),
-          end_at: endAt.toISOString(),
-          customer_notes: notes || null,
-          estimated_total_price: null,
-          estimated_total_duration: bookingDuration,
-          estimated_pending_points: totals.points || null,
-        })
-        .select()
-        .single();
+      const { data: appointment, error } = await supabase.
+      from('appointments').
+      insert({
+        customer_id: customer.id,
+        location_id: selectedLocation.id,
+        staff_member_id: finalStaff.id,
+        start_at: startAt.toISOString(),
+        end_at: endAt.toISOString(),
+        customer_notes: notes || null,
+        estimated_total_price: null,
+        estimated_total_duration: bookingDuration,
+        estimated_pending_points: totals.points || null
+      }).
+      select().
+      single();
 
       if (error) throw error;
 
@@ -495,14 +495,14 @@ const BookAppointment = () => {
             duration_minutes_snapshot: s.duration_min,
             points_snapshot: calcPoints(s),
             quantity: 1,
-            is_completed: false,
+            is_completed: false
           }))
         );
       }
 
       if (appointment?.staff_member_id) {
         supabase.functions.invoke('gcal-sync-appointments', {
-          body: { action: 'create', appointment_id: appointment.id },
+          body: { action: 'create', appointment_id: appointment.id }
         }).catch((err) => console.warn('GCal sync failed (non-blocking):', err));
       }
 
@@ -516,32 +516,32 @@ const BookAppointment = () => {
 
   const canNext = () => {
     switch (step) {
-      case 'location': return !!selectedLocation;
-      case 'section': return !!selectedSection;
-      case 'services': return selectedServices.length > 0;
-      case 'staff': return !!selectedStaff || isFirstAvailable;
-      case 'datetime': return !!selectedDate && !!selectedTime;
-      case 'confirm': return true;
+      case 'location':return !!selectedLocation;
+      case 'section':return !!selectedSection;
+      case 'services':return selectedServices.length > 0;
+      case 'staff':return !!selectedStaff || isFirstAvailable;
+      case 'datetime':return !!selectedDate && !!selectedTime;
+      case 'confirm':return true;
     }
   };
 
-  const goNext = () => { const i = STEPS.indexOf(step); if (i < STEPS.length - 1) setStep(STEPS[i + 1]); };
+  const goNext = () => {const i = STEPS.indexOf(step);if (i < STEPS.length - 1) setStep(STEPS[i + 1]);};
   const goPrev = () => {
     const i = STEPS.indexOf(step);
     if (i > 0) {
-      if (step === 'services') { setSelectedServices([]); }
-      if (step === 'staff') { setSelectedStaff(null); setIsFirstAvailable(false); setAutoAssignedStaff(null); }
-      if (step === 'section') { setSelectedSection(null); setSelectedStaff(null); setIsFirstAvailable(false); setSelectedServices([]); }
-      if (step === 'datetime') { setSelectedDate(undefined); setSelectedTime(null); setSelectedHour(null); setSelectedMinute(null); setAutoAssignedStaff(null); }
+      if (step === 'services') {setSelectedServices([]);}
+      if (step === 'staff') {setSelectedStaff(null);setIsFirstAvailable(false);setAutoAssignedStaff(null);}
+      if (step === 'section') {setSelectedSection(null);setSelectedStaff(null);setIsFirstAvailable(false);setSelectedServices([]);}
+      if (step === 'datetime') {setSelectedDate(undefined);setSelectedTime(null);setSelectedHour(null);setSelectedMinute(null);setAutoAssignedStaff(null);}
       setStep(STEPS[i - 1]);
     }
   };
 
   const toggleService = (service: Service) => {
     setSelectedServices((prev) =>
-      prev.find((s) => s.id === service.id)
-        ? prev.filter((s) => s.id !== service.id)
-        : [...prev, service]
+    prev.find((s) => s.id === service.id) ?
+    prev.filter((s) => s.id !== service.id) :
+    [...prev, service]
     );
   };
 
@@ -588,8 +588,8 @@ const BookAppointment = () => {
           {t('book.goToAppointments')}
         </Button>
         <BottomNav />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -621,16 +621,16 @@ const BookAppointment = () => {
 
       {/* Header */}
       <div className="px-6 pt-12 pb-4">
-        <button onClick={() => (stepIndex > 0 ? goPrev() : navigate(-1))} className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+        <button onClick={() => stepIndex > 0 ? goPrev() : navigate(-1)} className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft size={18} />
           <span className="text-sm">{stepIndex > 0 ? t('book.previous') : t('general.back')}</span>
         </button>
         <h1 className="font-display text-3xl text-foreground">{t('book.title')}</h1>
         <p className="text-xs text-muted-foreground mt-1">{t('book.step')} {stepIndex + 1} {t('book.of')} {STEPS.length}</p>
         <div className="mt-3 flex gap-1.5">
-          {STEPS.map((_, i) => (
-            <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= stepIndex ? 'gradient-gold' : 'bg-muted'}`} />
-          ))}
+          {STEPS.map((_, i) =>
+          <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= stepIndex ? 'gradient-gold' : 'bg-muted'}`} />
+          )}
         </div>
       </div>
 
@@ -638,11 +638,11 @@ const BookAppointment = () => {
         <motion.div key={step} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.2 }} className="px-6 py-4">
 
           {/* Step 1: Location */}
-          {step === 'location' && (
-            <div className="space-y-3">
+          {step === 'location' &&
+          <div className="space-y-3">
               <h2 className="text-lg font-display text-foreground mb-4">{t('book.selectLocation')}</h2>
-              {locations.map((loc) => (
-                <button key={loc.id} onClick={() => setSelectedLocation(loc)} className={`w-full rounded-xl border p-4 text-left transition-all ${selectedLocation?.id === loc.id ? 'border-gold bg-gold/5' : 'border-border bg-card hover:border-gold/20'}`}>
+              {locations.map((loc) =>
+            <button key={loc.id} onClick={() => setSelectedLocation(loc)} className={`w-full rounded-xl border p-4 text-left transition-all ${selectedLocation?.id === loc.id ? 'border-gold bg-gold/5' : 'border-border bg-card hover:border-gold/20'}`}>
                   <div className="flex items-center gap-3">
                     <MapPin className={`h-5 w-5 ${selectedLocation?.id === loc.id ? 'text-gold' : 'text-muted-foreground'}`} />
                     <div>
@@ -652,16 +652,16 @@ const BookAppointment = () => {
                     {selectedLocation?.id === loc.id && <Check className="ml-auto h-4 w-4 text-gold" />}
                   </div>
                 </button>
-              ))}
+            )}
             </div>
-          )}
+          }
 
           {/* Step 2: Section */}
-          {step === 'section' && (
-            <div className="space-y-3">
+          {step === 'section' &&
+          <div className="space-y-3">
               <h2 className="text-lg font-display text-foreground mb-4">{t('book.selectSection')}</h2>
-              {(['CABALLEROS', 'SENORAS', 'ESTETICA'] as SalonSection[]).map((section) => (
-                <button key={section} onClick={() => handleSectionSelect(section)} className={`w-full rounded-xl border p-5 text-left transition-all ${selectedSection === section ? 'border-gold bg-gold/5' : 'border-border bg-card hover:border-gold/20'}`}>
+              {(['CABALLEROS', 'SENORAS', 'ESTETICA'] as SalonSection[]).map((section) =>
+            <button key={section} onClick={() => handleSectionSelect(section)} className={`w-full rounded-xl border p-5 text-left transition-all ${selectedSection === section ? 'border-gold bg-gold/5' : 'border-border bg-card hover:border-gold/20'}`}>
                   <div className="flex items-center gap-4">
                     <div className={`flex h-12 w-12 items-center justify-center rounded-full ${selectedSection === section ? 'gradient-gold' : 'bg-muted'}`}>
                       <Scissors className={`h-5 w-5 ${selectedSection === section ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
@@ -677,34 +677,34 @@ const BookAppointment = () => {
                     {selectedSection === section && <Check className="ml-auto h-4 w-4 text-gold" />}
                   </div>
                 </button>
-              ))}
+            )}
             </div>
-          )}
+          }
 
           {/* Step 3: Services (moved before staff) */}
-          {step === 'services' && (
-            <div className="space-y-4">
+          {step === 'services' &&
+          <div className="space-y-4">
               <h2 className="text-lg font-display text-foreground mb-2">{t('book.selectServices')}</h2>
-              {servicesByCategory.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t('book.noServices')}</p>
-              ) : (
-                servicesByCategory.map(({ category, services: catServices }) => (
-                  <div key={category.id}>
+              {servicesByCategory.length === 0 ?
+            <p className="text-sm text-muted-foreground">{t('book.noServices')}</p> :
+
+            servicesByCategory.map(({ category, services: catServices }) =>
+            <div key={category.id}>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{category.name}</p>
                     <div className="space-y-2">
                       {catServices.map((svc) => {
-                        const isSelected = !!selectedServices.find((s) => s.id === svc.id);
-                        return (
-                          <button key={svc.id} onClick={() => toggleService(svc)} className={`w-full rounded-xl border p-3 text-left transition-all ${isSelected ? 'border-gold bg-gold/5' : 'border-border bg-card hover:border-gold/20'}`}>
+                  const isSelected = !!selectedServices.find((s) => s.id === svc.id);
+                  return (
+                    <button key={svc.id} onClick={() => toggleService(svc)} className={`w-full rounded-xl border p-3 text-left transition-all ${isSelected ? 'border-gold bg-gold/5' : 'border-border bg-card hover:border-gold/20'}`}>
                             <div className="flex items-start justify-between">
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-foreground">{svc.name}</p>
                                 <div className="flex items-center gap-3 mt-1">
-                                  {svc.duration_min && (
-                                    <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                                  {svc.duration_min &&
+                            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                                       <Clock size={10} /> {svc.duration_min} min
                                     </span>
-                                  )}
+                            }
                                   <span className="flex items-center gap-1 text-[11px] text-gold">
                                     <Star size={10} /> {calcPoints(svc)} pts
                                   </span>
@@ -714,16 +714,16 @@ const BookAppointment = () => {
                                 {isSelected && <Check className="h-4 w-4 text-gold" />}
                               </div>
                             </div>
-                          </button>
-                        );
-                      })}
+                          </button>);
+
+                })}
                     </div>
                   </div>
-                ))
-              )}
+            )
+            }
 
-              {selectedServices.length > 0 && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-gold/20 bg-gold/5 p-4 space-y-2">
+              {selectedServices.length > 0 &&
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-gold/20 bg-gold/5 p-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground flex items-center gap-1.5"><Clock size={12} /> {t('book.totalDuration')}</span>
                     <span className="text-foreground font-medium">{totals.duration} min</span>
@@ -734,115 +734,115 @@ const BookAppointment = () => {
                   </div>
                   <p className="text-[10px] text-muted-foreground">{t('book.pendingPointsNote')}</p>
                 </motion.div>
-              )}
+            }
             </div>
-          )}
+          }
 
           {/* Step 4: Staff (with "first available" option) */}
-          {step === 'staff' && (
-            <div className="space-y-3">
+          {step === 'staff' &&
+          <div className="space-y-3">
               <h2 className="text-lg font-display text-foreground mb-4">{t('book.selectStaff')}</h2>
 
               {/* First available option */}
               <button
-                onClick={() => handleStaffSelect(null, true)}
-                className={`w-full rounded-xl border p-4 text-left transition-all ${isFirstAvailable ? 'border-gold bg-gold/5' : 'border-border bg-card hover:border-gold/20'}`}
-              >
+              onClick={() => handleStaffSelect(null, true)}
+              className={`w-full rounded-xl border p-4 text-left transition-all ${isFirstAvailable ? 'border-gold bg-gold/5' : 'border-border bg-card hover:border-gold/20'}`}>
+              
                 <div className="flex items-center gap-3">
                   <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isFirstAvailable ? 'gradient-gold' : 'bg-muted'}`}>
                     <Zap className={`h-5 w-5 ${isFirstAvailable ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">{t('book.firstAvailable') || 'Primer disponible'}</p>
-                    <p className="text-[11px] text-muted-foreground">{t('book.firstAvailableDesc') || 'La hora más pronta con cualquier profesional'}</p>
+                    
                   </div>
                   {isFirstAvailable && <Check className="ml-auto h-4 w-4 text-gold" />}
                 </div>
               </button>
 
-              {staffMembers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t('book.noStaff')}</p>
-              ) : staffMembers.map((member) => (
-                <button key={member.id} onClick={() => handleStaffSelect(member, false)} className={`w-full rounded-xl border p-4 text-left transition-all ${!isFirstAvailable && selectedStaff?.id === member.id ? 'border-gold bg-gold/5' : 'border-border bg-card hover:border-gold/20'}`}>
+              {staffMembers.length === 0 ?
+            <p className="text-sm text-muted-foreground">{t('book.noStaff')}</p> :
+            staffMembers.map((member) =>
+            <button key={member.id} onClick={() => handleStaffSelect(member, false)} className={`w-full rounded-xl border p-4 text-left transition-all ${!isFirstAvailable && selectedStaff?.id === member.id ? 'border-gold bg-gold/5' : 'border-border bg-card hover:border-gold/20'}`}>
                   <div className="flex items-center gap-3">
                     <div className={`flex h-10 w-10 items-center justify-center rounded-full ${!isFirstAvailable && selectedStaff?.id === member.id ? 'gradient-gold' : 'bg-muted'}`}>
-                      {member.avatar_url ? (
-                        <img src={member.avatar_url} alt={member.name} className="h-10 w-10 rounded-full object-cover" />
-                      ) : (
-                        <User className={`h-5 w-5 ${!isFirstAvailable && selectedStaff?.id === member.id ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
-                      )}
+                      {member.avatar_url ?
+                  <img src={member.avatar_url} alt={member.name} className="h-10 w-10 rounded-full object-cover" /> :
+
+                  <User className={`h-5 w-5 ${!isFirstAvailable && selectedStaff?.id === member.id ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                  }
                     </div>
                     <p className="text-sm font-medium text-foreground">{member.name}</p>
                     {!isFirstAvailable && selectedStaff?.id === member.id && <Check className="ml-auto h-4 w-4 text-gold" />}
                   </div>
                 </button>
-              ))}
+            )}
             </div>
-          )}
+          }
 
           {/* Step 5: Date & Time */}
-          {step === 'datetime' && (
-            <div className="space-y-4">
+          {step === 'datetime' &&
+          <div className="space-y-4">
               <h2 className="text-lg font-display text-foreground mb-2">{t('book.selectDate')}</h2>
               <div className="flex justify-center rounded-xl border border-border bg-card p-2">
                 <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(d) => { setSelectedDate(d); setSelectedTime(null); setSelectedHour(null); setSelectedMinute(null); setAutoAssignedStaff(null); }}
-                  disabled={(date) => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    if (date < today || date.getDay() === 0) return true;
-                    const ds = formatLocalDate(date);
-                    if (isFirstAvailable) {
-                      // A day is available if ANY staff has availability that day
-                      return monthSchedules[ds] !== 'availability';
-                    }
-                    if (selectedStaff) {
-                      return monthSchedules[ds] !== 'availability';
-                    }
-                    return false;
-                  }}
-                  className="text-foreground pointer-events-auto"
-                />
+                mode="single"
+                selected={selectedDate}
+                onSelect={(d) => {setSelectedDate(d);setSelectedTime(null);setSelectedHour(null);setSelectedMinute(null);setAutoAssignedStaff(null);}}
+                disabled={(date) => {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  if (date < today || date.getDay() === 0) return true;
+                  const ds = formatLocalDate(date);
+                  if (isFirstAvailable) {
+                    // A day is available if ANY staff has availability that day
+                    return monthSchedules[ds] !== 'availability';
+                  }
+                  if (selectedStaff) {
+                    return monthSchedules[ds] !== 'availability';
+                  }
+                  return false;
+                }}
+                className="text-foreground pointer-events-auto" />
+              
               </div>
-              {selectedDate && (
-                <div className="space-y-3">
-                  {loadingSlots && (
-                    <p className="text-xs text-muted-foreground animate-pulse text-center">Comprobando disponibilidad...</p>
-                  )}
+              {selectedDate &&
+            <div className="space-y-3">
+                  {loadingSlots &&
+              <p className="text-xs text-muted-foreground animate-pulse text-center">Comprobando disponibilidad...</p>
+              }
                   {!loadingSlots && (() => {
-                    const checkFn = isFirstAvailable ? isSlotAvailableFirstAvailable : isSlotAvailable;
-                    const availableSlots = TIME_SLOTS.filter(s => checkFn(s));
-                    if (availableSlots.length === 0) {
-                      return <p className="text-sm text-muted-foreground text-center py-4">{t('book.noSlots')}</p>;
-                    }
-                    const availableHours = [...new Set(availableSlots.map(s => s.substring(0, 2)))];
-                    const availableMinutes = selectedHour
-                      ? availableSlots.filter(s => s.substring(0, 2) === selectedHour).map(s => s.substring(3, 5))
-                      : [];
+                const checkFn = isFirstAvailable ? isSlotAvailableFirstAvailable : isSlotAvailable;
+                const availableSlots = TIME_SLOTS.filter((s) => checkFn(s));
+                if (availableSlots.length === 0) {
+                  return <p className="text-sm text-muted-foreground text-center py-4">{t('book.noSlots')}</p>;
+                }
+                const availableHours = [...new Set(availableSlots.map((s) => s.substring(0, 2)))];
+                const availableMinutes = selectedHour ?
+                availableSlots.filter((s) => s.substring(0, 2) === selectedHour).map((s) => s.substring(3, 5)) :
+                [];
 
-                    return (
-                      <div className="space-y-3">
+                return (
+                  <div className="space-y-3">
                         <div className="flex gap-3">
                           <div className="flex-1">
                             <label className="text-xs text-muted-foreground mb-1 block">Hora</label>
                             <Select
-                              value={selectedHour || ''}
-                              onValueChange={(v) => {
-                                setSelectedHour(v);
-                                setSelectedMinute(null);
-                                setSelectedTime(null);
-                                setAutoAssignedStaff(null);
-                              }}
-                            >
+                          value={selectedHour || ''}
+                          onValueChange={(v) => {
+                            setSelectedHour(v);
+                            setSelectedMinute(null);
+                            setSelectedTime(null);
+                            setAutoAssignedStaff(null);
+                          }}>
+                          
                               <SelectTrigger className="w-full border-border bg-card text-foreground">
                                 <SelectValue placeholder="HH" />
                               </SelectTrigger>
                               <SelectContent className="max-h-64">
-                                {availableHours.map(h => (
-                                  <SelectItem key={h} value={h}>{parseInt(h, 10)}</SelectItem>
-                                ))}
+                                {availableHours.map((h) =>
+                            <SelectItem key={h} value={h}>{parseInt(h, 10)}</SelectItem>
+                            )}
                               </SelectContent>
                             </Select>
                           </div>
@@ -850,33 +850,33 @@ const BookAppointment = () => {
                           <div className="flex-1">
                             <label className="text-xs text-muted-foreground mb-1 block">Min</label>
                             <Select
-                              value={selectedMinute || ''}
-                              disabled={!selectedHour}
-                              onValueChange={(v) => {
-                                setSelectedMinute(v);
-                                const time = `${selectedHour}:${v}`;
-                                if (isFirstAvailable) {
-                                  handleFirstAvailableTimeSelect(time);
-                                } else {
-                                  setSelectedTime(time);
-                                }
-                              }}
-                            >
+                          value={selectedMinute || ''}
+                          disabled={!selectedHour}
+                          onValueChange={(v) => {
+                            setSelectedMinute(v);
+                            const time = `${selectedHour}:${v}`;
+                            if (isFirstAvailable) {
+                              handleFirstAvailableTimeSelect(time);
+                            } else {
+                              setSelectedTime(time);
+                            }
+                          }}>
+                          
                               <SelectTrigger className="w-full border-border bg-card text-foreground">
                                 <SelectValue placeholder="MM" />
                               </SelectTrigger>
                               <SelectContent>
-                                {availableMinutes.map(m => (
-                                  <SelectItem key={m} value={m}>{m}</SelectItem>
-                                ))}
+                                {availableMinutes.map((m) =>
+                            <SelectItem key={m} value={m}>{m}</SelectItem>
+                            )}
                               </SelectContent>
                             </Select>
                           </div>
                         </div>
 
                         {/* Show auto-assigned staff when first available */}
-                        {isFirstAvailable && autoAssignedStaff && (
-                          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-gold/20 bg-gold/5 p-3">
+                        {isFirstAvailable && autoAssignedStaff &&
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-gold/20 bg-gold/5 p-3">
                             <div className="flex items-center gap-3">
                               <div className="flex h-8 w-8 items-center justify-center rounded-full gradient-gold">
                                 <User className="h-4 w-4 text-primary-foreground" />
@@ -887,18 +887,18 @@ const BookAppointment = () => {
                               </div>
                             </div>
                           </motion.div>
-                        )}
-                      </div>
-                    );
-                  })()}
+                    }
+                      </div>);
+
+              })()}
                 </div>
-              )}
+            }
             </div>
-          )}
+          }
 
           {/* Step 6: Confirm */}
-          {step === 'confirm' && (
-            <div className="space-y-4">
+          {step === 'confirm' &&
+          <div className="space-y-4">
               <h2 className="text-lg font-display text-foreground mb-4">{t('book.confirm')}</h2>
 
               <div className="rounded-xl border border-border bg-card p-4 space-y-3">
@@ -938,8 +938,8 @@ const BookAppointment = () => {
               <div className="rounded-xl border border-border bg-card p-4">
                 <p className="text-xs text-muted-foreground mb-2">{t('appointments.services')}</p>
                 <div className="space-y-2">
-                  {selectedServices.map((s) => (
-                    <div key={s.id} className="flex items-center justify-between">
+                  {selectedServices.map((s) =>
+                <div key={s.id} className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-foreground">{s.name}</p>
                         <p className="text-[10px] text-muted-foreground">{s.duration_min ? `${s.duration_min} min` : ''}</p>
@@ -948,7 +948,7 @@ const BookAppointment = () => {
                         <p className="text-[10px] text-gold">{calcPoints(s)} pts</p>
                       </div>
                     </div>
-                  ))}
+                )}
                 </div>
                 <div className="border-t border-border mt-3 pt-3 space-y-1">
                   <div className="flex justify-between text-sm font-medium">
@@ -980,22 +980,22 @@ const BookAppointment = () => {
                 {loading ? t('general.loading') : t('book.confirmBooking')}
               </Button>
             </div>
-          )}
+          }
         </motion.div>
       </AnimatePresence>
 
       {/* Next button */}
-      {step !== 'confirm' && (
-        <div className="fixed bottom-[7rem] left-0 right-0 px-6 z-40">
+      {step !== 'confirm' &&
+      <div className="fixed bottom-[7rem] left-0 right-0 px-6 z-40">
           <Button onClick={goNext} disabled={!canNext()} className="w-full gradient-gold text-primary-foreground shadow-gold hover:opacity-90 disabled:opacity-40">
             {t('book.next')} <ChevronRight size={16} />
           </Button>
         </div>
-      )}
+      }
 
       <BottomNav />
-    </div>
-  );
+    </div>);
+
 };
 
 export default BookAppointment;
