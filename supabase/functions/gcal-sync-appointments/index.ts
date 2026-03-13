@@ -58,24 +58,31 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
     const saJson = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON')
     if (!saJson) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON not configured')
 
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey)
+    // Validate token using anon client with user's auth header
+    const anonClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    })
     const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(token)
-    if (authErr || !user) {
+    const { data: claimsData, error: claimsErr } = await anonClient.auth.getClaims(token)
+    if (claimsErr || !claimsData?.claims) {
       return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+
+    // Use service role client for DB operations
+    const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     const body = await req.json()
     const { action, appointment_id } = body
