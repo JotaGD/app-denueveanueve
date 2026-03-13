@@ -748,11 +748,12 @@ const BookAppointment = () => {
                             </SelectTrigger>
                             <SelectContent className="max-h-64">
                               {availableHours.map(h => (
-                                <SelectItem key={h} value={h}>{h}:00</SelectItem>
+                                <SelectItem key={h} value={h}>{parseInt(h, 10)}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
+                        <span className="flex items-end pb-2 text-lg font-semibold text-foreground">:</span>
                         <div className="flex-1">
                           <label className="text-xs text-muted-foreground mb-1 block">Min</label>
                           <Select
@@ -768,7 +769,7 @@ const BookAppointment = () => {
                             </SelectTrigger>
                             <SelectContent>
                               {availableMinutes.map(m => (
-                                <SelectItem key={m} value={m}>:{m}</SelectItem>
+                                <SelectItem key={m} value={m}>{m}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
