@@ -68,18 +68,31 @@ Deno.serve(async (req) => {
       payment_behavior: 'default_incomplete',
       payment_settings: { save_default_payment_method: 'on_subscription' },
       metadata: { plan, user_id: user.id },
-      expand: ['latest_invoice.payment_intent'],
+      expand: ['latest_invoice'],
     })
 
-    // Get client secret from expanded invoice
-    const invoice = subscription.latest_invoice as any
-    const paymentIntent = invoice?.payment_intent
-    let clientSecret: string | null = paymentIntent?.client_secret || null
+    // Get the invoice ID, then retrieve the invoice with payment_intent expanded
+    const invoiceObj = subscription.latest_invoice as any
+    const invoiceId = typeof invoiceObj === 'string' ? invoiceObj : invoiceObj?.id
+    
+    if (!invoiceId) {
+      console.error('No invoice from subscription', { subscriptionId: subscription.id })
+      throw new Error('Could not obtain invoice')
+    }
+
+    // Retrieve invoice with expanded payment_intent
+    const invoice = await stripe.invoices.retrieve(invoiceId, {
+      expand: ['payment_intent'],
+    })
+    
+    const paymentIntent = invoice.payment_intent as any
+    const clientSecret: string | null = paymentIntent?.client_secret || null
 
     if (!clientSecret) {
-      console.error('No client_secret from subscription', { 
-        invoiceId: invoice?.id,
+      console.error('No client_secret from invoice', { 
+        invoiceId: invoice.id,
         piId: paymentIntent?.id,
+        piStatus: paymentIntent?.status,
       })
       throw new Error('Could not obtain payment client secret')
     }
