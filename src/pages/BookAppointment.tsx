@@ -105,7 +105,7 @@ const BookAppointment = () => {
   const [success, setSuccess] = useState(false);
   const [busySlots, setBusySlots] = useState<{ start: string; end: string }[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [staffSchedule, setStaffSchedule] = useState<{ entry_type: string; start_time: string | null; end_time: string | null } | null>(null);
+  const [staffSchedules, setStaffSchedules] = useState<{ entry_type: string; start_time: string | null; end_time: string | null }[]>([]);
   const [monthSchedules, setMonthSchedules] = useState<Record<string, string>>({});
   const [hasActiveAppointment, setHasActiveAppointment] = useState(false);
   const [checkingAppointment, setCheckingAppointment] = useState(true);
