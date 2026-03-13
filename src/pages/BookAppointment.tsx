@@ -715,40 +715,65 @@ const BookAppointment = () => {
                 />
               </div>
               {selectedDate && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {loadingSlots && (
                     <p className="text-xs text-muted-foreground animate-pulse text-center">Comprobando disponibilidad...</p>
                   )}
                   {!loadingSlots && (() => {
                     const availableSlots = TIME_SLOTS.filter(s => isSlotAvailable(s));
-                    const morningSlots = availableSlots.filter(s => parseInt(s) < 14);
-                    const afternoonSlots = availableSlots.filter(s => parseInt(s) >= 14);
-                    return availableSlots.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">{t('book.noSlots')}</p>
-                    ) : (
-                      <Select value={selectedTime || ''} onValueChange={(v) => setSelectedTime(v)}>
-                        <SelectTrigger className="w-full border-border bg-card text-foreground">
-                          <SelectValue placeholder={t('book.selectDate')} />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-64">
-                          {morningSlots.length > 0 && (
-                            <SelectGroup>
-                              <SelectLabel className="text-gold">{t('book.morning')}</SelectLabel>
-                              {morningSlots.map(slot => (
-                                <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+                    if (availableSlots.length === 0) {
+                      return <p className="text-sm text-muted-foreground text-center py-4">{t('book.noSlots')}</p>;
+                    }
+                    // Available hours (deduplicated)
+                    const availableHours = [...new Set(availableSlots.map(s => s.substring(0, 2)))];
+                    // Available minutes for the selected hour
+                    const availableMinutes = selectedHour
+                      ? availableSlots.filter(s => s.substring(0, 2) === selectedHour).map(s => s.substring(3, 5))
+                      : [];
+
+                    return (
+                      <div className="flex gap-3">
+                        <div className="flex-1">
+                          <label className="text-xs text-muted-foreground mb-1 block">{t('book.morning').replace('Mañana', 'Hora').replace('Morning', 'Hour')}</label>
+                          <Select
+                            value={selectedHour || ''}
+                            onValueChange={(v) => {
+                              setSelectedHour(v);
+                              setSelectedMinute(null);
+                              setSelectedTime(null);
+                            }}
+                          >
+                            <SelectTrigger className="w-full border-border bg-card text-foreground">
+                              <SelectValue placeholder="HH" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-64">
+                              {availableHours.map(h => (
+                                <SelectItem key={h} value={h}>{h}:00</SelectItem>
                               ))}
-                            </SelectGroup>
-                          )}
-                          {afternoonSlots.length > 0 && (
-                            <SelectGroup>
-                              <SelectLabel className="text-gold">{t('book.afternoon')}</SelectLabel>
-                              {afternoonSlots.map(slot => (
-                                <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex-1">
+                          <label className="text-xs text-muted-foreground mb-1 block">Min</label>
+                          <Select
+                            value={selectedMinute || ''}
+                            disabled={!selectedHour}
+                            onValueChange={(v) => {
+                              setSelectedMinute(v);
+                              setSelectedTime(`${selectedHour}:${v}`);
+                            }}
+                          >
+                            <SelectTrigger className="w-full border-border bg-card text-foreground">
+                              <SelectValue placeholder="MM" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableMinutes.map(m => (
+                                <SelectItem key={m} value={m}>:{m}</SelectItem>
                               ))}
-                            </SelectGroup>
-                          )}
-                        </SelectContent>
-                      </Select>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     );
                   })()}
                 </div>
