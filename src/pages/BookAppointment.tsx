@@ -105,7 +105,7 @@ const BookAppointment = () => {
   const [success, setSuccess] = useState(false);
   const [busySlots, setBusySlots] = useState<{ start: string; end: string }[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [staffSchedule, setStaffSchedule] = useState<{ entry_type: string; start_time: string | null; end_time: string | null } | null>(null);
+  const [staffSchedules, setStaffSchedules] = useState<{ entry_type: string; start_time: string | null; end_time: string | null }[]>([]);
   const [monthSchedules, setMonthSchedules] = useState<Record<string, string>>({});
   const [hasActiveAppointment, setHasActiveAppointment] = useState(false);
   const [checkingAppointment, setCheckingAppointment] = useState(true);
@@ -227,17 +227,16 @@ const BookAppointment = () => {
       });
   }, [selectedStaff]);
 
-  // Fetch staff schedule for selected date
+  // Fetch staff schedule(s) for selected date (supports multiple availability blocks)
   useEffect(() => {
-    if (!selectedDate || !selectedStaff) { setStaffSchedule(null); return; }
+    if (!selectedDate || !selectedStaff) { setStaffSchedules([]); return; }
     const dateStr = formatLocalDate(selectedDate);
     supabase
       .from('employee_schedules')
       .select('entry_type, start_time, end_time')
       .eq('staff_member_id', selectedStaff.id)
       .eq('date', dateStr)
-      .maybeSingle()
-      .then(({ data }) => setStaffSchedule(data));
+      .then(({ data }) => setStaffSchedules(data || []));
   }, [selectedDate, selectedStaff]);
 
   // Fetch busy slots when date or staff changes
@@ -279,21 +278,24 @@ const BookAppointment = () => {
   const isSlotAvailable = (slot: string): boolean => {
     if (!selectedDate) return true;
 
-    // Check employee schedule: must be 'availability' with valid time range
-    if (!staffSchedule || staffSchedule.entry_type !== 'availability') return false;
-    if (staffSchedule.start_time && slot < staffSchedule.start_time.substring(0, 5)) return false;
-    if (staffSchedule.end_time && slot >= staffSchedule.end_time.substring(0, 5)) return false;
+    // Check employee schedule: slot must fall within at least one 'availability' block
+    const availBlocks = staffSchedules.filter(s => s.entry_type === 'availability');
+    if (availBlocks.length === 0) return false;
 
-    // Also check that the service end doesn't exceed the employee's end_time
-    if (staffSchedule.end_time) {
-      const totalDur = totals.duration || 30;
-      const [sh, sm] = slot.split(':').map(Number);
-      const slotMinutes = sh * 60 + sm;
-      const endMinutes = slotMinutes + totalDur;
-      const [eh, em] = staffSchedule.end_time.substring(0, 5).split(':').map(Number);
-      const scheduleEndMinutes = eh * 60 + em;
-      if (endMinutes > scheduleEndMinutes) return false;
-    }
+    const [sh, sm] = slot.split(':').map(Number);
+    const slotMinutes = sh * 60 + sm;
+    const totalDur = totals.duration || 30;
+    const endMinutes = slotMinutes + totalDur;
+
+    const fitsAnyBlock = availBlocks.some(block => {
+      if (!block.start_time || !block.end_time) return false;
+      const [bsh, bsm] = block.start_time.substring(0, 5).split(':').map(Number);
+      const [beh, bem] = block.end_time.substring(0, 5).split(':').map(Number);
+      const blockStart = bsh * 60 + bsm;
+      const blockEnd = beh * 60 + bem;
+      return slotMinutes >= blockStart && endMinutes <= blockEnd;
+    });
+    if (!fitsAnyBlock) return false;
 
     const dateStr = formatLocalDate(selectedDate);
     // Use Madrid timezone (+01:00 CET / +02:00 CEST) to match server busy slots
