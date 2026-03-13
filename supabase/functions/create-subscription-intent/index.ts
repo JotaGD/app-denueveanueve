@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       unit_amount: price_cents,
       recurring: { interval: 'month' },
       product_data: {
-        name: plan === 'LADIES_39' ? 'Plan Ladies' : 'Plan Men',
+        name: plan === 'LADIES_39' ? 'Plan Ladies' : plan === 'MEN_19' ? 'Plan Men Premium' : 'Plan Men Básico',
       },
     })
 
