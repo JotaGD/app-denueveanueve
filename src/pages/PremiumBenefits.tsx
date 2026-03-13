@@ -13,22 +13,25 @@ import type { Tables } from '@/integrations/supabase/types';
 type Subscription = Tables<'subscriptions'>;
 
 const LADIES_BENEFITS = [
-  { icon: Sparkles, key: 'premium.washBlowDry' },
-  { icon: Sparkles, key: 'premium.monthlyTreatment' },
+  { icon: Sparkles, key: 'premium.expressTreatment' },
   { icon: Palette, key: 'premium.colorDiscount' },
+  { icon: Palette, key: 'premium.highlightsDiscount' },
   { icon: Scissors, key: 'premium.cutDiscount' },
-  { icon: PartyPopper, key: 'premium.birthdayBenefit' },
-  { icon: Tag, key: 'premium.exclusivePromos' },
-  { icon: Ticket, key: 'premium.exclusiveGiveaways' },
+  { icon: Gift, key: 'premium.exclusiveBenefitsItem' },
 ];
 
-const MEN_BENEFITS = [
-  { icon: Scissors, key: 'premium.cutIncluded' },
+const MEN_PREMIUM_BENEFITS = [
+  { icon: Scissors, key: 'premium.cutIncludedPremium' },
   { icon: Gift, key: 'premium.extraCutDiscount' },
   { icon: CalendarCheck, key: 'premium.priorityAccess' },
-  { icon: PartyPopper, key: 'premium.birthdayBenefit' },
-  { icon: Tag, key: 'premium.exclusivePromos' },
-  { icon: Ticket, key: 'premium.exclusiveGiveaways' },
+  { icon: Gift, key: 'premium.exclusiveBenefitsItem' },
+];
+
+const MEN_BASIC_BENEFITS = [
+  { icon: Scissors, key: 'premium.cutIncludedBasic' },
+  { icon: Gift, key: 'premium.extraCutDiscount' },
+  { icon: CalendarCheck, key: 'premium.priorityAccess' },
+  { icon: Gift, key: 'premium.exclusiveBenefitsItem' },
 ];
 
 const PremiumBenefits = () => {
