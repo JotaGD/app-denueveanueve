@@ -342,6 +342,39 @@ Deno.serve(async (req) => {
       }
     }
 
+    // === COUPON REDEMPTION ===
+    let coupon_redeemed = false
+    if (redeem_coupon === true) {
+      const { data: activeCoupon } = await supabaseAuth
+        .from('welcome_coupons')
+        .select('id, status')
+        .eq('customer_id', customer.id)
+        .eq('status', 'ACTIVE')
+        .maybeSingle()
+
+      if (activeCoupon) {
+        await supabaseAuth
+          .from('welcome_coupons')
+          .update({ status: 'USED', used_at: now })
+          .eq('id', activeCoupon.id)
+
+        coupon_redeemed = true
+
+        // Audit log for coupon redemption
+        await supabaseAuth
+          .from('audit_logs')
+          .insert({
+            action: 'REDEEM_COUPON',
+            actor_id: staffUser.id,
+            actor_role: 'STAFF',
+            entity: 'welcome_coupons',
+            entity_id: activeCoupon.id,
+            location_id,
+            metadata: { customer_id: customer.id },
+          })
+      }
+    }
+
     return new Response(JSON.stringify({
       success: true,
       customer: { id: customer.id, name: `${customer.first_name} ${customer.last_name}` },
