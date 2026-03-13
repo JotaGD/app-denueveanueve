@@ -7,11 +7,13 @@ const corsHeaders = {
 
 const PLAN_BENEFITS: Record<string, { key: string; label: string; limit: number }[]> = {
   MEN_19: [
-    { key: 'monthly_cut', label: 'Corte de pelo mensual', limit: 1 },
+    { key: 'monthly_cut', label: 'Corte moda mensual', limit: 1 },
+  ],
+  MEN_17: [
+    { key: 'monthly_cut', label: 'Corte básico mensual', limit: 1 },
   ],
   LADIES_39: [
-    { key: 'monthly_wash_blowdry', label: 'Lavado + peinado mensual', limit: 1 },
-    { key: 'monthly_treatment', label: 'Tratamiento capilar mensual', limit: 1 },
+    { key: 'express_treatment', label: 'Tratamiento express', limit: 1 },
   ],
 }
 
