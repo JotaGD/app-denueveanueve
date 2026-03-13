@@ -217,7 +217,7 @@ const Appointments = () => {
                     <Clock size={10} /> {apt.estimated_total_duration} min
                   </span>
                 )}
-                {apt.estimated_pending_points && !apt.points_awarded && (
+                {apt.estimated_pending_points && !apt.points_awarded && ['CONFIRMED', 'RESCHEDULED'].includes(apt.status) && (
                   <span className="flex items-center gap-1 text-gold">
                     <Star size={10} /> {apt.estimated_pending_points} pts {t('appointments.pending')}
                   </span>
