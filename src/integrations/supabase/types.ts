@@ -1160,7 +1160,7 @@ export type Database = {
         | "PACK_UPGRADE"
         | "CUSTOM"
       salon_section: "CABALLEROS" | "SENORAS" | "ESTETICA"
-      subscription_plan: "LADIES_59" | "MEN_19" | "LADIES_39"
+      subscription_plan: "LADIES_59" | "MEN_19" | "LADIES_39" | "MEN_17"
       subscription_status:
         | "ACTIVE"
         | "PAYMENT_DUE"
@@ -1317,7 +1317,7 @@ export const Constants = {
         "CUSTOM",
       ],
       salon_section: ["CABALLEROS", "SENORAS", "ESTETICA"],
-      subscription_plan: ["LADIES_59", "MEN_19", "LADIES_39"],
+      subscription_plan: ["LADIES_59", "MEN_19", "LADIES_39", "MEN_17"],
       subscription_status: [
         "ACTIVE",
         "PAYMENT_DUE",

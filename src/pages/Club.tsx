@@ -28,13 +28,22 @@ const PLANS = [
     detailKeyAnnual: 'club.ladiesDetailAnnual',
   },
   {
-    key: 'men' as const,
+    key: 'menPremium' as const,
     plan: 'MEN_19' as const,
     price: 19,
-    benefits: ['club.menBenefits.1', 'club.menBenefits.2', 'club.menBenefits.3', 'club.menBenefits.4'],
-    annualOnlyBenefits: ['club.menBenefits.birthday'],
-    detailKey: 'club.menDetail',
-    detailKeyAnnual: 'club.menDetailAnnual',
+    benefits: ['club.menPremiumBenefits.1', 'club.menPremiumBenefits.2', 'club.menPremiumBenefits.3', 'club.menPremiumBenefits.4'],
+    annualOnlyBenefits: ['club.menPremiumBenefits.birthday'],
+    detailKey: 'club.menPremiumDetail',
+    detailKeyAnnual: 'club.menPremiumDetailAnnual',
+  },
+  {
+    key: 'menBasic' as const,
+    plan: 'MEN_17' as const,
+    price: 17,
+    benefits: ['club.menBasicBenefits.1', 'club.menBasicBenefits.2', 'club.menBasicBenefits.3', 'club.menBasicBenefits.4'],
+    annualOnlyBenefits: ['club.menBasicBenefits.birthday'],
+    detailKey: 'club.menBasicDetail',
+    detailKeyAnnual: 'club.menBasicDetailAnnual',
   },
 ];
 
@@ -179,7 +188,7 @@ const Club = () => {
               </span>
             </div>
             <p className="text-2xl font-display text-gold mb-1">
-              {subscription.plan === 'LADIES_39' ? t('club.ladies') : t('club.men')}
+              {subscription.plan === 'LADIES_39' ? t('club.ladies') : subscription.plan === 'MEN_19' ? t('club.menPremium') : t('club.menBasic')}
               <span className="text-sm text-muted-foreground ml-1">
                 {subscription.price_cents / 100}€{t('club.perMonth')}
               </span>
@@ -203,7 +212,7 @@ const Club = () => {
           {/* Detail text */}
           <div className="rounded-xl border border-border bg-card p-4">
             <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
-              {t(subscription.plan === 'LADIES_39' ? 'club.ladiesDetail' : 'club.menDetail')}
+              {t(subscription.plan === 'LADIES_39' ? 'club.ladiesDetail' : subscription.plan === 'MEN_19' ? 'club.menPremiumDetail' : 'club.menBasicDetail')}
             </pre>
           </div>
         </div>
@@ -219,7 +228,7 @@ const Club = () => {
                 className="rounded-xl border border-gold/20 bg-card p-5"
               >
                 <h3 className="font-display text-lg text-foreground mb-4">
-                  {selectedPlan === 'LADIES_39' ? t('club.ladies') : t('club.men')} — {t('club.confirmPayment')}
+                  {selectedPlan === 'LADIES_39' ? t('club.ladies') : selectedPlan === 'MEN_19' ? t('club.menPremium') : t('club.menBasic')} — {t('club.confirmPayment')}
                 </h3>
                 <Elements
                   stripe={stripePromise}

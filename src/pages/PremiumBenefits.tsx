@@ -13,22 +13,25 @@ import type { Tables } from '@/integrations/supabase/types';
 type Subscription = Tables<'subscriptions'>;
 
 const LADIES_BENEFITS = [
-  { icon: Sparkles, key: 'premium.washBlowDry' },
-  { icon: Sparkles, key: 'premium.monthlyTreatment' },
+  { icon: Sparkles, key: 'premium.expressTreatment' },
   { icon: Palette, key: 'premium.colorDiscount' },
+  { icon: Palette, key: 'premium.highlightsDiscount' },
   { icon: Scissors, key: 'premium.cutDiscount' },
-  { icon: PartyPopper, key: 'premium.birthdayBenefit' },
-  { icon: Tag, key: 'premium.exclusivePromos' },
-  { icon: Ticket, key: 'premium.exclusiveGiveaways' },
+  { icon: Gift, key: 'premium.exclusiveBenefitsItem' },
 ];
 
-const MEN_BENEFITS = [
-  { icon: Scissors, key: 'premium.cutIncluded' },
+const MEN_PREMIUM_BENEFITS = [
+  { icon: Scissors, key: 'premium.cutIncludedPremium' },
   { icon: Gift, key: 'premium.extraCutDiscount' },
   { icon: CalendarCheck, key: 'premium.priorityAccess' },
-  { icon: PartyPopper, key: 'premium.birthdayBenefit' },
-  { icon: Tag, key: 'premium.exclusivePromos' },
-  { icon: Ticket, key: 'premium.exclusiveGiveaways' },
+  { icon: Gift, key: 'premium.exclusiveBenefitsItem' },
+];
+
+const MEN_BASIC_BENEFITS = [
+  { icon: Scissors, key: 'premium.cutIncludedBasic' },
+  { icon: Gift, key: 'premium.extraCutDiscount' },
+  { icon: CalendarCheck, key: 'premium.priorityAccess' },
+  { icon: Gift, key: 'premium.exclusiveBenefitsItem' },
 ];
 
 const PremiumBenefits = () => {
@@ -85,7 +88,7 @@ const PremiumBenefits = () => {
     }
   };
 
-  const benefits = subscription?.plan === 'LADIES_39' ? LADIES_BENEFITS : MEN_BENEFITS;
+  const benefits = subscription?.plan === 'LADIES_39' ? LADIES_BENEFITS : subscription?.plan === 'MEN_19' ? MEN_PREMIUM_BENEFITS : MEN_BASIC_BENEFITS;
   const isBirthday = false; // Could check user's DOB vs current date
 
   return (
@@ -97,7 +100,7 @@ const PremiumBenefits = () => {
         <div className="flex items-center gap-2 mb-1">
           <Crown className="h-6 w-6 text-gold" />
           <h1 className="font-display text-2xl text-foreground">
-            {subscription?.plan === 'LADIES_39' ? t('club.ladies') : t('club.men')}
+            {subscription?.plan === 'LADIES_39' ? t('club.ladies') : subscription?.plan === 'MEN_19' ? t('club.menPremium') : t('club.menBasic')}
           </h1>
         </div>
         <p className="text-sm text-muted-foreground">{t('premium.exclusiveBenefits')}</p>
