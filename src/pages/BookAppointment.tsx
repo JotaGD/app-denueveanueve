@@ -102,7 +102,8 @@ const BookAppointment = () => {
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [notes, setNotes] = useState('');
+  const [selectedHour, setSelectedHour] = useState<string | null>(null);
+  const [selectedMinute, setSelectedMinute] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [busySlots, setBusySlots] = useState<{ start: string; end: string }[]>([]);
