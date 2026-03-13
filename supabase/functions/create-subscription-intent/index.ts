@@ -66,33 +66,49 @@ Deno.serve(async (req) => {
       customer: customerId,
       items: [{ price: price.id }],
       payment_behavior: 'default_incomplete',
-      payment_settings: { save_default_payment_method: 'on_subscription' },
+      payment_settings: {
+        save_default_payment_method: 'on_subscription',
+        payment_method_types: ['card'],
+      },
       metadata: { plan, user_id: user.id },
-      expand: ['latest_invoice'],
+      expand: ['latest_invoice.payment_intent'],
     })
 
-    // Get the invoice ID, then retrieve the invoice with payment_intent expanded
-    const invoiceObj = subscription.latest_invoice as any
-    const invoiceId = typeof invoiceObj === 'string' ? invoiceObj : invoiceObj?.id
-    
-    if (!invoiceId) {
-      console.error('No invoice from subscription', { subscriptionId: subscription.id })
-      throw new Error('Could not obtain invoice')
+    // Extract client secret from the expanded chain
+    const invoice = subscription.latest_invoice as any
+    let clientSecret: string | null = invoice?.payment_intent?.client_secret || null
+
+    // Fallback: if no PI on invoice, retrieve it separately
+    if (!clientSecret && invoice?.id) {
+      console.log('PI not in expand, retrieving invoice separately', { invoiceId: invoice.id })
+      const freshInvoice = await stripe.invoices.retrieve(invoice.id, {
+        expand: ['payment_intent'],
+      })
+      const pi = freshInvoice.payment_intent as any
+      clientSecret = pi?.client_secret || null
+
+      // Last resort: if still no PI, create one manually for the invoice amount
+      if (!clientSecret) {
+        console.log('No PI on invoice, creating manually', { invoiceId: invoice.id, total: freshInvoice.amount_due })
+        const manualPI = await stripe.paymentIntents.create({
+          amount: freshInvoice.amount_due,
+          currency: freshInvoice.currency,
+          customer: customerId,
+          metadata: {
+            invoice_id: invoice.id,
+            subscription_id: subscription.id,
+            plan,
+            user_id: user.id,
+          },
+        })
+        clientSecret = manualPI.client_secret
+      }
     }
 
-    // Retrieve invoice with expanded payment_intent
-    const invoice = await stripe.invoices.retrieve(invoiceId, {
-      expand: ['payment_intent'],
-    })
-    
-    const paymentIntent = invoice.payment_intent as any
-    const clientSecret: string | null = paymentIntent?.client_secret || null
-
     if (!clientSecret) {
-      console.error('No client_secret from invoice', { 
-        invoiceId: invoice.id,
-        piId: paymentIntent?.id,
-        piStatus: paymentIntent?.status,
+      console.error('Could not obtain client_secret after all attempts', {
+        subscriptionId: subscription.id,
+        invoiceId: invoice?.id,
       })
       throw new Error('Could not obtain payment client secret')
     }
