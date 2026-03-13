@@ -716,50 +716,38 @@ const BookAppointment = () => {
                   {loadingSlots && (
                     <p className="text-xs text-muted-foreground animate-pulse text-center">Comprobando disponibilidad...</p>
                   )}
-                  <h3 className="text-sm font-medium text-foreground">{t('book.morning')}</h3>
-                  <div className="grid grid-cols-6 gap-1.5">
-                    {TIME_SLOTS.filter((t) => parseInt(t) < 14).map((slot) => {
-                      const available = isSlotAvailable(slot);
-                      return (
-                        <button
-                          key={slot}
-                          onClick={() => available && setSelectedTime(slot)}
-                          disabled={!available}
-                          className={`rounded-lg border px-1.5 py-2 text-xs font-medium transition-all ${
-                            !available
-                              ? 'border-border bg-muted text-muted-foreground/40 cursor-not-allowed line-through'
-                              : selectedTime === slot
-                              ? 'border-gold gradient-gold text-primary-foreground'
-                              : 'border-border bg-card text-foreground hover:border-gold/20'
-                          }`}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <h3 className="text-sm font-medium text-foreground mt-3">{t('book.afternoon')}</h3>
-                  <div className="grid grid-cols-6 gap-1.5">
-                    {TIME_SLOTS.filter((t) => parseInt(t) >= 14).map((slot) => {
-                      const available = isSlotAvailable(slot);
-                      return (
-                        <button
-                          key={slot}
-                          onClick={() => available && setSelectedTime(slot)}
-                          disabled={!available}
-                          className={`rounded-lg border px-1.5 py-2 text-xs font-medium transition-all ${
-                            !available
-                              ? 'border-border bg-muted text-muted-foreground/40 cursor-not-allowed line-through'
-                              : selectedTime === slot
-                              ? 'border-gold gradient-gold text-primary-foreground'
-                              : 'border-border bg-card text-foreground hover:border-gold/20'
-                          }`}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {!loadingSlots && (() => {
+                    const availableSlots = TIME_SLOTS.filter(s => isSlotAvailable(s));
+                    const morningSlots = availableSlots.filter(s => parseInt(s) < 14);
+                    const afternoonSlots = availableSlots.filter(s => parseInt(s) >= 14);
+                    return availableSlots.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">{t('book.noSlots')}</p>
+                    ) : (
+                      <Select value={selectedTime || ''} onValueChange={(v) => setSelectedTime(v)}>
+                        <SelectTrigger className="w-full border-border bg-card text-foreground">
+                          <SelectValue placeholder={t('book.selectDate')} />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-64">
+                          {morningSlots.length > 0 && (
+                            <SelectGroup>
+                              <SelectLabel className="text-gold">{t('book.morning')}</SelectLabel>
+                              {morningSlots.map(slot => (
+                                <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+                              ))}
+                            </SelectGroup>
+                          )}
+                          {afternoonSlots.length > 0 && (
+                            <SelectGroup>
+                              <SelectLabel className="text-gold">{t('book.afternoon')}</SelectLabel>
+                              {afternoonSlots.map(slot => (
+                                <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+                              ))}
+                            </SelectGroup>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    );
+                  })()}
                 </div>
               )}
             </div>
