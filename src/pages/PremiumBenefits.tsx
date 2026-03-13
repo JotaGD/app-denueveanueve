@@ -100,7 +100,7 @@ const PremiumBenefits = () => {
         <div className="flex items-center gap-2 mb-1">
           <Crown className="h-6 w-6 text-gold" />
           <h1 className="font-display text-2xl text-foreground">
-            {subscription?.plan === 'LADIES_39' ? t('club.ladies') : t('club.men')}
+            {subscription?.plan === 'LADIES_39' ? t('club.ladies') : subscription?.plan === 'MEN_19' ? t('club.menPremium') : t('club.menBasic')}
           </h1>
         </div>
         <p className="text-sm text-muted-foreground">{t('premium.exclusiveBenefits')}</p>
