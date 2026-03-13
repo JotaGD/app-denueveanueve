@@ -227,17 +227,16 @@ const BookAppointment = () => {
       });
   }, [selectedStaff]);
 
-  // Fetch staff schedule for selected date
+  // Fetch staff schedule(s) for selected date (supports multiple availability blocks)
   useEffect(() => {
-    if (!selectedDate || !selectedStaff) { setStaffSchedule(null); return; }
+    if (!selectedDate || !selectedStaff) { setStaffSchedules([]); return; }
     const dateStr = formatLocalDate(selectedDate);
     supabase
       .from('employee_schedules')
       .select('entry_type, start_time, end_time')
       .eq('staff_member_id', selectedStaff.id)
       .eq('date', dateStr)
-      .maybeSingle()
-      .then(({ data }) => setStaffSchedule(data));
+      .then(({ data }) => setStaffSchedules(data || []));
   }, [selectedDate, selectedStaff]);
 
   // Fetch busy slots when date or staff changes
