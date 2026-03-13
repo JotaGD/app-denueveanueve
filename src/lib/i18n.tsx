@@ -331,6 +331,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'book.selectStaff': 'Choose your professional',
     'book.staff': 'Professional',
     'book.noStaff': 'No professionals available',
+    'book.firstAvailable': 'First available',
+    'book.firstAvailableDesc': 'The earliest time with any professional',
     'book.existingAppointment': 'You already have an active appointment',
     'book.existingAppointmentDesc': 'You can only have one appointment at a time. Cancel your current appointment or wait until it\'s completed to book another.',
     'book.goToMyAppointments': 'View my appointment',
