@@ -212,7 +212,7 @@ const Club = () => {
           {/* Detail text */}
           <div className="rounded-xl border border-border bg-card p-4">
             <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
-              {t(subscription.plan === 'LADIES_39' ? 'club.ladiesDetail' : 'club.menDetail')}
+              {t(subscription.plan === 'LADIES_39' ? 'club.ladiesDetail' : subscription.plan === 'MEN_19' ? 'club.menPremiumDetail' : 'club.menBasicDetail')}
             </pre>
           </div>
         </div>
