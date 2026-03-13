@@ -753,7 +753,7 @@ const BookAppointment = () => {
                     <Zap className={`h-5 w-5 ${isFirstAvailable ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">{t('book.firstAvailable') || 'Primer disponible'}</p>
+                    <p className="text-sm font-medium text-foreground">{t('book.firstAvailable') || 'Primer empleado disponible'}</p>
                     
                   </div>
                   {isFirstAvailable && <Check className="ml-auto h-4 w-4 text-gold" />}
