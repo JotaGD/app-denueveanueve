@@ -34,20 +34,36 @@ const Appointments = () => {
   const [appointments, setAppointments] = useState<EnrichedAppointment[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [customerId, setCustomerId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Get customer id once
   useEffect(() => {
     if (!user) return;
+    supabase.from('customers').select('id').eq('user_id', user.id).single().then(({ data }) => {
+      if (data) setCustomerId(data.id);
+    });
+  }, [user]);
+
+  // Subscribe to realtime appointment changes to auto-refresh
+  useEffect(() => {
+    if (!customerId) return;
+    const channel = supabase
+      .channel(`appointments-${customerId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments', filter: `customer_id=eq.${customerId}` }, () => {
+        setRefreshKey((k) => k + 1);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [customerId]);
+
+  useEffect(() => {
+    if (!customerId) return;
     const loadAppointments = async () => {
       setLoading(true);
-      const { data: customer } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!customer) { setLoading(false); return; }
 
       const now = new Date().toISOString();
-      let query = supabase.from('appointments').select('*').eq('customer_id', customer.id);
+      let query = supabase.from('appointments').select('*').eq('customer_id', customerId);
 
       if (tab === 'upcoming') {
         query = query.in('status', ['CONFIRMED', 'RESCHEDULED']).gte('start_at', now).order('start_at', { ascending: true });
@@ -87,7 +103,7 @@ const Appointments = () => {
       setLoading(false);
     };
     loadAppointments();
-  }, [user, tab]);
+  }, [customerId, tab, refreshKey]);
 
   const handleCancel = async (id: string) => {
     if (!confirm(t('appointments.cancelConfirm'))) return;

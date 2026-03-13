@@ -45,26 +45,49 @@ const Loyalty = () => {
   const [qrFullscreen, setQrFullscreen] = useState(false);
   const [pendingPoints, setPendingPoints] = useState(0);
 
+  const [customerId, setCustomerId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Get customer id and qr_token once
   useEffect(() => {
     if (!user) return;
+    supabase.from('customers').select('id, qr_token').eq('user_id', user.id).single().then(({ data }) => {
+      if (data) {
+        setCustomerId(data.id);
+        setQrToken(data.qr_token);
+      }
+    });
+  }, [user]);
+
+  // Realtime: listen for loyalty_accounts and appointments changes to auto-refresh
+  useEffect(() => {
+    if (!customerId) return;
+    const channel = supabase
+      .channel(`loyalty-refresh-${customerId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'loyalty_accounts', filter: `customer_id=eq.${customerId}` }, () => {
+        setRefreshKey((k) => k + 1);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments', filter: `customer_id=eq.${customerId}` }, () => {
+        setRefreshKey((k) => k + 1);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'welcome_coupons', filter: `customer_id=eq.${customerId}` }, () => {
+        setRefreshKey((k) => k + 1);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [customerId]);
+
+  useEffect(() => {
+    if (!customerId) return;
     const load = async () => {
       setLoading(true);
-      const { data: customer } = await supabase
-        .from('customers')
-        .select('id, qr_token')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!customer) { setLoading(false); return; }
-
-      setQrToken(customer.qr_token);
 
       const [loyaltyRes, movementsRes, rewardsRes, couponRes, pendingRes] = await Promise.all([
-        supabase.from('loyalty_accounts').select('*').eq('customer_id', customer.id).single(),
-        supabase.from('points_movements').select('*').eq('customer_id', customer.id).order('created_at', { ascending: false }).limit(50),
-        supabase.from('rewards').select('*').eq('customer_id', customer.id).order('created_at', { ascending: false }),
-        supabase.from('welcome_coupons').select('*').eq('customer_id', customer.id).single(),
-        supabase.from('appointments').select('estimated_pending_points').eq('customer_id', customer.id).in('status', ['CONFIRMED', 'RESCHEDULED']).gte('start_at', new Date().toISOString()),
+        supabase.from('loyalty_accounts').select('*').eq('customer_id', customerId).single(),
+        supabase.from('points_movements').select('*').eq('customer_id', customerId).order('created_at', { ascending: false }).limit(50),
+        supabase.from('rewards').select('*').eq('customer_id', customerId).order('created_at', { ascending: false }),
+        supabase.from('welcome_coupons').select('*').eq('customer_id', customerId).single(),
+        supabase.from('appointments').select('estimated_pending_points').eq('customer_id', customerId).in('status', ['CONFIRMED', 'RESCHEDULED']).gte('start_at', new Date().toISOString()),
       ]);
 
       setAccount(loyaltyRes.data);
@@ -78,7 +101,7 @@ const Loyalty = () => {
       setLoading(false);
     };
     load();
-  }, [user]);
+  }, [customerId, refreshKey]);
 
   const REWARD_STATUS_COLOR: Record<string, string> = {
     AVAILABLE: 'text-success',
