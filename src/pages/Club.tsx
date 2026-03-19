@@ -15,7 +15,7 @@ import type { Tables } from '@/integrations/supabase/types';
 
 type Subscription = Tables<'subscriptions'>;
 
-const stripePromise = loadStripe('pk_test_51PjF2DRwEJFCE84fkHMGhRxIvGLHxPEVCxQdZeILFDODRdrjyZx0XBSAdJTh0YGClKj3qwdLDAKqvVjqX3Xa6CkW004m3JIhCj');
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const PLANS = [
   {
