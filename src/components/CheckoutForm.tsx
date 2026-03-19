@@ -44,7 +44,12 @@ const CheckoutForm = ({ onSuccess, onCancel }: CheckoutFormProps) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <PaymentElement
         options={{
-          layout: 'tabs',
+          layout: {
+            type: 'accordion',
+            defaultCollapsed: false,
+            radios: true,
+            spacedAccordionItems: true,
+          },
         }}
       />
       <div className="flex gap-2">
