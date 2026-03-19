@@ -6,6 +6,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
+const PRICE_MAP: Record<string, { monthly: string; annual: string }> = {
+  LADIES_39: {
+    monthly: 'price_1TCjDWIsEUPwjqgmwaOeqUa1',
+    annual: 'price_1TCjDsIsEUPwjqgmYAGHgWS8',
+  },
+  MEN_19: {
+    monthly: 'price_1TCjEDIsEUPwjqgm6Hg5haVZ',
+    annual: 'price_1TCjEjIsEUPwjqgmsmB9Ckt7',
+  },
+  MEN_17: {
+    monthly: 'price_1TCjFGIsEUPwjqgmi9OYw8NA',
+    annual: 'price_1TCjFXIsEUPwjqgmzPzWMkXc',
+  },
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -28,7 +43,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    const { plan, price_cents } = await req.json()
+    const { plan, price_cents, billing_period } = await req.json()
     if (!plan || !price_cents) {
       return new Response(JSON.stringify({ error: 'plan and price_cents required' }), {
         status: 400,
@@ -36,9 +51,18 @@ Deno.serve(async (req) => {
       })
     }
 
+    const period = billing_period === 'annual' ? 'annual' : 'monthly'
+    const priceEntry = PRICE_MAP[plan]
+    if (!priceEntry) {
+      return new Response(JSON.stringify({ error: `Unknown plan: ${plan}` }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const priceId = priceEntry[period]
+
     const stripe = new Stripe(stripeKey, { apiVersion: '2025-08-27.basil' })
 
-    // Find or reference existing Stripe customer
     const customers = await stripe.customers.list({ email: user.email, limit: 1 })
     let customerId: string | undefined
     if (customers.data.length > 0) {
@@ -50,22 +74,11 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [{
-        price_data: {
-          currency: 'eur',
-          unit_amount: price_cents,
-          recurring: { interval: 'month' },
-          product_data: {
-            name: plan === 'LADIES_39' ? 'Plan Ladies' : plan === 'MEN_19' ? 'Plan Men Premium' : 'Plan Men Básico',
-            description: plan === 'LADIES_39' ? 'Suscripción mensual Ladies' : plan === 'MEN_19' ? 'Suscripción mensual Men Premium' : 'Suscripción mensual Men Básico',
-          },
-        },
-        quantity: 1,
-      }],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
       success_url: `${origin}/club?checkout=success`,
       cancel_url: `${origin}/club?checkout=cancel`,
-      metadata: { plan, user_id: user.id },
+      metadata: { plan, user_id: user.id, billing_period: period },
     })
 
     return new Response(JSON.stringify({ url: session.url }), {

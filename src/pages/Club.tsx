@@ -112,13 +112,16 @@ const Club = () => {
     setSelectedPlan(plan);
     try {
       const { data, error } = await supabase.functions.invoke('create-subscription-intent', {
-        body: { plan, price_cents: priceCents },
+        body: { plan, price_cents: priceCents, billing_period: billingPeriod },
       });
       if (error) throw error;
       if (data?.clientSecret) {
         setClientSecret(data.clientSecret);
+      } else {
+        throw new Error('No se recibió el secreto de pago');
       }
     } catch (err: any) {
+      console.error('Subscribe error:', err);
       toast.error(err.message || 'Error al iniciar el pago');
       setSelectedPlan(null);
     } finally {
