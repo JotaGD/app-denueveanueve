@@ -84,9 +84,7 @@ Deno.serve(async (req) => {
       payment_behavior: 'default_incomplete',
       payment_settings: {
         save_default_payment_method: 'on_subscription',
-      },
-      automatic_payment_methods: {
-        enabled: true,
+        payment_method_types: ['card', 'paypal', 'link'],
       },
       metadata: { plan, user_id: user.id, billing_period: period },
       expand: ['latest_invoice.payment_intent'],
