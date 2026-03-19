@@ -92,7 +92,34 @@ Deno.serve(async (req) => {
 
     // Extract client secret
     const invoice = subscription.latest_invoice as any
-    const clientSecret: string | null = invoice?.payment_intent?.client_secret || null
+    let clientSecret: string | null = invoice?.payment_intent?.client_secret || null
+
+    // Fallback: retrieve invoice separately if PI not expanded
+    if (!clientSecret && invoice?.id) {
+      console.log('PI not in expand, retrieving invoice separately', { invoiceId: invoice.id })
+      const freshInvoice = await stripe.invoices.retrieve(invoice.id, {
+        expand: ['payment_intent'],
+      })
+      const pi = freshInvoice.payment_intent as any
+      clientSecret = pi?.client_secret || null
+
+      // Last resort: create a PaymentIntent manually for the invoice amount
+      if (!clientSecret) {
+        console.log('No PI on invoice, creating manually', { invoiceId: invoice.id, total: freshInvoice.amount_due })
+        const manualPI = await stripe.paymentIntents.create({
+          amount: freshInvoice.amount_due,
+          currency: freshInvoice.currency,
+          customer: customerId,
+          metadata: {
+            invoice_id: invoice.id,
+            subscription_id: subscription.id,
+            plan,
+            user_id: user.id,
+          },
+        })
+        clientSecret = manualPI.client_secret
+      }
+    }
 
     if (!clientSecret) {
       console.error('Could not obtain client_secret', {
