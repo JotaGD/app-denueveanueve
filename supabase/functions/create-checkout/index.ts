@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
+      payment_method_types: ['card', 'paypal'],
       success_url: `${origin}/club?checkout=success`,
       cancel_url: `${origin}/club?checkout=cancel`,
       metadata: { plan, user_id: user.id, billing_period: period },
