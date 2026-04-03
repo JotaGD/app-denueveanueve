@@ -4,10 +4,13 @@ import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift } from 'lucide-react';
+import { CalendarPlus, Star, Crown, Tag, ChevronRight, Gift, Clock, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BottomNav from '@/components/BottomNav';
 import logoImg from '@/assets/logo.png';
+import type { Tables } from '@/integrations/supabase/types';
+
+type Appointment = Tables<'appointments'> & { location_name?: string };
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -22,9 +25,12 @@ const Home = () => {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [points, setPoints] = useState(0);
   const [visits, setVisits] = useState(0);
   const [isClubMember, setIsClubMember] = useState(false);
+  const [nextAppointment, setNextAppointment] = useState<Appointment | null | undefined>(undefined);
+  const [couponStatus, setCouponStatus] = useState<'active' | 'used' | 'expired' | null>(null);
 
   const rawName = user?.user_metadata?.first_name || 'Cliente';
   const firstName = rawName
@@ -34,30 +40,65 @@ const Home = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
+      setLoading(true);
       const { data: customer } = await supabase
         .from('customers')
         .select('id')
         .eq('user_id', user.id)
         .single();
-      if (!customer) return;
+      if (!customer) { setLoading(false); return; }
 
-      const { data: account } = await supabase
-        .from('loyalty_accounts')
-        .select('points_balance, visits_total')
-        .eq('customer_id', customer.id)
-        .single();
-      if (account) {
-        setPoints(account.points_balance);
-        setVisits(account.visits_total);
+      const now = new Date().toISOString();
+
+      const [accountRes, subRes, aptRes, couponRes] = await Promise.all([
+        supabase
+          .from('loyalty_accounts')
+          .select('points_balance, visits_total')
+          .eq('customer_id', customer.id)
+          .single(),
+        supabase
+          .from('subscriptions')
+          .select('status')
+          .eq('customer_id', customer.id)
+          .in('status', ['ACTIVE', 'CANCELLED_END_OF_PERIOD'])
+          .maybeSingle(),
+        supabase
+          .from('appointments')
+          .select('*, locations(name)')
+          .eq('customer_id', customer.id)
+          .in('status', ['CONFIRMED', 'RESCHEDULED'])
+          .gte('start_at', now)
+          .order('start_at', { ascending: true })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from('welcome_coupons')
+          .select('status, expires_at')
+          .eq('customer_id', customer.id)
+          .maybeSingle(),
+      ]);
+
+      if (accountRes.data) {
+        setPoints(accountRes.data.points_balance);
+        setVisits(accountRes.data.visits_total);
+      }
+      setIsClubMember(!!subRes.data);
+
+      if (aptRes.data) {
+        const apt = aptRes.data as Appointment & { locations: { name: string } | null };
+        setNextAppointment({ ...apt, location_name: apt.locations?.name });
+      } else {
+        setNextAppointment(null);
       }
 
-      const { data: sub } = await supabase
-        .from('subscriptions')
-        .select('status')
-        .eq('customer_id', customer.id)
-        .in('status', ['ACTIVE', 'CANCELLED_END_OF_PERIOD'])
-        .maybeSingle();
-      setIsClubMember(!!sub);
+      if (couponRes.data) {
+        const c = couponRes.data;
+        if (c.status === 'USED') setCouponStatus('used');
+        else if (c.expires_at && new Date(c.expires_at) < new Date()) setCouponStatus('expired');
+        else setCouponStatus('active');
+      }
+
+      setLoading(false);
     };
     load();
   }, [user]);
@@ -99,25 +140,27 @@ const Home = () => {
       )}
 
       <div className="space-y-4 px-6">
-        {/* Welcome Coupon */}
-        <motion.div
-          custom={0}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          className="relative overflow-hidden rounded-xl border border-gold/20 bg-gradient-to-r from-gold/10 to-gold/5 p-4"
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/20">
-              <Gift className="h-5 w-5 text-gold" />
+        {/* Welcome Coupon — only show if active */}
+        {couponStatus === 'active' && (
+          <motion.div
+            custom={0}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            className="relative overflow-hidden rounded-xl border border-gold/20 bg-gradient-to-r from-gold/10 to-gold/5 p-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/20">
+                <Gift className="h-5 w-5 text-gold" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">{t('home.welcomeCoupon')}</p>
+                <p className="text-xs text-gold-light">{t('home.couponDesc')}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-gold/50" />
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">{t('home.welcomeCoupon')}</p>
-              <p className="text-xs text-gold-light">{t('home.couponDesc')}</p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gold/50" />
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* Next Appointment */}
         <motion.div
@@ -131,14 +174,50 @@ const Home = () => {
             <h3 className="text-sm font-medium text-foreground">{t('home.nextAppointment')}</h3>
             <CalendarPlus className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-xs text-muted-foreground mb-3">{t('home.noAppointments')}</p>
-          <Button
-            onClick={() => navigate('/book')}
-            size="sm"
-            className="gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
-          >
-            {t('home.bookNow')}
-          </Button>
+
+          {loading || nextAppointment === undefined ? (
+            <div className="space-y-2">
+              <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+            </div>
+          ) : nextAppointment ? (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                {new Date(nextAppointment.start_at).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}
+              </p>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Clock size={11} />
+                  {new Date(nextAppointment.start_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                {nextAppointment.location_name && (
+                  <span className="flex items-center gap-1">
+                    <MapPin size={11} />
+                    {nextAppointment.location_name}
+                  </span>
+                )}
+              </div>
+              <Button
+                onClick={() => navigate('/appointments')}
+                size="sm"
+                variant="outline"
+                className="mt-1 border-gold/40 text-gold hover:bg-gold/10 text-xs"
+              >
+                {t('home.viewAppointment')}
+              </Button>
+            </div>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground mb-3">{t('home.noAppointments')}</p>
+              <Button
+                onClick={() => navigate('/book')}
+                size="sm"
+                className="gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
+              >
+                {t('home.bookNow')}
+              </Button>
+            </>
+          )}
         </motion.div>
 
         {/* Loyalty */}
@@ -154,16 +233,29 @@ const Home = () => {
             <h3 className="text-sm font-medium text-foreground">{t('home.loyalty')}</h3>
             <Star className="h-4 w-4 text-gold" />
           </div>
-          <div className="flex gap-6">
-            <div>
-              <p className="font-display text-2xl text-gold">{points}</p>
-              <p className="text-xs text-muted-foreground">{t('home.points')}</p>
+          {loading ? (
+            <div className="flex gap-6">
+              <div className="space-y-1">
+                <div className="h-7 w-12 animate-pulse rounded bg-muted" />
+                <div className="h-3 w-10 animate-pulse rounded bg-muted" />
+              </div>
+              <div className="space-y-1">
+                <div className="h-7 w-8 animate-pulse rounded bg-muted" />
+                <div className="h-3 w-10 animate-pulse rounded bg-muted" />
+              </div>
             </div>
-            <div>
-              <p className="font-display text-2xl text-foreground">{visits}</p>
-              <p className="text-xs text-muted-foreground">{t('home.visits')}</p>
+          ) : (
+            <div className="flex gap-6">
+              <div>
+                <p className="font-display text-2xl text-gold">{points}</p>
+                <p className="text-xs text-muted-foreground">{t('home.points')}</p>
+              </div>
+              <div>
+                <p className="font-display text-2xl text-foreground">{visits}</p>
+                <p className="text-xs text-muted-foreground">{t('home.visits')}</p>
+              </div>
             </div>
-          </div>
+          )}
         </motion.div>
 
         {/* Quick actions */}

@@ -407,7 +407,7 @@ const BookAppointment = () => {
     });
     const uncategorized = services.filter((s) => !s.category_id);
     if (uncategorized.length > 0) {
-      map.set('uncategorized', { category: { id: 'uncategorized', name: 'Otros', sort_order: 999, created_at: '' }, services: uncategorized });
+      map.set('uncategorized', { category: { id: 'uncategorized', name: t('book.otherCategory'), sort_order: 999, created_at: '' }, services: uncategorized });
     }
     return Array.from(map.values());
   }, [services, categories]);
@@ -437,7 +437,7 @@ const BookAppointment = () => {
       const { data: availabilityData, error: availabilityError } = await supabase.functions.invoke('gcal-sync-appointments', {
         body: { action: 'check-availability', staff_member_id: finalStaff.id, date: dateStr }
       });
-      if (availabilityError) throw new Error('No se pudo comprobar disponibilidad. Inténtalo de nuevo.');
+      if (availabilityError) throw new Error(t('book.errorAvailability'));
 
       const newWindows: {start: Date;end: Date;}[] = [];
       if (totals.hasPhases) {
@@ -461,7 +461,7 @@ const BookAppointment = () => {
       );
 
       if (hasOverlap) {
-        toast.error('Ese horario ya no está disponible. Elige otra hora.');
+        toast.error(t('book.errorSlotTaken'));
         setSelectedTime(null);
         return;
       }
@@ -753,7 +753,7 @@ const BookAppointment = () => {
                     <Zap className={`h-5 w-5 ${isFirstAvailable ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">{t('book.firstAvailable') || 'Primer empleado disponible'}</p>
+                    <p className="text-sm font-medium text-foreground">{t('book.firstAvailable')}</p>
                     
                   </div>
                   {isFirstAvailable && <Check className="ml-auto h-4 w-4 text-gold" />}
@@ -809,7 +809,7 @@ const BookAppointment = () => {
               {selectedDate &&
             <div className="space-y-3">
                   {loadingSlots &&
-              <p className="text-xs text-muted-foreground animate-pulse text-center">Comprobando disponibilidad...</p>
+              <p className="text-xs text-muted-foreground animate-pulse text-center">{t('book.checkingAvailability')}</p>
               }
                   {!loadingSlots && (() => {
                 const checkFn = isFirstAvailable ? isSlotAvailableFirstAvailable : isSlotAvailable;

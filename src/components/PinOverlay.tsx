@@ -2,28 +2,13 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n';
+import { useCustomer } from '@/hooks/useCustomer';
 
 const PinOverlay = () => {
-  const { user } = useAuth();
   const { t } = useI18n();
+  const { customerId } = useCustomer();
   const [pin, setPin] = useState<string | null>(null);
-  const [customerId, setCustomerId] = useState<string | null>(null);
-
-  // Get customer id
-  useEffect(() => {
-    if (!user) return;
-    const fetchCustomer = async () => {
-      const { data } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-      if (data) setCustomerId(data.id);
-    };
-    fetchCustomer();
-  }, [user]);
 
   // Subscribe to Realtime visit_pins changes
   useEffect(() => {
@@ -76,6 +61,9 @@ const PinOverlay = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pin-overlay-title"
           className="fixed inset-0 z-[200] flex items-center justify-center bg-background/95 backdrop-blur-sm px-8"
         >
           <motion.div
@@ -87,6 +75,7 @@ const PinOverlay = () => {
           >
             <button
               onClick={() => setPin(null)}
+              aria-label={t('general.close')}
               className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
             >
               <X size={20} />
@@ -98,7 +87,7 @@ const PinOverlay = () => {
               </div>
             </div>
 
-            <h2 className="font-display text-xl text-foreground mb-1">
+            <h2 id="pin-overlay-title" className="font-display text-xl text-foreground mb-1">
               {t('pin.title')}
             </h2>
             <p className="text-sm text-muted-foreground mb-6">

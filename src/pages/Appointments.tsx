@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CalendarDays, MapPin, Clock, MessageCircle, Star, Euro } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
-import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import BottomNav from '@/components/BottomNav';
+import RescheduleDialog from '@/components/RescheduleDialog';
+import { useCustomer } from '@/hooks/useCustomer';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Appointment = Tables<'appointments'>;
@@ -28,22 +29,13 @@ const STATUS_COLORS: Record<string, string> = {
 const Appointments = () => {
   const navigate = useNavigate();
   const { t } = useI18n();
-  const { user } = useAuth();
+  const { customerId } = useCustomer();
 
   const [tab, setTab] = useState<'upcoming' | 'history'>('upcoming');
   const [appointments, setAppointments] = useState<EnrichedAppointment[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [customerId, setCustomerId] = useState<string | null>(null);
+  const [rescheduleApt, setRescheduleApt] = useState<Appointment | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  // Get customer id once
-  useEffect(() => {
-    if (!user) return;
-    supabase.from('customers').select('id').eq('user_id', user.id).single().then(({ data }) => {
-      if (data) setCustomerId(data.id);
-    });
-  }, [user]);
 
   // Subscribe to realtime appointment changes to auto-refresh
   useEffect(() => {
@@ -234,7 +226,10 @@ const Appointments = () => {
                   <Button size="sm" variant="outline" onClick={() => handleCancel(apt.id)} className="text-xs">
                     {t('appointments.cancel')}
                   </Button>
-                  <Button size="sm" variant="ghost" className="text-xs text-gold" onClick={() => {}}>
+                  <Button size="sm" variant="outline" onClick={() => setRescheduleApt(apt)} className="text-xs text-gold border-gold/40 hover:bg-gold/10">
+                    {t('appointments.reschedule')}
+                  </Button>
+                  <Button size="sm" variant="ghost" className="text-xs text-muted-foreground" onClick={() => {}}>
                     <MessageCircle size={14} /> {t('appointments.whatsappManage')}
                   </Button>
                 </div>
@@ -245,6 +240,15 @@ const Appointments = () => {
       </div>
 
       <BottomNav />
+
+      {rescheduleApt && (
+        <RescheduleDialog
+          appointment={rescheduleApt}
+          open={!!rescheduleApt}
+          onClose={() => setRescheduleApt(null)}
+          onRescheduled={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
     </div>
   );
 };

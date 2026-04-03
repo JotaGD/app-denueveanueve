@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, MapPin, Bell, MessageCircle, LogOut, Globe, ChevronRight, Shield, Trash2 } from 'lucide-react';
+import { User, MapPin, Bell, MessageCircle, LogOut, Globe, ChevronRight, Shield, Trash2, Key } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +24,7 @@ const Profile = () => {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -38,9 +39,10 @@ const Profile = () => {
     if (!user) return;
     const load = async () => {
       setLoading(true);
-      const [custRes, locRes] = await Promise.all([
+      const [custRes, locRes, roleRes] = await Promise.all([
         supabase.from('customers').select('*').eq('user_id', user.id).single(),
         supabase.from('locations').select('*'),
+        supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle(),
       ]);
 
       if (custRes.data) {
@@ -55,6 +57,7 @@ const Profile = () => {
         setWhatsappConsent(!!c.consent_whatsapp_at);
       }
       setLocations(locRes.data || []);
+      setIsAdmin(!!roleRes.data);
       setLoading(false);
     };
     load();
@@ -194,6 +197,27 @@ const Profile = () => {
             </div>
           </div>
         </div>
+
+        {/* Admin panel */}
+        {isAdmin && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-3">
+            <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+              <Shield size={14} className="text-gold" /> Administración
+            </h3>
+            <div className="rounded-xl border border-border bg-card divide-y divide-border">
+              <button
+                onClick={() => navigate('/admin/api-keys')}
+                className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Key size={16} className="text-muted-foreground" />
+                  <span className="text-sm text-foreground">API Keys</span>
+                </div>
+                <ChevronRight size={16} className="text-muted-foreground" />
+              </button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Save */}
         <Button onClick={handleSave} disabled={saving} className="w-full gradient-gold text-primary-foreground shadow-gold">
