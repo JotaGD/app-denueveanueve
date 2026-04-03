@@ -84,8 +84,8 @@ const ApiKeys = () => {
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('api_keys')
-      .select('id,name,description,key_prefix,created_at,last_used_at,expires_at,is_active,scopes')
+      .from('api_keys' as never)
+      .select('id,name,key_prefix,created_at,last_used_at,expires_at,is_active,scopes')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -106,14 +106,16 @@ const ApiKeys = () => {
 
     const { key, hash, prefix } = await generateApiKey();
 
-    const { error } = await supabase.from('api_keys').insert({
+    const payload: Record<string, unknown> = {
       name: newName.trim(),
-      description: newDesc.trim() || null,
       key_hash: hash,
       key_prefix: prefix,
       created_by: user!.id,
       is_active: true,
-    });
+    };
+    if (newDesc.trim()) payload.description = newDesc.trim();
+
+    const { error } = await supabase.from('api_keys' as never).insert(payload as never);
 
     setCreating(false);
 
